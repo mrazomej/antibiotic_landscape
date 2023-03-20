@@ -1,5 +1,7 @@
 using Measures, CairoMakie
+import Makie
 import ColorSchemes
+import DataFrames as DF
 
 """
     `pboc_plotlyjs!()`
@@ -174,3 +176,105 @@ function pboc_makie!()
     )
     set_theme!(theme)
 end
+
+@doc raw"""
+    `corner_plot!(
+        fig, df, plot_var, plot_value, group_var, color;
+        colgap=2, rowgap=2
+    )`
+
+Function to generate a corner plot for different variables using `Makie.jl`.
+
+# Arguments
+- `fig::Makie.Figure`: Figure where the plot will be inserted.
+- `df::DataFrames.DataFrame`: **tidy** dataframe with data to be plotted.
+- `plot_var::Symbol`: Name of column indicating the variable names that will be
+  plot.
+- `plot_value::Symbol`: Name of the column with the numerical value to be plot.
+- `group_var::Union{Vector{Symbol}, Symbol}`: Name of column by which to group
+  data when plotting.
+- `color`: Single color or list of colors to be used for plot.
+
+## Optional arguments
+- `colgap::Real=2`: gap between subplot columns.
+- `rowgap::Real=2`: gap between subplot rows.
+- `density_color=ColorSchemes.seaborn_colorblind[1]`: Color to be used for the
+  density plots.
+"""
+function corner_plot!(
+    fig::Makie.Figure,
+    df::DF.DataFrame,
+    plot_var::Symbol,
+    plot_value::Symbol,
+    group_var::Union{Vector{Symbol},Symbol},
+    colors;
+    colgap::Real=2,
+    rowgap::Real=2,
+    density_color=ColorSchemes.seaborn_colorblind[1]
+)
+    # Define variable names
+    var_names = unique(df[!, plot_var])
+    # Define number of variables
+    n_var = length(var_names)
+
+    # Initialize grid layout where axes will exist
+    gl = GridLayout(fig[1, 1])
+    # Initialize object to save axes
+    axes = Dict()
+    # Loop through variables
+    for i = 1:n_var
+        # Loop through axes
+        for j = 1:i
+            # Add axes
+            axes[[i, j]] = Axis(gl[i, j])
+            # Remove decorations
+            hidedecorations!(axes[[i, j]], label=false)
+        end # for
+    end # for
+    # Change gap between plots
+    colgap!(gl, colgap)
+    rowgap!(gl, rowgap)
+
+    # Collect plot keys
+    ax_keys = sort(collect(keys(axes)))
+
+    # Group data
+    df_group = DF.groupby(df, group_var)
+
+    # Loop through keys
+    for k in ax_keys
+        # Extract values
+        i, j = k
+
+        # Check which plot should be done
+        if i == j
+            # Plot density
+            density!(
+                axes[k],
+                df[df[:, plot_var].==var_names[i], plot_value],
+                color=density_color,
+            )
+        else
+            # Loop through groups
+            for (idx, data) in enumerate(df_group)
+                # Extract x axis
+                x_val = data[data[:, plot_var].==var_names[i], plot_value]
+                # Extract y axis
+                y_val = data[data[:, plot_var].==var_names[j], plot_value]
+                # Plot scatter plot
+                scatter!(axes[k], x_val, y_val, color=colors[idx])
+            end # for
+        end # if
+
+        # Add y-axis labels
+        if (j == 1)
+            axes[k].ylabel = var_names[i]
+        end
+
+        # Add x-axis labels
+        if (i == n_var)
+            axes[k].xlabel = var_names[j]
+        end # if
+    end # for
+
+end # function
