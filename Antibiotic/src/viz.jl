@@ -196,10 +196,14 @@ Function to generate a corner plot for different variables using `Makie.jl`.
 - `color`: Single color or list of colors to be used for plot.
 
 ## Optional arguments
+- `marker::Symbol`: Marker to use in scatter plots
+- `markersize::Real`: Marker size for scatter plot.
 - `colgap::Real=2`: gap between subplot columns.
 - `rowgap::Real=2`: gap between subplot rows.
 - `density_color=ColorSchemes.seaborn_colorblind[1]`: Color to be used for the
   density plots.
+- `legend::Bool=true`: Boolean indicating if legend should be added to the plot
+  for each of the groups defined by `group_var`.
 """
 function corner_plot!(
     fig::Makie.Figure,
@@ -208,9 +212,12 @@ function corner_plot!(
     plot_value::Symbol,
     group_var::Union{Vector{Symbol},Symbol},
     colors;
+    marker::Symbol=:circle,
+    markersize::Real=8,
     colgap::Real=2,
     rowgap::Real=2,
-    density_color=ColorSchemes.seaborn_colorblind[1]
+    density_color=ColorSchemes.seaborn_colorblind[1],
+    legend::Bool=true
 )
     # Define variable names
     var_names = unique(df[!, plot_var])
@@ -240,6 +247,8 @@ function corner_plot!(
 
     # Group data
     df_group = DF.groupby(df, group_var)
+    # Collect group keys
+    df_keys = [first(x) for x in collect(keys(df_group))]
 
     # Loop through keys
     for k in ax_keys
@@ -262,7 +271,14 @@ function corner_plot!(
                 # Extract y axis
                 y_val = data[data[:, plot_var].==var_names[j], plot_value]
                 # Plot scatter plot
-                scatter!(axes[k], x_val, y_val, color=colors[idx])
+                scatter!(
+                    axes[k],
+                    x_val,
+                    y_val,
+                    color=colors[idx],
+                    marker=marker,
+                    markersize=markersize
+                )
             end # for
         end # if
 
@@ -277,4 +293,18 @@ function corner_plot!(
         end # if
     end # for
 
+    # Check if legend should be added
+    if legend
+        # Define elements to be added to legend
+        leg_sym = [
+            MarkerElement(
+                marker=marker,
+                color=colors[i],
+                strokecolor=:transparent,
+                markersize=markersize
+            ) for i = 1:length(df_group)
+        ]
+        # Add legend
+        Legend(gl[1, end], leg_sym, df_keys, halign=:left, valign=:top)
+    end # if
 end # function
