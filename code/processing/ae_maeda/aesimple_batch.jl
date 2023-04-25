@@ -34,7 +34,7 @@ Random.seed!(42)
 println("Reading metadata...")
 
 # Define number of epochs
-n_epoch = 10_000_000
+n_epoch = 50_000_000
 # Define how often to compute error
 n_error = 10_000
 # Define batch size
@@ -44,7 +44,7 @@ n_hidden = 4
 # Define number of neurons in non-linear hidden layers
 n_neuron = 100
 # Define dimensionality of latent space
-latent_dim = 4
+latent_dim = 2
 # Define parameter scheduler
 epoch_change = [1, 10^4, 10^5, 5 * 10^5, 10^6]
 learning_rates = [10^-4, 10^-5, 10^-5.5, 10^-6, 10^-7];
