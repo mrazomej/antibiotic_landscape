@@ -7,6 +7,9 @@ using TensorOperations: @tensor
 # Import library for automatic differentiation
 import Zygote
 
+# Import ML library
+import Flux
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
 # Differential Geometry on Riemmanian Manifolds
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
@@ -27,6 +30,29 @@ numerical differentiation with `Zygote.jl`.
 """
 function riemmanian_metric(
     manifold::Function, val::Vector{T}
+)::Array{T} where {T<:AbstractFloat}
+    # Compute Jacobian
+    jac = first(Zygote.jacobian(manifold, val))
+    # Initialize
+    return jac' * jac
+end # function
+
+@doc raw"""
+    riemmanian_metric(manifold, val)
+
+Function to compute the metric `M̲̲ = J̲̲ᵀJ̲̲` of a Riemmanian manifold via
+numerical differentiation with `Zygote.jl`.
+
+# Arguments
+- `manifold::Function`: Function defining the manifold.
+- `val::Vector{<:AbstractFloat}`: Value where to evaluate the metric.
+
+# Returns
+- `M̲̲::Matrix{<:AbstractFloat}`: Matrix evaluating the Riemmanian manifold
+  metric.
+"""
+function riemmanian_metric(
+    manifold::Flux.Chain, val::Vector{T}
 )::Array{T} where {T<:AbstractFloat}
     # Compute Jacobian
     jac = first(Zygote.jacobian(manifold, val))
@@ -158,7 +184,7 @@ function geodesic_system!(du, u, param, t)
 end # function
 
 @doc raw"""
-    boundary_condition!(residual, u, param, t)
+    bc_collocation!(residual, u, param, t)
 
 Function that evaluates the residuals between the current position and the
 desired boundary conditions.
@@ -176,7 +202,7 @@ desired boundary conditions.
   - `γ_end::Vector{<:AbstractFloat}`: Final position in latent space.
 - `t::AbstractFloat`: Time where to evaluate the righ-hand side.
 """
-function boundary_condition!(residual, u, param, t)
+function bc_collocation!(residual, u, param, t)
     # Extract parameters
     in_dim = param[:in_dim]
 
@@ -185,6 +211,35 @@ function boundary_condition!(residual, u, param, t)
 
     # Compute residual for final position
     @. residual[in_dim+1:end] = u[end][1:in_dim] - param[:γ_end]
+end # function
+
+@doc raw"""
+    bc_shooting!(residual, u, param, t)
+
+Function that evaluates the residuals between the current position and the
+desired boundary conditions.
+
+# Arguments
+- `residual::Vector{<:AbstractFloat}`: Array containing the residuals between
+  the desired boundary conditions and the current state.
+- `param::Dictionary`: Parameters required for the geodesic differential
+  equation system and the boundary value integration. The list of required
+  parameters are:
+  - `in_dim::Int`: Dimensionality of input space.
+  - `out_dim::Int`: Dimensionality of output space.
+  - `manifold::Function`: Function definining the manifold.
+  - `γ_init::Vector{<:AbstractFloat}`: Initial position in latent space.
+  - `γ_end::Vector{<:AbstractFloat}`: Final position in latent space.
+- `t::AbstractFloat`: Time where to evaluate the righ-hand side.
+"""
+function bc_shooting!(residual, u, param, t)
+    # Extract parameters
+    in_dim = param[:in_dim]
+
+    # Compute residual for initial position
+    @. residual[1:in_dim] = u(0.0)[1:in_dim] - param[:γ_init]
+    # Compute residual for final position
+    @. residual[in_dim+1:end] = u(1.0)[1:in_dim] - param[:γ_end]
 end # function
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
