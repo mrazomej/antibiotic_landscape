@@ -34,7 +34,7 @@ Random.seed!(42)
 println("Reading metadata...")
 
 # Define number of epochs
-n_epoch = 50_000_000
+n_epoch = 10_000_000
 # Define how often to compute error
 n_error = 10_000
 # Define batch size
@@ -44,7 +44,7 @@ n_hidden = 4
 # Define number of neurons in non-linear hidden layers
 n_neuron = 100
 # Define dimensionality of latent space
-latent_dim = 2
+latent_dim = 3
 # Define parameter scheduler
 epoch_change = [1, 10^4, 10^5, 5 * 10^5, 10^6]
 learning_rates = [10^-4, 10^-5, 10^-5.5, 10^-6, 10^-7];
@@ -190,7 +190,7 @@ ae_sc = Antibiotic.ml.AEs.SimpleAutoencoder(
 # Initialize parameters
 param = SimpleChains.init_params(ae_sc)
 
-ae_flux = Antibiotic.ml.AEs.Autoencoder(
+ae_flux = Antibiotic.ml.AEs.ae_init(
     n_env,
     latent_dim,
     latent_activation_flux,
@@ -229,8 +229,12 @@ ae_mse_flux = similar(ae_mse_sc)
 
 # Evaluate initial error
 ae_mse_sc[1] = ae_loss(IC50_std, param)
+# Transfer parameters to Flux.jl
+local ae_tmp = Antibiotic.ml.AEs.simple_to_flux(collect(param), ae_flux)
+ae_tmp = Flux.Chain(ae_tmp.encoder..., ae_tmp.decoder...)
+# Evaluate error with Flux.jl
 ae_mse_flux[1] = Flux.mse(
-    Antibiotic.ml.AEs.simple_to_flux(collect(param), ae_flux)(IC50_std),
+    Antibiotic.ml.AEs.simple_to_flux(collect(param), ae_tmp)(IC50_std),
     IC50_std
 )
 
@@ -252,13 +256,11 @@ for (j, r) in enumerate(ranges)
     # Evaluate SimpleChains error
     ae_mse_sc[j+1] = ae_loss(IC50_std, param)
 
+    # Transfer parametres
+    ae_tmp = Antibiotic.ml.AEs.simple_to_flux(collect(param), ae_flux)
+    ae_tmp = Flux.Chain(ae_tmp.encoder..., ae_tmp.decoder...)
     # Evaluate Flux MSE
-    ae_mse_flux[j+1] = Flux.mse(
-        Antibiotic.ml.AEs.simple_to_flux(
-            collect(param), ae_flux
-        )(IC50_std),
-        IC50_std
-    )
+    ae_mse_flux[j+1] = Flux.mse(ae_tmp(IC50_std), IC50_std)
 end # for
 
 BSON.bson(
