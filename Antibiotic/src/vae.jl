@@ -14,13 +14,14 @@ import StatsBase
 import Distributions
 import Distances
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+# Variational Autoencoders
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+
 @doc raw"""
     `VAE`
 
 Structure containing the components of a variational autoencoder (VAE).
-
-NOTE: This method was created before I discovered the basic `Flux.identity`
-function to create linear layers. Thus, its use will be deprecated
 
 # Fields
 - `encoder::Flux.Chain`: neural network that takes the input and passes it
@@ -203,15 +204,15 @@ Loss function for the variational autoencoder. The loss function is defined as
 
 loss = argmin -⟨log P(x|z)⟩ + β Dₖₗ(qᵩ(z | x) || P(z)),
 
-where the minimization is taken over the functions f, g, and h. f(z) encodes the
+where the minimization is taken over the functions f̲, g̲, and h̲̲. f̲(z) encodes the
 function that defines the mean ⟨x|z⟩ of the decoder P(x|z), i.e.,
 
-    P(x|z) = Normal(f(x), σI).
+    P(x|z) = Normal(f̲(x), σI).
 
-g and h define the mean and covariance of the approximate decoder qᵩ(z|x),
+g̲ and h̲̲ define the mean and covariance of the approximate decoder qᵩ(z|x),
 respectively, i.e.,
 
-    P(z|x) ≈ qᵩ(z|x) = Normal(g(x), h(x)).
+    P(z|x) ≈ qᵩ(z|x) = Normal(g̲(x), h̲̲(x)).
 
 # Arguments
 - `x::Vector`: Input to the neural network.
@@ -270,15 +271,19 @@ Loss function for the variational autoencoder. The loss function is defined as
 
 loss = argmin -⟨log P(x|z)⟩ + β Dₖₗ(qᵩ(z | x) || P(z)),
 
-where the minimization is taken over the functions f, g, and h. f(z) encodes the
-function that defines the mean ⟨x|z⟩ of the decoder P(x|z), i.e.,
+where the minimization is taken over the functions f̲, g̲, and h̲̲. f̲(z)
+encodes the function that defines the mean ⟨x|z⟩ of the decoder P(x|z), i.e.,
 
-    P(x|z) = Normal(f(x), σI).
+    P(x|z) = Normal(f̲(x), σI).
 
-g and h define the mean and covariance of the approximate decoder qᵩ(z|x),
+g̲ and h̲̲ define the mean and covariance of the approximate decoder qᵩ(z|x),
 respectively, i.e.,
 
-    P(z|x) ≈ qᵩ(z|x) = Normal(g(x), h(x)).
+    P(z|x) ≈ qᵩ(z|x) = Normal(g̲(x), h̲̲(x)).
+
+NOTE: This method accepts an extra argument `x_true` as the ground truth against
+which to compare the input values that is not necessarily the same as the input
+value.
 
 # Arguments
 - `x::Vector`: Input to the neural network.
@@ -335,11 +340,12 @@ end #function
 
 @doc raw"""
     `vae_kl_div(x, vae)`
+
 Function to compute the KL divergence between the approximate encoder qₓ(z) and
 the latent variable prior distribution P(z). Since we assume
         P(z) = Normal(0̲, 1̲),
 and
-        qₓ(z) = Normal(f(x̲), σI̲̲),
+        qₓ(z) = Normal(f̲(x̲), σI̲̲),
 the KL divergence has a closed form
 
 # Arguments
@@ -375,21 +381,21 @@ given a loss function.
   corresponding parametres. For example, one could feed: ⋅ Flux.AMSGrad(η)
 
 ## Optional arguments
-- `kwargs::NamedTuple`: Tuple containing arguments for the loss function.
-    For `vae_loss`, for example, we have
+- `kwargs::Union{NamedTuple,Dict}`: Tuple containing arguments for the loss
+    function. For `vae_loss`, for example, we have
     - `σ::Float32=1`: Standard deviation of the probabilistic decoder P(x|z).
     - `β::Float32=1`: Annealing inverse temperature for the KL-divergence term.
-    - `reconstruct::Function`: Function that reconstructs the input x̂ by passing it
-    through the autoencoder.
+    - `reconstruct::Function`: Function that reconstructs the input x̂ by
+    passing it through the autoencoder.
     - `n_samples::Int`: Number of samples to take from the latent space when
     computing ⟨logP(x|z)⟩.
 """
 function vae_train!(
     loss::Function,
     vae::VAE,
-    data::Matrix{Float32},
+    data::AbstractMatrix{Float32},
     opt::Flux.Optimise.AbstractOptimiser;
-    kwargs...
+    kwargs::Union{NamedTuple,Dict}=Dict(:σ => 1.0f0, :β => 1.0f0, :n_samples => 1)
 )
     # Extract parameters
     params = Flux.params(vae.encoder, vae.µ, vae.logσ, vae.decoder)
@@ -510,7 +516,7 @@ variational autoencoder.
 # Returns
 - `MSE_boots:Array{Float32}`: Mean squared error bootstrap samples.
 """
-function vae_mse_boots(vae::VAE, data::Matrix{Float32}, n_samples::Int)
+function vae_mse_boots(vae::VAE, data::AbstractMatrix{Float32}, n_samples::Int)
     # Initialize array to save bootstrap samples
     boots_samples = Array{Float32}(undef, n_samples)
 
@@ -567,6 +573,12 @@ function vae_cyc_annealing(
     end # if
 end # function
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+# Maximum-Mean Discrepancy Variational Autoencoders
+# Zhao, S., Song, J. & Ermon, S. InfoVAE: Information Maximizing Variational
+# Autoencoders. Preprint at http://arxiv.org/abs/1706.02262 (2018).
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+
 @doc raw"""
     `gaussian_kernel(x, y)`
 Function to compute the Gaussian Kernel between two vectors `x` and `y`, defined
@@ -574,8 +586,8 @@ as
     k(x, y) = exp(-||x - y ||² / ρ²)
 
 # Arguments
-- `x::Matrix{Float32}`: First array in kernel
-- `y::Matrix{Float32}`: Second array in kernel
+- `x::AbstractMatrix{Float32}`: First array in kernel
+- `y::AbstractMatrix{Float32}`: Second array in kernel
 
 ## Optional Arguments
 - `ρ::Float32`: Kernel amplitude hyperparameter.
@@ -584,7 +596,7 @@ as
 k(x, y) = exp(-||x - y ||² / ρ²)
 """
 function gaussian_kernel(
-    x::Matrix{Float32}, y::Matrix{Float32}; ρ::Float32=1.0f0
+    x::AbstractMatrix{Float32}, y::AbstractMatrix{Float32}; ρ::Float32=1.0f0
 )
     # return Gaussian kernel
     return exp.(
@@ -602,8 +614,8 @@ as
 where k(⋅, ⋅) is any positive definite kernel.
 
 # Arguments
-- `x::Matrix{Float32}`: First array in kernel
-- `y::Matrix{Float32}`: Second array in kernel
+- `x::AbstractMatrix{Float32}`: First array in kernel
+- `y::AbstractMatrix{Float32}`: Second array in kernel
 
 ## Optional argument
 - `kernel::Function=gaussian_kernel`: Kernel used to compute the divergence.
@@ -611,8 +623,8 @@ where k(⋅, ⋅) is any positive definite kernel.
 - `kwargs::NamedTuple`: Tuple containing arguments for the Kernel function.
 """
 function mmd_div(
-    x::Matrix{Float32},
-    y::Matrix{Float32};
+    x::AbstractMatrix{Float32},
+    y::AbstractMatrix{Float32};
     kernel::Function=gaussian_kernel,
     kwargs...
 )
@@ -631,7 +643,7 @@ NOTE: This function is useful to define the value of the hyperparameter λ for
 the infoVAE training.
 
 # Arguments
-- `x::Matrix{Float32}`: Data to train the infoVAE.
+- `x::AbstractMatrix{Float32}`: Data to train the infoVAE.
 - `vae::VAE`: Struct containint the elements of the variational autoencoder.
 
 ## Optional Arguments
@@ -649,7 +661,7 @@ the infoVAE training.
 abs(⟨log P(x|z)⟩ / MMD-D(qᵩ(z|x)||P(z)))
 """
 function logP_mmd_ratio(
-    x::Matrix{Float32},
+    x::AbstractMatrix{Float32},
     vae::VAE;
     σ::Float32=1.0f0,
     n_latent_samples::Int=100,
@@ -703,18 +715,18 @@ function is defined as
 loss = argmin -⟨⟨log P(x|z)⟩⟩ + (1 - α) ⟨Dₖₗ(qᵩ(z | x) || P(z))⟩ + 
               (λ + α - 1) Dₖₗ(qᵩ(z) || P(z)),
 
-where the minimization is taken over the functions f, g, and h. f(z) encodes the
+where the minimization is taken over the functions f̲, g̲, and h̲̲. f̲(z) encodes the
 function that defines the mean ⟨x|z⟩ of the decoder P(x|z), i.e.,
 
-    P(x|z) = Normal(f(x), σI).
+    P(x|z) = Normal(f̲(x), σI̲̲).
 
-g and h define the mean and covariance of the approximate decoder qᵩ(z|x),
+g̲ and h̲̲ define the mean and covariance of the approximate decoder qᵩ(z|x),
 respectively, i.e.,
 
-    P(z|x) ≈ qᵩ(z|x) = Normal(g(x), h(x)).
+    P(z|x) ≈ qᵩ(z|x) = Normal(g̲(x), h̲̲(x)).
 
 # Arguments
-- `x::Vector`: Input to the neural network.
+- `x::AbstractVector{Float32}`: Input to the neural network.
 - `vae::VAE`: Struct containint the elements of the variational autoencoder.
 
 ## Optional arguments
@@ -794,6 +806,14 @@ function mmd_loss(
            (λ + α - 1) * mmd_q_p / n_samples
 end # function
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+# InfoMax-VAE
+# Rezaabad, A. L. & Vishwanath, S. Learning Representations by Maximizing Mutual
+# Information in Variational Autoencoders. in 2020 IEEE International Symposium
+# on Information Theory (ISIT) 2729–2734 (IEEE, 2020).
+# doi:10.1109/ISIT44484.2020.9174424.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+
 @doc raw"""
     `infomax_loss(x, vae, mlp; σ, β, α, reconstruct, n_samples)`
 
@@ -808,7 +828,7 @@ variational autoencoder (vae) and a multi-layered perceptron (mlp) to compute
 the mutual information between input and latent variables.
 
 # Arguments
-- `x::Vector`: Input to the neural network.
+- `x::AbstractVector{Float32}`: Input to the neural network.
 - `x_shuffle::Vector`: Shuffled input to the neural network needed to compute
   the mutual information term. This term is used to obtain an encoding
   `z_shuffle` that represents a random sample from the marginal P(z).
@@ -894,10 +914,10 @@ variational autoencoder (vae) and a multi-layered perceptron (mlp) to compute
 the mutual information between input and latent variables. 
 
 # Arguments
-- `x::Vector`: Input to the neural network.
-- `x_shuffle::Vector`: Shuffled input to the neural network needed to compute
-  the mutual information term. This term is used to obtain an encoding
-  `z_shuffle` that represents a random sample from the marginal P(z).
+- `x::AbstractVector{Float32}`: Input to the neural network.
+- `x_shuffle::AbstractVector{Float32}`: Shuffled input to the neural network
+  needed to compute the mutual information term. This term is used to obtain an
+  encoding `z_shuffle` that represents a random sample from the marginal P(z).
 - `x_true::Vector`: True input against which to compare autoencoder
   reconstruction.
 - `vae::VAE`: Struct containing the elements of the variational autoencoder.
@@ -976,17 +996,17 @@ Function used to train the multi-layered perceptron (mlp) used in the infoMaxVAE
 algorithm to estimate the mutual information between the input x and the latent
 space encoding z. The loss function is of the form
 
-Ixz_MLP = g(x, z)⟩ - ⟨exp(g(x, z) - 1)⟩
+Ixz_MLP = ⟨g(x, z)⟩ - ⟨exp(g(x, z) - 1)⟩
 
 The mutual information is expressed in a variational form (optimizing over the
 space of all possible functions) where the MLP encodes the unknown optimal
 function g(x, z).
 
 # Arguments
-- `x::Vector`: Input to the neural network.
-- `x_shuffle::Vector`: Shuffled input to the neural network needed to compute
-  the mutual information term. This term is used to obtain an encoding
-  `z_shuffle` that represents a random sample from the marginal P(z).
+- `x::AbstractVector{Float32}`: Input to the neural network.
+- `x_shuffle::AbstractVector{Float32}`: Shuffled input to the neural network
+  needed to compute the mutual information term. This term is used to obtain an
+  encoding `z_shuffle` that represents a random sample from the marginal P(z).
 - `vae::VAE`: Struct containint the elements of the variational autoencoder.
 - `mlp::Flux.Chain`: Multi-layered perceptron to compute mutual information
   between input and output.
@@ -1045,15 +1065,15 @@ Function to compute the mutual information between the input `x` and the latent
 variable `z` for a given inforMaxVAE architecture.
 
 # Arguments
-- `vae::jlFitnotype.ml.VAE`: Struct containint the elements of a variational
-    autoencoder.
+- `vae::VAE`: Struct containint the elements of a variational autoencoder.
 - `mlp::Flux.Chain`: Multi-layered perceptron to compute mutual information
     between input and output.
-- `data::Matrix{Float32}`: Matrix containing the data on which to evaluate the
-    loss function. NOTE: Every column should represent a single input.
+- `data::AbstractMatrix{Float32}`: Matrix containing the data on which to
+    evaluate the loss function. NOTE: Every column should represent a single
+    input.
 """
 function mutual_info_mlp(
-    vae::VAE, mlp::Flux.Chain, data::Matrix{Float32}
+    vae::VAE, mlp::Flux.Chain, data::AbstractMatrix{Float32}
 )
     # Generate list of random indexes for data shuffling
     shuffle_idx = Random.shuffle(1:size(data, 2))
@@ -1080,20 +1100,19 @@ variational autoencoder (vae) and a multi-layered perceptron (mlp) to compute
 the mutual information between input and latent variables.
 
 # Arguments
-- `vae::jlFitnotype.ml.VAE`: Struct containint the elements of a variational
-  autoencoder.
+- `vae::VAE`: Struct containint the elements of a variational autoencoder.
 - `mlp::Flux.Chain`: Multi-layered perceptron to compute mutual information
   between input and output.
-- `data::Matrix{Float32}`: Matrix containing the data on which to evaluate the
-  loss function. NOTE: Every column should represent a single input.
+- `data::AbstractMatrix{Float32}`: Matrix containing the data on which to
+  evaluate the loss function. NOTE: Every column should represent a single
+  input.
 - `vae_opt::Flux.Optimise.AbstractOptimiser`: Optimizing algorithm to be used to
   update the variational autoencoder parameters. This should be fed already with
-  the corresponding parameters. For example, one could feed: 
-  ⋅ Flux.AMSGrad(η)
+  the corresponding parameters. For example, one could feed: ⋅ Flux.AMSGrad(η)
 - `mlp_opt::Flux.Optimise.AbstractOptimiser`: Optimizing algorithm to be used to
   update the multi-layered perceptron parameters. This should be fed already
-  with the corresponding parameters. For example, one could feed: 
-  ⋅ Flux.AMSGrad(η)
+  with the corresponding parameters. For example, one could feed: ⋅
+  Flux.AMSGrad(η)
 
 ## Optional arguments
 - `kwargs::NamedTuple`: Tuple containing arguments for the loss function. For
@@ -1110,7 +1129,7 @@ the mutual information between input and latent variables.
 function infomaxvae_train!(
     vae::VAE,
     mlp::Flux.Chain,
-    data::Matrix{Float32},
+    data::AbstractMatrix{Float32},
     vae_opt::Flux.Optimise.AbstractOptimiser,
     mlp_opt::Flux.Optimise.AbstractOptimiser;
     kwargs...
@@ -1319,6 +1338,10 @@ function infomaxvae_train!(
 
 end # function
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+# VAE Utils
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
+
 @doc raw"""
     `step_scheduler(epoch, epoch_change, learning_rates)`
 
@@ -1336,8 +1359,8 @@ Simple function to define different learning rates at specified epochs.
 """
 function step_scheduler(
     epoch::Int,
-    epoch_change::Vector{<:Int},
-    learning_rates::Vector{<:AbstractFloat}
+    epoch_change::AbstractVector{<:Int},
+    learning_rates::AbstractVector{<:AbstractFloat}
 )
     # Check that arrays are of the same length
     if length(epoch_change) != length(learning_rates)
