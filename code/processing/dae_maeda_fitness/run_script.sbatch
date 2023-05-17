@@ -13,16 +13,15 @@
 #SBATCH --mail-type=fail			            # send email if job fails
 #SBATCH --output=date.out			            # filename where to save output
 
-# Load CUDA
-# ml cuda
 # load CUDA-related libraries
-ml cudnn/8.1.1.33 cutensor/1.5.0.3
+ml cudnn/8.6.0.163 cutensor/1.5.0.3
 
 # Load julia
 ml julia
 
 # Set debugger
-export JULIA_DEBUG=CUDA
+# export JULIA_DEBUG=CUDA
+# Use local binaries rather than CUDA.jl installed ones
 export JULIA_CUDA_USE_BINARYBUILDER=false
 
 # Launch julia and run script

@@ -55,8 +55,8 @@ latent_dim = 3
 # Define noise probability
 noise_prob = 0.2
 # Define parameter scheduler
-epoch_change = [1, 10^4, 10^5, 5 * 10^5, 10^6]
-learning_rates = [10^-5, 10^-6, 10^-6.5, 10^-7, 10^-8]
+epoch_change = [1, 10^4, 10^5, 10^6]
+learning_rates = [10^-4, 10^-4.5, 10^-5, 10^-5.5]
 
 ##
 
@@ -172,11 +172,11 @@ output_activation = Flux.identity
 
 # Define encoder layer and activation functions
 encoder = repeat([n_neuron], n_hidden)
-encoder_activation = repeat([Flux.softplus], n_hidden)
+encoder_activation = repeat([Flux.relu], n_hidden)
 
 # Define decoder layer and activation function
 decoder = repeat([n_neuron], n_hidden)
-decoder_activation = repeat([Flux.softplus], n_hidden)
+decoder_activation = repeat([Flux.relu], n_hidden)
 
 ##
 
@@ -192,7 +192,11 @@ ae = AutoEncode.AEs.ae_init(
     encoder_activation,
     decoder,
     decoder_activation,
-) |> Flux.gpu
+)
+
+# Load autoencoder parameters to GPU
+ae.encoder = Flux.fmap(CUDA.cu, ae.encoder)
+ae.decoder = Flux.fmap(CUDA.cu, ae.decoder)
 
 ##
 
@@ -214,12 +218,19 @@ loss(x̂, x) = Flux.mse(AutoEncode.recon(ae, x̂), x)
 
 ##
 
+println("Generating random noise to upload to GPU")
+rnd_noise = Random.rand(
+    Distributions.Bernoulli(1 - noise_prob), n_env, n_batch, n_epoch
+) |> Flux.gpu
+
+##
+
 println("Training encoder...")
 
 # Define array where to store errors on training data
 ae_mse = Vector{Float32}(undef, n_epoch ÷ n_error + 1)
 # Evaluate initial error
-ae_mse[1] = loss(ic50_std, ic50_std) |> Flux.cpu
+ae_mse[1] = Flux.cpu(loss(ic50_std, ic50_std))
 
 # Initialize error counter
 global mse_counter = 2
@@ -231,11 +242,9 @@ for j = 1:n_epoch
         1:n_samples, n_batch, replace=false
     )
     # Extract minibatch ic50 data
-    ic50_batch = @view ic50_std[:, batch_idx]
+    ic50_batch = ic50_std[:, batch_idx]
     # Generate noisy data
-    ic50_noise = Random.rand(
-        Distributions.Bernoulli(1 - noise_prob), size(ic50_batch)...
-    ) .* ic50_batch
+    ic50_noise = rnd_noise[:, :, j] .* ic50_batch
 
     # Train network
     Flux.train!(
@@ -250,7 +259,7 @@ for j = 1:n_epoch
     # Print progress report
     if (j % n_error == 0)
         println("Epoch # $j")
-        ae_mse[mse_counter] = loss(ic50_batch, ic50_batch) |> Flux.cpu
+        ae_mse[mse_counter] = Flux.cpu(loss(ic50_std, ic50_std))
 
         println("MSE: $(ae_mse[mse_counter])")
 
