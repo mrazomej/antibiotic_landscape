@@ -30,18 +30,10 @@ import Distributions
 Random.seed!(42)
 ##
 
-# # Check if GPU is available
-# if !(CUDA.functional())
-#     error("GPU is not available")
-# end # if
-
-# # Check CUDA information
-# CUDA.versioninfo()
-
-##
-
+# Define boolean wether it should be evaluated with gpu
+gpu_eval = false
 # Define number of epochs
-n_epoch = 100_000
+n_epoch = 250_000
 # Define how often to compute error
 n_error = 1_000
 # Define batch size
@@ -53,10 +45,16 @@ n_neuron = 100
 # Define dimensionality of latent space
 latent_dim = 3
 # Define noise probability
-noise_prob = 0.2
+noise_prob = 0.25
 # Define parameter scheduler
 epoch_change = [1, 10^4, 10^5, 10^6]
 learning_rates = [10^-4, 10^-4.5, 10^-5, 10^-5.5]
+
+##
+# Check if GPU is available
+if gpu_eval & !(CUDA.functional())
+    error("GPU is not available")
+end # if
 
 ##
 
@@ -79,8 +77,6 @@ fname = "./output/$(n_epoch)_epoch/dae_$(latent_dim)dimensions.bson"
 if isfile(fname)
     error("$(latent_dim)-D was already processed")
 end # if
-
-##
 
 ##
 
@@ -194,9 +190,12 @@ ae = AutoEncode.AEs.ae_init(
     decoder_activation,
 )
 
-# Load autoencoder parameters to GPU
-ae.encoder = Flux.fmap(CUDA.cu, ae.encoder)
-ae.decoder = Flux.fmap(CUDA.cu, ae.decoder)
+# Check if model should be run on gpu
+if gpu_eval
+    # Load autoencoder parameters to GPU
+    ae.encoder = Flux.fmap(CUDA.cu, ae.encoder)
+    ae.decoder = Flux.fmap(CUDA.cu, ae.decoder)
+end # if
 
 ##
 
@@ -213,12 +212,20 @@ end # if
 
 println("Definining loss function as MSE...")
 # Define loss function. The loss function is the MSE between the encoder output
-# and the learned latent space built from the fitness data only
-loss(x̂, x) = Flux.mse(AutoEncode.recon(ae, x̂), x)
+# and the learned latent space built from the fitness data only. Notice that
+# this function can take a mini-batch matrix as input more efficiently since it
+# runs the inputs through the autoencoder all together, which is much more
+# efficient than doing it individually.
+function loss(x̂, x)
+    # Reconstruct input
+    x̂_pred = AutoEncode.recon(ae, x̂)
+    # Evaluate loss function
+    return sum(Flux.mse.(eachcol(x̂_pred), eachcol(x))) / size(x, 2)
+end # function
 
 ##
 
-println("Generating random noise to upload to GPU")
+println("Generating random noise")
 rnd_noise = Random.rand(
     Distributions.Bernoulli(1 - noise_prob), n_env, n_batch, n_epoch
 ) |> Flux.gpu
@@ -250,7 +257,7 @@ for j = 1:n_epoch
     Flux.train!(
         loss,
         Flux.params(ae.encoder, ae.decoder),
-        zip(eachcol(ic50_noise), eachcol(ic50_batch)),
+        [(ic50_noise, ic50_batch),],
         Flux.ADAM(
             AutoEncode.utils.step_scheduler(j, epoch_change, learning_rates)
         )
