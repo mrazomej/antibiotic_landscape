@@ -47,8 +47,8 @@ latent_dim = 3
 # Define noise probability
 noise_prob = 0.25
 # Define parameter scheduler
-epoch_change = [1, 10^4, 10^5, 10^6]
-learning_rates = [10^-4, 10^-4.5, 10^-5, 10^-5.5]
+epoch_change = [1, 10^4, Int64(7.5 * 10^4), 10^5]
+learning_rates = [10^-4, 10^-4, 10^-4.25, 10^-4.5]
 
 ##
 # Check if GPU is available
