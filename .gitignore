@@ -99,5 +99,6 @@ miscellaneous/quarto/_*.html
 miscellaneous/quarto/_*.pdf
 code/analysis/*/output/
 code/processing/*/output/
+code/processing/*/*/output/
 code/exploratory/output/
 data/*
