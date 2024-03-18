@@ -24,7 +24,7 @@ Random.seed!(42)
 # Define dimensionality of latent space
 n_latent = 2
 # Define number of neurons in hidden layers
-n_neuron = 64
+n_neuron = 128
 
 # Define RHVAE hyper-parameters
 T = 0.8f0 # Temperature

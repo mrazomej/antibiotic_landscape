@@ -31,14 +31,11 @@ n_batch = 256
 # Define fraction to split data into training and validation
 split_frac = 0.85
 # Define learning rate
-η = 10^-5.5
-
-# Define β values to train
-β_vals = Float32.([1E-3, 1E-2, 0.1, 0.25, 0.5, 0.75, 1.0])
+η = 10^-3
 
 # Define loss function hyper-parameters
 K = 5 # Number of leapfrog steps
-ϵ = 1.0f-3 # Leapfrog step size
+ϵ = 1.0f-4 # Leapfrog step size
 βₒ = 0.3f0 # Initial temperature for tempering
 
 # Define RHVAE hyper-parameters in a dictionary
@@ -49,6 +46,26 @@ rhvae_kwargs = Dict(
     :∇H => AutoEncode.RHVAEs.∇hamiltonian_TaylorDiff,
     :∇H_kwargs => Dict(
         :momentum_logprior => AutoEncode.RHVAEs.riemannian_logprior_loop
+    ),
+)
+
+# Define dictionary with prefactors
+prefactor_dict = Dict(
+    "pre1" => (
+        logp_prefactor=[10.0f0, 1.0f0, 1.0f0],
+        logq_prefactor=[1.0f0, 1.0f0, 1.0f0]
+    ),
+    "pre2" => (
+        logp_prefactor=[1.0f0, 1.0f0, 1.0f0],
+        logq_prefactor=[1.0f0, 0.0f0, 0.0f0]
+    ),
+    "pre3" => (
+        logp_prefactor=[10.0f0, 0.0f0, 0.0f0],
+        logq_prefactor=[1.0f0, 0.0f0, 0.0f0]
+    ),
+    "pre4" => (
+        logp_prefactor=[1.0f0, 0.1f0, 0.1f0],
+        logq_prefactor=[0.1f0, 0.0f0, 0.0f0]
     ),
 )
 
@@ -141,9 +158,6 @@ Flux.loadmodel!(rhvae_template, model_state)
 # Update metric parameters
 AutoEncode.RHVAEs.update_metric!(rhvae_template)
 
-# Make a copy of the model for each β value
-models = [Flux.deepcopy(rhvae_template) for _ in β_vals]
-
 ## =============================================================================
 
 println("Writing down metadata to README.md file")
@@ -152,13 +166,11 @@ println("Writing down metadata to README.md file")
 readme = """
 # `$(@__FILE__)`
 ## Latent space dimensionalities to train
-`latent_dim = $(size(rhvae.vae.encoder.µ.weight, 1))`
+`latent_dim = $(size(rhvae_template.vae.encoder.µ.weight, 1))`
 ## Number of epochs
 `n_epoch = $(n_epoch)`
 ## Training regimen
-`β-rhvae mini-batch training witm multiple β values`
-## β values
-`β_vals = $(β_vals)
+`β-rhvae mini-batch training witm multiple prefactor values`
 ## Batch size
 `n_batch = $(n_batch)`
 ## Data split fraction
@@ -174,20 +186,25 @@ end
 
 ## ============================================================================= 
 
+# Extract keys from dictionary
+keys_dict = [x for x in keys(prefactor_dict)]
+
 # Loop through β values
-Threads.@threads for i in eachindex(β_vals)
+Threads.@threads for i in 1:length(keys_dict)
     # Define model
-    rhvae = models[i]
-    # Define β value
-    α = β_vals[i]
+    rhvae = deepcopy(rhvae_template)
+
+    # Define pre case
+    pre = keys_dict[i]
 
     # Define loss function hyper-parameters as a copy of the RHVAE
-    # hyper-parameters with extra α parameter
+    # hyper-parameters with extra pre-factor
     loss_kwargs = deepcopy(rhvae_kwargs)
-    loss_kwargs[:α] = α
+    loss_kwargs[:logp_prefactor] = prefactor_dict[pre][:logp_prefactor]
+    loss_kwargs[:logq_prefactor] = prefactor_dict[pre][:logq_prefactor]
 
     # List previous model parameters
-    model_states = sort(Glob.glob("$(out_dir)/beta-rhvae_$(α)beta_epoch*.jld2"))
+    model_states = sort(Glob.glob("$(out_dir)/beta-rhvae_$(pre)_epoch*.jld2"))
 
     # Check if model states exist
     if length(model_states) > 0
@@ -196,7 +213,7 @@ Threads.@threads for i in eachindex(β_vals)
         # Input parameters to model
         Flux.loadmodel!(rhvae, model_state)
         # Update metric parameters
-        Flux.update_metric!(rhvae)
+        AutoEncode.RHVAEs.update_metric!(rhvae)
         # Extract epoch number
         epoch_init = parse(
             Int, match(r"epoch(\d+)", model_states[end]).captures[1]
@@ -236,8 +253,6 @@ Threads.@threads for i in eachindex(β_vals)
             rhvae, val_data; loss_kwargs...
         )
 
-        println("\n ($(α)) Epoch: $(epoch) / $(n_epoch)\n - loss_train: $(loss_train)\n - loss_val: $(loss_val)\n")
-
         # Forward pass training data
         local rhvae_train = rhvae(train_data; rhvae_kwargs...)
         # Compute MSE for training data
@@ -248,9 +263,11 @@ Threads.@threads for i in eachindex(β_vals)
         # Compute MSE for validation data
         local mse_val = Flux.mse(rhvae_val.µ, val_data)
 
+        println("\n ($(pre)) Epoch: $(epoch) / $(n_epoch)\n - mse_train: $(mse_train)\n - mse_val: $(mse_val)\n")
+
         # Save checkpoint
         JLD2.jldsave(
-            "$(out_dir)/beta-rhvae_$(α)beta_epoch$(lpad(epoch, 5, "0")).jld2",
+            "$(out_dir)/beta-rhvae_$(pre)_epoch$(lpad(epoch, 5, "0")).jld2",
             model_state=Flux.state(rhvae),
             mse_train=mse_train,
             mse_val=mse_val,
