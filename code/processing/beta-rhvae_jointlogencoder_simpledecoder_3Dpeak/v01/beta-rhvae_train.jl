@@ -249,7 +249,7 @@ Threads.@threads for i in eachindex(T_vals)
         println("\n ($(T)) Epoch: $(epoch) / $(n_epoch)\n - mse_train: $(mse_train)\n - mse_val: $(mse_val)\n")
 
         # Check if epoch is multiple of n_error
-        if epoch % n_error != 0
+        if epoch % n_error == 0
             println("($T) saving epoch $(epoch)...")
             # Save checkpoint
             JLD2.jldsave(

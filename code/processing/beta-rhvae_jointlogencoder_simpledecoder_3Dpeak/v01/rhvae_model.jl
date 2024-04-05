@@ -28,8 +28,6 @@ n_data = 1_000
 # Define number of samples in batch
 n_batch = 128
 
-# Define number of hidden layers
-n_hidden = 3
 # Define number of neurons in non-linear hidden layers
 n_neuron = 32
 # Define dimensionality of latent space
@@ -77,57 +75,74 @@ data_std = StatsBase.transform(dt, data);
 # Select centroids via k-means
 centroids_data = AutoEncode.utils.centroids_kmedoids(data_std, n_centroids)
 
-## ============================================================================
+## =============================================================================
 
-println("Defining VAE architecture")
+println("Defining RHVAE architecture")
 
-# Define latent space activation function
-latent_activation = Flux.identity
-# Define output layer activation function
-output_activation = Flux.identity
-
-# Define encoder layer and activation functions
-encoder_neurons = repeat([n_neuron], n_hidden)
-encoder_activation = repeat([Flux.leakyrelu], n_hidden)
-
-# Define decoder layer and activation function
-decoder_neurons = repeat([n_neuron], n_hidden)
-decoder_activation = repeat([Flux.leakyrelu], n_hidden)
-
-# Define MetricChain layer and activation function
-metric_neurons = repeat([n_neuron], n_hidden)
-metric_activation = repeat([Flux.leakyrelu], n_hidden)
-
-## ============================================================================
-
-println("Initializing rhvae...")
-
-# Initialize encoder
-encoder = AutoEncode.JointLogEncoder(
-    n_input,
-    n_latent,
-    encoder_neurons,
-    encoder_activation,
-    latent_activation
+println("Define JointLogEncoder...")
+# Define encoder chain
+encoder_chain = Flux.Chain(
+    # First layer
+    Flux.Dense(n_input => n_neuron, Flux.identity),
+    # Second layer
+    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    # Third layer
+    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    # Fourth layer
+    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
 )
 
+# Define layers for µ and log(σ)
+µ_layer = Flux.Dense(n_neuron => n_latent, Flux.identity)
+logσ_layer = Flux.Dense(n_neuron => n_latent, Flux.identity)
+
+# build encoder
+encoder = AutoEncode.JointLogEncoder(encoder_chain, µ_layer, logσ_layer)
+
+## =============================================================================
+
+println("Define SimpleDecoder...")
 # Initialize decoder
 decoder = AutoEncode.SimpleDecoder(
-    n_input,
-    n_latent,
-    decoder_neurons,
-    decoder_activation,
-    output_activation
+    Flux.Chain(
+        # First layer
+        Flux.Dense(n_latent => n_neuron, Flux.identity),
+        # Second Layer
+        Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+        # Third layer
+        Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+        # Fourth layer
+        Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+        # Output layer
+        Flux.Dense(n_neuron => n_input, Flux.identity)
+    )
 )
 
-# Define Metric MLP
-metric_chain = AutoEncode.RHVAEs.MetricChain(
-    n_input,
-    n_latent,
-    metric_neurons,
-    metric_activation,
-    Flux.identity
+## =============================================================================
+
+println("Define MetricChain...")
+
+# Define mlp chain
+mlp_chain = Flux.Chain(
+    # First layer
+    Flux.Dense(n_input => n_neuron, Flux.identity),
+    # Second layer
+    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    # Third layer
+    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    # Fourth layer
+    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
 )
+
+# Define layers for the diagonal and lower triangular part of the covariance
+# matrix
+diag = Flux.Dense(n_neuron => n_latent, Flux.identity)
+lower = Flux.Dense(
+    n_neuron => n_latent * (n_latent - 1) ÷ 2, Flux.identity
+)
+
+# Build metric chain
+metric_chain = AutoEncode.RHVAEs.MetricChain(mlp_chain, diag, lower)
 
 
 # Initialize rhvae
