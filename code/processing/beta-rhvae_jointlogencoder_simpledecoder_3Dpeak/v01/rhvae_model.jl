@@ -25,11 +25,8 @@ n_input = 3
 # Define number of synthetic data points
 n_data = 1_000
 
-# Define number of samples in batch
-n_batch = 128
-
 # Define number of neurons in non-linear hidden layers
-n_neuron = 32
+n_neuron = 16
 # Define dimensionality of latent space
 n_latent = 2
 
@@ -85,11 +82,11 @@ encoder_chain = Flux.Chain(
     # First layer
     Flux.Dense(n_input => n_neuron, Flux.identity),
     # Second layer
-    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    Flux.Dense(n_neuron => n_neuron, Flux.relu),
     # Third layer
-    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    Flux.Dense(n_neuron => n_neuron, Flux.relu),
     # Fourth layer
-    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    Flux.Dense(n_neuron => n_neuron, Flux.relu),
 )
 
 # Define layers for µ and log(σ)
@@ -108,11 +105,11 @@ decoder = AutoEncode.SimpleDecoder(
         # First layer
         Flux.Dense(n_latent => n_neuron, Flux.identity),
         # Second Layer
-        Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+        Flux.Dense(n_neuron => n_neuron, Flux.relu),
         # Third layer
-        Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+        Flux.Dense(n_neuron => n_neuron, Flux.relu),
         # Fourth layer
-        Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+        Flux.Dense(n_neuron => n_neuron, Flux.relu),
         # Output layer
         Flux.Dense(n_neuron => n_input, Flux.identity)
     )
@@ -127,11 +124,11 @@ mlp_chain = Flux.Chain(
     # First layer
     Flux.Dense(n_input => n_neuron, Flux.identity),
     # Second layer
-    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    Flux.Dense(n_neuron => n_neuron, Flux.relu),
     # Third layer
-    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    Flux.Dense(n_neuron => n_neuron, Flux.relu),
     # Fourth layer
-    Flux.Dense(n_neuron => n_neuron, Flux.leakyrelu),
+    Flux.Dense(n_neuron => n_neuron, Flux.relu),
 )
 
 # Define layers for the diagonal and lower triangular part of the covariance

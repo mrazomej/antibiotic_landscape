@@ -12,6 +12,9 @@ import Glob
 # Import ML libraries
 import Flux
 
+# Import GPU support
+import CUDA
+
 # Import library to save models
 import JLD2
 
@@ -30,7 +33,7 @@ n_data = 1_000
 # Define model hyperparameters
 
 # Define number of epochs
-n_epoch = 1_000
+n_epoch = 100
 # Define how often to save model
 n_error = 1
 # Define number of samples in batch
@@ -38,7 +41,7 @@ n_batch = 256
 # Define fraction to split data into training and validation
 split_frac = 0.85
 # Define learning rate
-η = 10^-2.5
+η = 10^-4
 
 # Define loss function hyper-parameters
 ϵ = Float32(1E-4) # Leapfrog step size
@@ -108,6 +111,13 @@ train_data, val_data = Flux.splitobs(data_std, at=split_frac, shuffle=true)
 
 train_loader = Flux.DataLoader(train_data, batchsize=n_batch, shuffle=true)
 
+# Upload data to GPU
+train_data = Flux.gpu(train_data)
+val_data = Flux.gpu(val_data)
+
+# Extract batches
+train_batches = Flux.gpu.([x for x in train_loader])
+
 ## =============================================================================
 
 println("Setting output directories...")
@@ -148,7 +158,7 @@ readme = """
 ## Number of epochs
 `n_epoch = $(n_epoch)`
 ## Training regimen
-`rhvae mini-batch training witm multiple temperatures`
+`rhvae mini-batch training witm multiple temperatures on the GPU`
 ## T values
 `T_vals = $(T_vals)`
 ## Batch size
@@ -167,7 +177,7 @@ end
 ## ============================================================================= 
 
 # Loop through β values
-Threads.@threads for i in eachindex(T_vals)
+for i in eachindex(T_vals)
     # Define λ value
     T = T_vals[i]
     # Make a copy of the model   
@@ -186,7 +196,9 @@ Threads.@threads for i in eachindex(T_vals)
     AutoEncode.RHVAEs.update_metric!(rhvae)
 
     # List previous model parameters
-    model_states = sort(Glob.glob("$(out_dir)/beta-rhvae_$(T)temp_*epoch.jld2"))
+    model_states = sort(
+        Glob.glob("$(out_dir)/gpu_beta-rhvae_$(T)temp_*epoch.jld2")
+    )
 
     # Check if model states exist
     if length(model_states) > 0
@@ -195,7 +207,7 @@ Threads.@threads for i in eachindex(T_vals)
         # Input parameters to model
         Flux.loadmodel!(rhvae, model_state)
         # Update metric parameters
-        Flux.update_metric!(rhvae)
+        AutoEncode.RHVAEs.update_metric!(rhvae)
         # Extract epoch number
         epoch_init = parse(
             Int, match(r"epoch(\d+)", model_states[end]).captures[1]
@@ -219,7 +231,7 @@ Threads.@threads for i in eachindex(T_vals)
     # Loop through number of epochs
     for epoch in epoch_init:n_epoch
         # Loop through batches
-        for (i, x) in enumerate(train_loader)
+        for (i, x) in enumerate(train_batches)
             # Train RHVAE
             AutoEncode.RHVAEs.train!(
                 rhvae, x, opt_rhvae; loss_kwargs=loss_kwargs
@@ -254,7 +266,7 @@ Threads.@threads for i in eachindex(T_vals)
             # Save checkpoint
             JLD2.jldsave(
                 "$(out_dir)/beta-rhvae_$(T)temp_$(lpad(epoch, 5, "0"))epoch.jld2",
-                model_state=Flux.state(rhvae),
+                model_state=Flux.cpu(Flux.state(rhvae)),
                 mse_train=mse_train,
                 mse_val=mse_val,
                 loss_train=loss_train,
