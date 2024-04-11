@@ -48,7 +48,7 @@ Flux.loadmodel!(
 println("Loading RHVAE models...")
 
 # List files in output directory
-files = Glob.glob("output/model_state/*.jld2")
+files = Glob.glob("./output/gpu_model_state/beta*.jld2")
 
 # Locate unique temperatures in file names
 temps = sort(unique([split(f, "_")[end-1] for f in files]))
@@ -57,7 +57,7 @@ temps = sort(unique([split(f, "_")[end-1] for f in files]))
 rhvae_dict = Dict()
 
 # Load model template
-rhvae_template = JLD2.load("./output/model.jld2")["model"]
+rhvae_template = JLD2.load("./output/gpu_model.jld2")["model"]
 
 # Loop through temperatures
 for (i, temp) in enumerate(temps)
@@ -77,7 +77,7 @@ for (i, temp) in enumerate(temps)
         deepcopy(rhvae_template.λ)
     )
     # Search for model files
-    model_files = Glob.glob("./output/model_state/*$(temp)*.jld2")
+    model_files = Glob.glob("./output/gpu_model_state/*$(temp)*.jld2")
     # Load parameters
     model_state = JLD2.load(model_files[end])["model_state"]
     # Set model parameters

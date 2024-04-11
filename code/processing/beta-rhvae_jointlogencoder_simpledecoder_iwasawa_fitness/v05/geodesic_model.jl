@@ -25,7 +25,7 @@ n_neuron = 32
 println("Loading reference RHVAE model...")
 
 # Load model
-rhvae_template = JLD2.load("./output/model.jld2")["model"]
+rhvae_template = JLD2.load("./output/gpu_model.jld2")["model"]
 
 ## =============================================================================
 
