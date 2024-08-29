@@ -250,6 +250,58 @@ function theme_makie!()
         Lines=(
             linewidth=2,
         ),
+        Axis3=(
+            xzpanelcolor="#E6E6EF",
+            xypanelcolor="#E6E6EF",
+            yzpanelcolor="#E6E6EF",
+            viewmode=:fit,
+
+            # Font sizes
+            titlesize=16,
+            xlabelsize=16,
+            ylabelsize=16,
+            xticklabelsize=14,
+            yticklabelsize=14,
+            zticklabelsize=14,
+
+            # Font styles
+            titlefont=:bold,
+            xticklabelfont=:regular,
+            yticklabelfont=:regular,
+            zticklabelfont=:regular,
+            xlabelfont=:regular,
+            ylabelfont=:regular,
+            zlabelfont=:regular,
+
+            # Grid
+            xgridwidth=1.25,
+            ygridwidth=1.25,
+            zgridwidth=1.25,
+            xgridcolor="white",
+            ygridcolor="white",
+            zgridcolor="white",
+            xminorgridcolor="white",
+            yminorgridcolor="white",
+            zminorgridcolor="white",
+            xminorgridvisible=false,
+            xminorgridwidth=1.0,
+            yminorgridvisible=false,
+            yminorgridwidth=1.0,
+            zminorgridvisible=false,
+            zminorgridwidth=1.0,
+
+            # Axis ticks
+            minorticks=false,
+            xticksvisible=false,
+            yticksvisible=false,
+            zticksvisible=false,
+
+            # Box
+            rightspinevisible=false,
+            leftspinevisible=false,
+            topspinevisible=false,
+            bottomspinevisible=false,
+        ),
         backgroundcolor="white",
         linewidth=1.25,
     )
