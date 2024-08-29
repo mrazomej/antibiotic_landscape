@@ -101,4 +101,5 @@ code/analysis/*/output/
 code/processing/*/output/
 code/processing/*/*/output/
 code/exploratory/output/
+code/fig/output/
 data/*
