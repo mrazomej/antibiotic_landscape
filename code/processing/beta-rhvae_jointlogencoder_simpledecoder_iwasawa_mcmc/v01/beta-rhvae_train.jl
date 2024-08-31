@@ -68,10 +68,16 @@ loss_kwargs = (
 
 println("Setting output directories...")
 
-# Define output directory
-out_dir = "./output/model_state"
+# Find the path perfix where input data is stored
+prefix = replace(
+    match(r"processing/(.*)", path_dir).match,
+    "processing" => "",
+)
+
 # Define model directory
-model_dir = "./output"
+model_dir = "$(git_root())/output$(out_prefix)"
+# Define output directory
+out_dir = "$(git_root())/output$(out_prefix)/model_state"
 
 # Generate output directory if it doesn't exist
 if !isdir(out_dir)
@@ -84,7 +90,7 @@ end
 println("Loading data into memory...")
 
 # Define data directory
-data_dir = "$(git_root())/data/Iwasawa_2022/mcmc_nonnegative"
+data_dir = "$(git_root())/output/mcmc_iwasawa_logistic"
 
 # Load standardized mean data
 train_data = JLD2.load(
@@ -184,15 +190,13 @@ for epoch in epoch_init:n_epoch
     for (i, idx_tuple) in enumerate(idx_batches)
         println("Epoch: $(epoch) | Batch: $(i) / $(length(idx_batches))")
         # Extract indexes
-        idx = collect(idx_tuple)
-        # Sample mcmc index for x_in
-        idx_in = StatsBase.sample(1:size(train_data, 3))
-        # Sample mcmc index for x_out
-        idx_out = StatsBase.sample(1:size(train_data, 3))
+        idx_batch = collect(idx_tuple)
+        # Sample mcmc index for the MCMC sample for this training step
+        idx_mcmc = StatsBase.sample(1:size(train_data, 3))
         # Train RHVAE
         loss_epoch[i] = AET.RHVAEs.train!(
-            rhvae, train_data[:, idx, idx_in], train_data[:, idx, idx_out],
-            opt_rhvae; loss_kwargs=loss_kwargs, verbose=false, loss_return=true
+            rhvae, train_data[:, idx_batch, idx_mcmc], opt_rhvae;
+            loss_kwargs=loss_kwargs, verbose=false, loss_return=true
         )
         println("Loss: $(loss_epoch[i])")
     end # for train_loader

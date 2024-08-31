@@ -36,7 +36,7 @@ n_centroids = 256 # Number of centroids
 println("Loading data into memory...")
 
 # Define data directory
-data_dir = "$(git_root())/data/Iwasawa_2022/mcmc_nonnegative"
+data_dir = "$(git_root())/output/mcmc_iwasawa_logistic"
 
 # Load standardized mean data
 logic50_mean_std = JLD2.load(
@@ -48,10 +48,30 @@ n_env = size(logic50_mean_std, 1)
 
 ## =============================================================================
 
+# Locate current directory
+path_dir = pwd()
+
+## =============================================================================
+
 # Select centroids via k-means
 centroids_data = AutoEncoderToolkit.utils.centroids_kmedoids(
     logic50_mean_std, n_centroids
 )
+
+# Find the path perfix where input data is stored
+out_prefix = replace(
+    match(r"processing/(.*)", path_dir).match,
+    "processing" => "",
+)
+
+# Define output directory
+out_dir = "$(git_root())/output$(out_prefix)"
+
+# Generate output directory if it doesn't exist
+if !isdir(out_dir)
+    println("Generating output directory...")
+    mkpath(out_dir)
+end
 
 ## =============================================================================
 
@@ -141,6 +161,6 @@ println("Save model object...")
 
 # Save model object
 JLD2.save(
-    "./output/model.jld2",
+    "$(out_dir)/model.jld2",
     Dict("model" => rhvae, "model_state" => Flux.state(rhvae))
 )
