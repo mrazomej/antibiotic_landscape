@@ -17,7 +17,7 @@ Random.seed!(42)
 println("Listing MCMC files...")
 
 # Define output directory
-out_dir = "$(git_root())/data/Iwasawa_2022/mcmc_nonnegative"
+out_dir = "$(git_root())/output/mcmc_iwasawa_logistic"
 
 # List all files in the output directory
 files = sort(Glob.glob("$(out_dir)/*.csv"[2:end], "/"))

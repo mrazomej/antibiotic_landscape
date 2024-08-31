@@ -32,7 +32,7 @@ println("Set random seed")
 Random.seed!(42)
 
 println("Define output directory")
-out_dir = "$(git_root())/data/Iwasawa_2022/mcmc_nonnegative"
+out_dir = "$(git_root())/output/mcmc_iwasawa_logistic"
 
 # Check if directory exists
 if !isdir(out_dir)
