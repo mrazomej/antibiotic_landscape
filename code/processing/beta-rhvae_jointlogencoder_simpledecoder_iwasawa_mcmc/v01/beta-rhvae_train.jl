@@ -68,6 +68,9 @@ loss_kwargs = (
 
 println("Setting output directories...")
 
+# Define current directory
+path_dir = pwd()
+
 # Find the path perfix where input data is stored
 prefix = replace(
     match(r"processing/(.*)", path_dir).match,
@@ -75,9 +78,9 @@ prefix = replace(
 )
 
 # Define model directory
-model_dir = "$(git_root())/output$(out_prefix)"
+model_dir = "$(git_root())/output$(prefix)"
 # Define output directory
-out_dir = "$(git_root())/output$(out_prefix)/model_state"
+out_dir = "$(git_root())/output$(prefix)/model_state"
 
 # Generate output directory if it doesn't exist
 if !isdir(out_dir)
@@ -139,7 +142,7 @@ end
 println("Checking previous model states...")
 
 # List previous model parameters
-model_states = sort(Glob.glob("$(out_dir)/beta-rhvae_epoch*.jld2"))
+model_states = sort(Glob.glob("$(out_dir)/beta-rhvae_epoch*.jld2"[2:end], "/"))
 
 # Check if model states exist
 if length(model_states) > 0
