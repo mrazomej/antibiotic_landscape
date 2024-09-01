@@ -116,6 +116,8 @@ println("Build logIC50 default matrix...")
 logic50_mean = Matrix{Float32}(
     undef, length(unique(df_ic50_thresh.drug)), length(df_group)
 )
+logic50_lower = similar(logic50_mean)
+logic50_upper = similar(logic50_mean)
 
 # Loop through groups
 for (i, data) in enumerate(df_group)
@@ -124,6 +126,8 @@ for (i, data) in enumerate(df_group)
     if all(data.drug .== sort(unique(df_ic50_thresh.drug)))
         # Add data to matrix
         logic50_mean[:, i] = Float32.(data.logic50_mean)
+        logic50_lower[:, i] = Float32.(data.logic50_ci_lower)
+        logic50_upper[:, i] = Float32.(data.logic50_ci_upper)
     else
         println("group $i stress does not match")
     end # if
@@ -166,6 +170,8 @@ dt = StatsBase.fit(StatsBase.ZScoreTransform, logic50_mean, dims=2)
 
 # Center data to have mean zero and standard deviation one
 logic50_mean_std = StatsBase.transform(dt, logic50_mean)
+logic50_lower_std = StatsBase.transform(dt, logic50_lower)
+logic50_upper_std = StatsBase.transform(dt, logic50_upper)
 
 logic50_mcmc_std = reduce(
     (x, y) -> cat(x, y, dims=3),
@@ -174,14 +180,40 @@ logic50_mcmc_std = reduce(
 
 ## =============================================================================
 
+# Loop through groups to add standardized data to dataframe
+for (i, data) in enumerate(df_group)
+    # Sort data by stress
+    DF.sort!(data, :drug)
+    # Add standardized data to dataframe
+    data.logic50_mean_std = logic50_mean_std[:, i]
+    data.logic50_ci_lower_std = logic50_lower_std[:, i]
+    data.logic50_ci_upper_std = logic50_upper_std[:, i]
+end # for
+
+# Concatentate all dataframes
+df_std = vcat(df_group...)
+# Remove file column
+df_std = df_std[:, DF.Not(:file)]
+
+## =============================================================================
+
 println("Save objects into JLD2 file...")
 
 JLD2.save(
-    "$(git_root())/data/Iwasawa_2022/mcmc_nonnegative/logic50_preprocess.jld2",
+    "$(git_root())/output/mcmc_iwasawa_logistic/logic50_preprocess.jld2",
     Dict(
         "logic50_mean" => logic50_mean,
         "logic50_mean_std" => logic50_mean_std,
         "logic50_mcmc" => logic50_mcmc,
         "logic50_mcmc_std" => logic50_mcmc_std
     )
+)
+
+## =============================================================================
+
+println("Save dataframe into CSV files...")
+
+CSV.write(
+    "$(git_root())/output/mcmc_iwasawa_logistic/logic50_ci.csv",
+    df_std
 )
