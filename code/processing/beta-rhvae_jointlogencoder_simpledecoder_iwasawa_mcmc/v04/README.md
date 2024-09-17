@@ -5,7 +5,7 @@
 - latent space dimensionality: 2
 - number of neurons in hidden layers: 128
 - activation function: leaky ReLU
-- temperature parameter: 0.65
+- temperature parameter: 0.5
 - regularization parameter: 1E-2
 - number of centroids: 256
 - centroid determination: k-medoids
