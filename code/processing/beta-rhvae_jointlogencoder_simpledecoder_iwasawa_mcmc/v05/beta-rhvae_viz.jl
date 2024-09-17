@@ -74,7 +74,7 @@ rhvae_kwargs = (K=K, ϵ=ϵ, βₒ=βₒ,)
 ## =============================================================================
 
 # Find model file
-model_file = first(Glob.glob("$(out_dir)/*.jld2"[2:end], "/"))
+model_file = first(Glob.glob("$(out_dir)/model*.jld2"[2:end], "/"))
 # List epoch parameters
 model_states = Glob.glob("$(model_dir)/*.jld2"[2:end], "/")
 
