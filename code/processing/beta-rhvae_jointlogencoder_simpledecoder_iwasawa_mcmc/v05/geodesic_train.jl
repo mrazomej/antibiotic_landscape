@@ -28,7 +28,7 @@ Random.seed!(42)
 # Define number of time points to evaluate along curve
 n_time = 50
 # Define number of epochs
-n_epoch = 10_000
+n_epoch = 50_000
 # Define learning rate
 η = 10^-4
 

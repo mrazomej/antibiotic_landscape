@@ -89,10 +89,16 @@ for f in model_states
     f_load = JLD2.load(f)
     # Extract values
     loss_train = f_load["loss_train"]
+    loss_val = f_load["loss_val"]
+    mse_train = f_load["mse_train"]
+    mse_val = f_load["mse_val"]
     # Generate temporary dataframe to store metadata
     df_tmp = DF.DataFrame(
         :epoch => epoch,
         :loss_train => loss_train,
+        :loss_val => loss_val,
+        :mse_train => mse_train,
+        :mse_val => mse_val,
         :model_file => model_file,
         :model_state => f,
     )
@@ -105,7 +111,7 @@ end # for f in model_states
 println("Plotting training loss...")
 
 # Initialize figure
-fig = Figure(size=(350, 300))
+fig = Figure(size=(600, 300))
 
 # Add axis
 ax = Axis(
@@ -121,6 +127,41 @@ lines!(
     df_meta.loss_train,
     label="train",
 )
+# Plot validation loss
+lines!(
+    ax,
+    df_meta.epoch,
+    df_meta.loss_val,
+    label="validation",
+)
+
+# Add legend
+axislegend(ax, position=:rt)
+
+# Add axis
+ax = Axis(
+    fig[1, 2],
+    xlabel="epoch",
+    ylabel="MSE",
+)
+
+# Plot training loss
+lines!(
+    ax,
+    df_meta.epoch,
+    df_meta.mse_train,
+    label="train",
+)
+# Plot validation loss
+lines!(
+    ax,
+    df_meta.epoch,
+    df_meta.mse_val,
+    label="validation",
+)
+
+# Add legend
+axislegend(ax, position=:rt)
 
 fig
 
@@ -381,6 +422,6 @@ scatter!(
 # Add colorbar
 Colorbar(fig[1, 2], hm, label="√log[det(G̲̲)]")
 
-save("$(fig_dir)/rhvae_latent_space_metric.pdf", fig)
+save("$(fig_dir)/rhvae_latent_space_metric.png", fig)
 
 fig
