@@ -350,3 +350,204 @@ save("$(fig_dir)/vae_latent_space_day.pdf", fig)
 save("$(fig_dir)/vae_latent_space_day.png", fig)
 
 fig
+
+## =============================================================================
+
+println("Plot some evolutionary paths...")
+
+# Initialize figure
+fig = Figure(size=(850, 600))
+
+# Add grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Define (:env, :strain_num) pairs to plot
+pairs = [
+    ("KM", 16), ("NFLX", 33), ("TET", 8), ("KM", 28), ("NFLX", 35), ("TET", 3)
+]
+
+# Define number of rows and columns
+rows = 2
+cols = 3
+
+# Loop through pairs
+for (i, p) in enumerate(pairs)
+    println("env: $(p[1]) | strain: $(p[2])")
+    # Define row and column index
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
+    # Add axis
+    ax = Axis(
+        gl[row, col],
+        aspect=AxisAspect(1),
+        title="evolution antibiotic: $(p[1])",
+        xticksvisible=false,
+        yticksvisible=false,
+    )
+    # Hide axis labels
+    hidedecorations!(ax)
+
+    # Plot all points in background
+    scatter!(
+        ax,
+        df_latent.latent1,
+        df_latent.latent2,
+        markersize=5,
+        color=(:gray, 0.5),
+        marker=:circle,
+    )
+
+    # Extract lineage information
+    lineage = df_latent[df_latent.strain_num.==p[2], :]
+
+    # Plot lineage
+    scatterlines!(
+        ax,
+        lineage.latent1,
+        lineage.latent2,
+        markersize=8,
+        linewidth=2,
+    )
+
+    # Add first point 
+    scatter!(
+        ax,
+        [lineage.latent1[1]],
+        [lineage.latent2[1]],
+        color=:white,
+        markersize=18,
+        marker=:xcross
+    )
+    scatter!(
+        ax,
+        [lineage.latent1[1]],
+        [lineage.latent2[1]],
+        color=:black,
+        markersize=12,
+        marker=:xcross
+    )
+
+    # Add last point
+    scatter!(
+        ax,
+        [lineage.latent1[end]],
+        [lineage.latent2[end]],
+        color=:white,
+        markersize=18,
+        marker=:utriangle
+    )
+    scatter!(
+        ax,
+        [lineage.latent1[end]],
+        [lineage.latent2[end]],
+        color=:black,
+        markersize=12,
+        marker=:utriangle
+    )
+
+end # for p in pairs
+
+# Save figure
+save("$(fig_dir)/vae_latent_space_trajectory_examples.pdf", fig)
+
+fig
+## =============================================================================
+
+println("Plotting latent space trajectories...")
+
+# Define figure name
+fname = "$(fig_dir)/vae_latent_trajectory"
+
+# Group data by :env
+df_group = DF.groupby(df_latent, :env)
+
+# Loop through groups
+for (i, data_group) in enumerate(df_group)
+    # Extract unique strain numbers
+    strain_nums = unique(data_group.strain_num)
+    # Define number of columns
+    cols = 4
+    # Define the number of needed rows
+    rows = ceil(Int, length(strain_nums) / cols)
+
+    # Initialize figure
+    fig = Figure(size=(200 * cols, 200 * rows))
+    # Add grid layout
+    gl = fig[1, 1] = GridLayout()
+    # Loop through metadata
+    for (j, strain_num) in enumerate(strain_nums)
+        # Extract data
+        lineage = df_latent[df_latent.strain_num.==strain_num, :]
+
+        # Define row and column index
+        row = (j - 1) ÷ cols + 1
+        col = (j - 1) % cols + 1
+        # Add axis
+        ax = Axis(
+            gl[row, col],
+            aspect=AxisAspect(1),
+            title="env: $(first(lineage.env)) | strain: $(first(lineage.strain_num))",
+            xticksvisible=false,
+            yticksvisible=false,
+        )
+        # Hide axis labels
+        hidedecorations!(ax)
+
+        # Plot all points in background
+        scatter!(
+            ax,
+            df_latent.latent1,
+            df_latent.latent2,
+            markersize=5,
+            color=(:gray, 0.5),
+            marker=:circle,
+        )
+
+        # Plot lineage
+        scatterlines!(
+            ax,
+            lineage.latent1,
+            lineage.latent2,
+            markersize=6,
+            linewidth=2,
+        )
+
+        # Add first point 
+        scatter!(
+            ax,
+            [lineage.latent1[1]],
+            [lineage.latent2[1]],
+            color=:white,
+            markersize=11,
+            marker=:xcross
+        )
+        scatter!(
+            ax,
+            [lineage.latent1[1]],
+            [lineage.latent2[1]],
+            color=:black,
+            markersize=7,
+            marker=:xcross
+        )
+
+        # Add last point
+        scatter!(
+            ax,
+            [lineage.latent1[end]],
+            [lineage.latent2[end]],
+            color=:white,
+            markersize=11,
+            marker=:utriangle
+        )
+        scatter!(
+            ax,
+            [lineage.latent1[end]],
+            [lineage.latent2[end]],
+            color=:black,
+            markersize=7,
+            marker=:utriangle
+        )
+        # Save figure 
+        save("$(fname)_$(first(data_group.env)).png", fig)
+    end # for 
+end # for 
