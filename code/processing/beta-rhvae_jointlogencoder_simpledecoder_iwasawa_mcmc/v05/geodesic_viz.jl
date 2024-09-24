@@ -113,7 +113,7 @@ println("Loading NeuralGeodesic template...")
 nng_template = JLD2.load("$(out_dir)/geodesic.jld2")["model"].mlp
 
 # Define number of points per axis
-n_time = 50
+n_time = 75
 # Define time points along curve
 t_array = Float32.(collect(range(0, 1, length=n_time)))
 
@@ -166,17 +166,17 @@ end # for
 println("Compute Riemannian metric for latent space...")
 
 # Define number of points per axis
-n_points = 250
+n_points = 100
 
 # Extract latent space ranges
 latent1_range = range(
-    minimum(df_latent.latent1) - 3.5,
-    maximum(df_latent.latent1) + 3.5,
+    minimum(df_latent.latent1) - 2,
+    maximum(df_latent.latent1) + 2,
     length=n_points
 )
 latent2_range = range(
-    minimum(df_latent.latent2) - 3.5,
-    maximum(df_latent.latent2) + 3.5,
+    minimum(df_latent.latent2) - 2,
+    maximum(df_latent.latent2) + 2,
     length=n_points
 )
 # Define latent points to evaluate
@@ -193,25 +193,33 @@ logdetG = reshape(
 
 ## =============================================================================
 
-# Define number of rows and columns in figure
-rows = 5
-cols = 4
+# Group data by :env
+df_group = DF.groupby(df_latent, :env)
 
-# Split df_meta_gen into chunks of size rows * cols
-df_meta_chunks = [
-    df_meta[i:i+rows*cols-1, :] for i in 1:rows*cols:size(df_meta, 1)
-]
 # Define figure name
 fname = "$(fig_dir)/geodesic_latent_trajectory"
+
 # Loop through meta chunks
-for (i, chunk) in enumerate(df_meta_chunks)
+for (i, data_group) in enumerate(df_group)
+    # Extract unique strain numbers
+    strain_nums = unique(data_group.strain_num)
+    # Define number of columns
+    cols = 4
+    # Define the number of needed rows
+    rows = ceil(Int, length(strain_nums) / cols)
+
     # Initialize figure
-    fig = Figure(size=(800, 1000))
+    fig = Figure(size=(200 * cols, 200 * rows))
     # Add grid layout
     gl = fig[1, 1] = GridLayout()
     # Loop through metadata
-    for (j, data_meta) in enumerate(eachrow(chunk))
-        println("   - Plotting geodesic: $(data_meta.strain_num)")
+    for (j, strain_num) in enumerate(strain_nums)
+        # Extract metadata
+        data_meta = df_meta[
+            (df_meta.env.==first(data_group.env)).&(df_meta.strain_num.==strain_num),
+            :]
+
+        println("   - Plotting geodesic: $(strain_num)")
         # Define row and column index
         row = (j - 1) ÷ cols + 1
         col = (j - 1) % cols + 1
@@ -219,7 +227,8 @@ for (i, chunk) in enumerate(df_meta_chunks)
         ax = Axis(
             gl[row, col],
             aspect=AxisAspect(1),
-            title="env: $(data_meta.env) | strain: $(data_meta.strain_num)",
+            title="env: $(first(data_meta.env)) | " *
+                  "strain: $(first(data_meta.strain_num))",
             xticksvisible=false,
             yticksvisible=false,
         )
@@ -248,7 +257,7 @@ for (i, chunk) in enumerate(df_meta_chunks)
         )
 
         # Load geodesic state
-        geo_state = JLD2.load(data_meta.geodesic_state)
+        geo_state = JLD2.load(first(data_meta.geodesic_state))
         # Define NeuralGeodesic model
         nng = NG.NeuralGeodesic(
             nng_template,
@@ -304,7 +313,7 @@ for (i, chunk) in enumerate(df_meta_chunks)
             marker=:utriangle
         )
         # Save figure 
-        save("$(fname)_$(lpad(i, 2, "0")).png", fig)
+        save("$(fname)_$(first(data_group.env)).png", fig)
     end # for data_meta in eachrow(chunk)
 end # for chunk in df_meta_chunks
 
@@ -349,7 +358,7 @@ for (i, p) in enumerate(pairs)
     hidedecorations!(ax)
 
     # Plot heatmap of log determinant of metric tensor
-    heatmap!(
+    hm = heatmap!(
         ax,
         latent1_range,
         latent2_range,
@@ -375,7 +384,7 @@ for (i, p) in enumerate(pairs)
         ax,
         lineage.latent1,
         lineage.latent2,
-        markersize=6,
+        markersize=8,
         linewidth=2,
     )
 
@@ -406,7 +415,7 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[1]],
         [lineage.latent2[1]],
         color=:white,
-        markersize=11,
+        markersize=18,
         marker=:xcross
     )
     scatter!(
@@ -414,7 +423,7 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[1]],
         [lineage.latent2[1]],
         color=:black,
-        markersize=7,
+        markersize=12,
         marker=:xcross
     )
 
@@ -424,7 +433,7 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[end]],
         [lineage.latent2[end]],
         color=:white,
-        markersize=11,
+        markersize=18,
         marker=:utriangle
     )
     scatter!(
@@ -432,10 +441,148 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[end]],
         [lineage.latent2[end]],
         color=:black,
-        markersize=7,
+        markersize=12,
         marker=:utriangle
     )
 
+    # Check if plot is the last one
+    if i == length(pairs)
+        # Add grid layout inside grid layout
+        gc = gl[1:2, 4] = GridLayout()
+        # Add couple of empty grid layouts
+        ge_top = gc[1, :] = GridLayout()
+        ge_bottom = gc[4, :] = GridLayout()
+        # Add colorbar
+        Colorbar(gc[2:3, :], hm, label="logdet(G)")
+    end
+end # for p in pairs
+
+save("$(fig_dir)/geodesic_examples_04.pdf", fig)
+
+fig
+
+## =============================================================================
+
+# Initialize figure
+fig = Figure(size=(900, 600))
+
+# Add grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Define number of rows and columns
+rows = 2
+cols = 3
+
+# Loop through pairs
+for (i, p) in enumerate(pairs)
+    println("env: $(p[1]) | strain: $(p[2])")
+    # Extract metadata
+    data_meta = df_meta[
+        (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
+    ]
+    # Define row and column index
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
+    # Add axis
+    ax = Axis(
+        gl[row, col],
+        aspect=AxisAspect(1),
+        title="evolution antibiotic: $(p[1])",
+        xticksvisible=false,
+        yticksvisible=false,
+    )
+    # Hide axis labels
+    hidedecorations!(ax)
+
+    # Plot heatmap of log determinant of metric tensor
+    hm = heatmap!(
+        ax,
+        latent1_range,
+        latent2_range,
+        logdetG,
+        colormap=ColorSchemes.tokyo,
+    )
+
+    # Plot all points in background
+    scatter!(
+        ax,
+        df_latent.latent1,
+        df_latent.latent2,
+        markersize=5,
+        color=(:gray, 0.25),
+        marker=:circle,
+    )
+
+    # Extract lineage information
+    lineage = df_latent[df_latent.strain_num.==p[2], :]
+
+    # # Load geodesic state
+    geo_state = JLD2.load(first(data_meta.geodesic_state))
+    # Define NeuralGeodesic model
+    nng = NG.NeuralGeodesic(
+        nng_template,
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+    )
+    # Update model state
+    Flux.loadmodel!(nng, geo_state["model_state"])
+    # Generate curve
+    curve = nng(t_array)
+    # Add geodesic line to axis
+    lines!(
+        ax,
+        eachrow(curve)...,
+        linewidth=2,
+        linestyle=(:dot, :dense),
+        color=:white,
+    )
+
+    # Add first point 
+    scatter!(
+        ax,
+        [lineage.latent1[1]],
+        [lineage.latent2[1]],
+        color=:white,
+        markersize=18,
+        marker=:xcross
+    )
+    scatter!(
+        ax,
+        [lineage.latent1[1]],
+        [lineage.latent2[1]],
+        color=:black,
+        markersize=12,
+        marker=:xcross
+    )
+
+    # Add last point
+    scatter!(
+        ax,
+        [lineage.latent1[end]],
+        [lineage.latent2[end]],
+        color=:white,
+        markersize=18,
+        marker=:utriangle
+    )
+    scatter!(
+        ax,
+        [lineage.latent1[end]],
+        [lineage.latent2[end]],
+        color=:black,
+        markersize=12,
+        marker=:utriangle
+    )
+
+    # Check if plot is the last one
+    if i == length(pairs)
+        # Add grid layout inside grid layout
+        gc = gl[1:2, 4] = GridLayout()
+        # Add couple of empty grid layouts
+        ge_top = gc[1, :] = GridLayout()
+        ge_bottom = gc[4, :] = GridLayout()
+        # Add colorbar
+        Colorbar(gc[2:3, :], hm, label="logdet(G)")
+    end
 end # for p in pairs
 
 save("$(fig_dir)/geodesic_examples_03.pdf", fig)
@@ -445,13 +592,14 @@ fig
 ## =============================================================================
 
 # Initialize figure
-fig = Figure(size=(900, 300))
+fig = Figure(size=(900, 600))
 
 # Add grid layout
 gl = fig[1, 1] = GridLayout()
 
-# Define (:env, :strain_num) pairs to plot
-pairs = [("KM", 16), ("NFLX", 33), ("TET", 8)]
+# Define number of rows and columns
+rows = 2
+cols = 3
 
 # Loop through pairs
 for (i, p) in enumerate(pairs)
@@ -461,8 +609,8 @@ for (i, p) in enumerate(pairs)
         (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
     ]
     # Define row and column index
-    row = 1
-    col = i
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
     # Add axis
     ax = Axis(
         gl[row, col],
@@ -475,7 +623,7 @@ for (i, p) in enumerate(pairs)
     hidedecorations!(ax)
 
     # Plot heatmap of log determinant of metric tensor
-    heatmap!(
+    hm = heatmap!(
         ax,
         latent1_range,
         latent2_range,
@@ -502,7 +650,7 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[1]],
         [lineage.latent2[1]],
         color=:white,
-        markersize=11,
+        markersize=18,
         marker=:xcross
     )
     scatter!(
@@ -510,7 +658,7 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[1]],
         [lineage.latent2[1]],
         color=:black,
-        markersize=7,
+        markersize=12,
         marker=:xcross
     )
 
@@ -520,7 +668,7 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[end]],
         [lineage.latent2[end]],
         color=:white,
-        markersize=11,
+        markersize=18,
         marker=:utriangle
     )
     scatter!(
@@ -528,127 +676,20 @@ for (i, p) in enumerate(pairs)
         [lineage.latent1[end]],
         [lineage.latent2[end]],
         color=:black,
-        markersize=7,
+        markersize=12,
         marker=:utriangle
     )
 
-end # for p in pairs
-
-save("$(fig_dir)/geodesic_examples_01.pdf", fig)
-
-fig
-
-## =============================================================================
-
-# Initialize figure
-fig = Figure(size=(900, 300))
-
-# Add grid layout
-gl = fig[1, 1] = GridLayout()
-
-# Define (:env, :strain_num) pairs to plot
-pairs = [("KM", 16), ("NFLX", 33), ("TET", 8)]
-
-# Loop through pairs
-for (i, p) in enumerate(pairs)
-    println("env: $(p[1]) | strain: $(p[2])")
-    # Extract metadata
-    data_meta = df_meta[
-        (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
-    ]
-    # Define row and column index
-    row = 1
-    col = i
-    # Add axis
-    ax = Axis(
-        gl[row, col],
-        aspect=AxisAspect(1),
-        title="evolution antibiotic: $(p[1])",
-        xticksvisible=false,
-        yticksvisible=false,
-    )
-    # Hide axis labels
-    hidedecorations!(ax)
-
-    # Plot heatmap of log determinant of metric tensor
-    heatmap!(
-        ax,
-        latent1_range,
-        latent2_range,
-        logdetG,
-        colormap=ColorSchemes.tokyo,
-    )
-
-    # Plot all points in background
-    scatter!(
-        ax,
-        df_latent.latent1,
-        df_latent.latent2,
-        markersize=5,
-        color=(:gray, 0.25),
-        marker=:circle,
-    )
-
-    # Extract lineage information
-    lineage = df_latent[df_latent.strain_num.==p[2], :]
-
-    # # Load geodesic state
-    geo_state = JLD2.load(first(data_meta.geodesic_state))
-    # Define NeuralGeodesic model
-    nng = NG.NeuralGeodesic(
-        nng_template,
-        geo_state["latent_init"],
-        geo_state["latent_end"],
-    )
-    # Update model state
-    Flux.loadmodel!(nng, geo_state["model_state"])
-    # Generate curve
-    curve = nng(t_array)
-    # Add geodesic line to axis
-    lines!(
-        ax,
-        eachrow(curve)...,
-        linewidth=2,
-        linestyle=(:dot, :dense),
-        color=:white,
-    )
-
-    # Add first point 
-    scatter!(
-        ax,
-        [lineage.latent1[1]],
-        [lineage.latent2[1]],
-        color=:white,
-        markersize=11,
-        marker=:xcross
-    )
-    scatter!(
-        ax,
-        [lineage.latent1[1]],
-        [lineage.latent2[1]],
-        color=:black,
-        markersize=7,
-        marker=:xcross
-    )
-
-    # Add last point
-    scatter!(
-        ax,
-        [lineage.latent1[end]],
-        [lineage.latent2[end]],
-        color=:white,
-        markersize=11,
-        marker=:utriangle
-    )
-    scatter!(
-        ax,
-        [lineage.latent1[end]],
-        [lineage.latent2[end]],
-        color=:black,
-        markersize=7,
-        marker=:utriangle
-    )
-
+    # Check if plot is the last one
+    if i == length(pairs)
+        # Add grid layout inside grid layout
+        gc = gl[1:2, 4] = GridLayout()
+        # Add couple of empty grid layouts
+        ge_top = gc[1, :] = GridLayout()
+        ge_bottom = gc[4, :] = GridLayout()
+        # Add colorbar
+        Colorbar(gc[2:3, :], hm, label="logdet(G)")
+    end
 end # for p in pairs
 
 save("$(fig_dir)/geodesic_examples_02.pdf", fig)
@@ -658,10 +699,14 @@ fig
 ## =============================================================================
 
 # Initialize figure
-fig = Figure(size=(900, 300))
+fig = Figure(size=(900, 600))
 
 # Add grid layout
 gl = fig[1, 1] = GridLayout()
+
+# Define number of rows and columns
+rows = 2
+cols = 3
 
 # Loop through pairs
 for (i, p) in enumerate(pairs)
@@ -671,8 +716,8 @@ for (i, p) in enumerate(pairs)
         (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
     ]
     # Define row and column index
-    row = 1
-    col = i
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
     # Add axis
     ax = Axis(
         gl[row, col],
@@ -685,7 +730,7 @@ for (i, p) in enumerate(pairs)
     hidedecorations!(ax)
 
     # Plot heatmap of log determinant of metric tensor
-    heatmap!(
+    hm = heatmap!(
         ax,
         latent1_range,
         latent2_range,
@@ -699,14 +744,132 @@ for (i, p) in enumerate(pairs)
         ax,
         df_latent.latent1,
         df_latent.latent2,
-        markersize=8,
-        color=(:gray, 0.5),
+        markersize=5,
+        color=(:gray, 0.25),
         marker=:circle,
     )
 
     # Extract lineage information
     lineage = df_latent[df_latent.strain_num.==p[2], :]
 
+    # Add first point 
+    scatter!(
+        ax,
+        [lineage.latent1[1]],
+        [lineage.latent2[1]],
+        color=:white,
+        markersize=18,
+        marker=:xcross
+    )
+    scatter!(
+        ax,
+        [lineage.latent1[1]],
+        [lineage.latent2[1]],
+        color=:black,
+        markersize=12,
+        marker=:xcross
+    )
+
+    # Add last point
+    scatter!(
+        ax,
+        [lineage.latent1[end]],
+        [lineage.latent2[end]],
+        color=:white,
+        markersize=18,
+        marker=:utriangle
+    )
+    scatter!(
+        ax,
+        [lineage.latent1[end]],
+        [lineage.latent2[end]],
+        color=:black,
+        markersize=12,
+        marker=:utriangle
+    )
+
+    # Check if plot is the last one
+    if i == length(pairs)
+        # Add grid layout inside grid layout
+        gc = gl[1:2, 4] = GridLayout()
+        # Add couple of empty grid layouts
+        ge_top = gc[1, :] = GridLayout()
+        ge_bottom = gc[4, :] = GridLayout()
+        # Add colorbar
+        Colorbar(gc[2:3, :], hm, label="logdet(G)")
+    end
+end # for p in pairs
+
+save("$(fig_dir)/geodesic_examples_01.pdf", fig)
+
+fig
+
+## =============================================================================
+
+# Initialize figure
+fig = Figure(size=(900, 600))
+
+# Add grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Define number of rows and columns
+rows = 2
+cols = 3
+
+# Loop through pairs
+for (i, p) in enumerate(pairs)
+    println("env: $(p[1]) | strain: $(p[2])")
+    # Extract metadata
+    data_meta = df_meta[
+        (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
+    ]
+    # Define row and column index
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
+    # Add axis
+    ax = Axis(
+        gl[row, col],
+        aspect=AxisAspect(1),
+        title="evolution antibiotic: $(p[1])",
+        xticksvisible=false,
+        yticksvisible=false,
+    )
+    # Hide axis labels
+    hidedecorations!(ax)
+
+    # Plot heatmap of log determinant of metric tensor
+    hm = heatmap!(
+        ax,
+        latent1_range,
+        latent2_range,
+        logdetG,
+        colormap=ColorSchemes.tokyo,
+        alpha=0.0,
+    )
+
+    # Plot all points in background
+    scatter!(
+        ax,
+        df_latent.latent1,
+        df_latent.latent2,
+        markersize=5,
+        color=(:gray, 0.25),
+        marker=:circle,
+    )
+
+    # Extract lineage information
+    lineage = df_latent[df_latent.strain_num.==p[2], :]
+
+    # Check if plot is the last one
+    if i == length(pairs)
+        # Add grid layout inside grid layout
+        gc = gl[1:2, 4] = GridLayout()
+        # Add couple of empty grid layouts
+        ge_top = gc[1, :] = GridLayout()
+        ge_bottom = gc[4, :] = GridLayout()
+        # Add colorbar
+        Colorbar(gc[2:3, :], hm, label="logdet(G)")
+    end
 end # for p in pairs
 
 save("$(fig_dir)/geodesic_examples_00.pdf", fig)
