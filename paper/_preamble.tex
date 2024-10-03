@@ -1,0 +1,43 @@
+% Change font size
+\usepackage[font={footnotesize, sf}, labelfont=bf, margin=0.05\linewidth]{caption}
+\renewcommand{\familydefault}{\sfdefault}
+% Bold the 'Figure #' in the caption and separate it from the title/caption
+% with a period
+% Captions will be left justified
+\usepackage[
+	aboveskip=1pt,
+	labelfont=bf,
+	labelsep=period,
+	justification=raggedright,
+	singlelinecheck=off
+]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Add numbered lines
+\usepackage{lineno}
+% \linenumbers
+
+% Package to include multiple title pages
+% This will allow me to add a tile to the main text and to the SI
+\usepackage{titling}
+
+% Define command to begin the supplementary section
+\newcommand{\beginsupplement}{
+\setcounter{page}{1} % Restart page counter
+\setcounter{section}{0} % Restart section counter
+% \renewcommand{\thesection}{\Alph{section}}%
+\renewcommand{\thesection}{}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\setcounter{table}{0} % Restart table counter
+\renewcommand{\thetable}{\Alph{table}}
+\setcounter{figure}{0} % Restart figure counter
+\renewcommand{\thefigure}{\Alph{figure}}%
+\setcounter{equation}{0} % Restart equation counter
+\renewcommand{\theequation}{S\arabic{equation}}%
+}
+
+% Add author affiliations
+\usepackage{authblk}
+
+% Allow to define personalized colors
+\usepackage{xcolor}

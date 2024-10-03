@@ -1,0 +1,108 @@
+project:
+  type: website
+  output-dir: _output
+  render:
+    - paper.qmd
+
+# Title
+title: "Rapid evolution follows predictable paths on learnable low-dimensional manifolds"
+
+# Authors
+author:
+  - name: Manuel Razo-Mejia
+    orcid: 0000-0002-9510-0527
+    email: mrazo@stanford.edu
+    affiliations: 
+      - ref: stanfordbio
+    corresponding: true
+  - name: Madhav Mani
+    orcid: 0000-0002-5812-4167
+    affiliations: 
+      - ref: nwqbio
+      - ref: nweng
+  - name: Dmitri Petrov
+    orcid: 0000-0002-3664-9130
+    affiliations:
+      - ref: stanfordbio
+      - ref: stanfordcancer
+      - ref: czb
+
+# Author affiliations
+affiliations:
+  - id: stanfordbio
+    number: 1
+    name: Department of Biology, Stanford University
+    city: Stanford
+    state: California
+    country: United States of America
+  - id: stanfordcancer
+    number: 4
+    name: Stanford Cancer Institute, Stanford University School of Medicine
+    city: Stanford
+    state: California
+    country: United States of America
+  - id: nwqbio
+    number: 2
+    name: NSF-Simons Center for Quantitative Biology, Northwestern University
+    city: Chicago
+    state: Illinois
+    country: United States of America
+  - id: nweng
+    number: 3
+    name: Department of Engineering Sciences and Applied Mathematics, Northwestern University
+    city: Chicago
+    state: Illinois
+    country: United States of America
+  - id: czb
+    number: 5
+    name: Chan Zuckerberg Biohub
+    city: San Francisco
+    state: California
+    country: United States of America
+    
+# Keywords
+keywords:
+  - variational autoencoders
+  - evolutionary dynamics
+  - antibiotic resistance
+
+# Abstract
+abstract: |
+  TBD
+
+bibliography: references.bib
+
+website:
+  navbar:
+    right:
+      - icon: github
+        href: https://github.com/mrazomej/antibiotic_landscape
+      - icon: twitter-x
+        href: https://twitter.com/mrazomej
+  # sidebar:
+  #   alignment: left
+  #   title: "Sidebar"
+  #   logo: logo.png
+
+format:
+  html:
+    theme: cosmo
+    default-image-extension: png
+    toc: true
+    filters:
+      - maintext-filter.lua
+      - sitext-filter.lua
+  pdf: 
+    documentclass: scrartcl
+    numbersections: true
+    template: template.tex
+    cite-method: biblatex
+    default-image-extension: pdf
+    include-in-header:
+      - file: _preamble.tex
+    biblio-style: vancouver
+    keep-tex: true
+    filters:
+      - color-text-span.lua
+      - maintext-filter.lua
+      - sitext-refsection.lua

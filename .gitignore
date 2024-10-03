@@ -94,9 +94,11 @@ Manifest.toml
 doc/*_files/*
 doc/_*.html
 doc/_*.pdf
-miscellaneous/quarto/*_files/*
-miscellaneous/quarto/_*.html
-miscellaneous/quarto/_*.pdf
+paper/*_files/*
+paper/_*.html
+paper/_*.pdf
+paper/_output/*
+paper/site_libs/*
 code/analysis/*/output/
 code/processing/*/output/
 code/processing/*/*/output/

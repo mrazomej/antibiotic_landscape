@@ -1,0 +1,318 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+% Change font size
+\usepackage[font={footnotesize, sf}, labelfont=bf, margin=0.05\linewidth]{caption}
+\renewcommand{\familydefault}{\sfdefault}
+% Bold the 'Figure #' in the caption and separate it from the title/caption
+% with a period
+% Captions will be left justified
+\usepackage[
+	aboveskip=1pt,
+	labelfont=bf,
+	labelsep=period,
+	justification=raggedright,
+	singlelinecheck=off
+]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Add numbered lines
+\usepackage{lineno}
+% \linenumbers
+
+% Package to include multiple title pages
+% This will allow me to add a tile to the main text and to the SI
+\usepackage{titling}
+
+% Define command to begin the supplementary section
+\newcommand{\beginsupplement}{
+\setcounter{page}{1} % Restart page counter
+\setcounter{section}{0} % Restart section counter
+% \renewcommand{\thesection}{\Alph{section}}%
+\renewcommand{\thesection}{}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\setcounter{table}{0} % Restart table counter
+\renewcommand{\thetable}{\Alph{table}}
+\setcounter{figure}{0} % Restart figure counter
+\renewcommand{\thefigure}{\Alph{figure}}%
+\setcounter{equation}{0} % Restart equation counter
+\renewcommand{\theequation}{S\arabic{equation}}%
+}
+
+% Add author affiliations
+\usepackage{authblk}
+
+% Allow to define personalized colors
+\usepackage{xcolor}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[
+    style=vancouver,
+    sorting=none,				% Do not sort bibliography
+	url=false, 					% Do not show url in reference
+	doi=false, 					% Do not show doi in reference
+	isbn=false, 				% Do not show isbn link in reference
+	eprint=false, 			    % Do not show eprint link in reference
+	maxbibnames=9, 			    % Include up to 9 names in citation
+	firstinits=true,
+]{biblatex}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addbibresource{references.bib}
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Rapid evolution follows predictable paths on learnable low-dimensional manifolds},
+  pdfauthor={Manuel Razo-Mejia; Madhav Mani; Dmitri Petrov},
+  pdfkeywords={variational autoencoders, evolutionary
+dynamics, antibiotic resistance},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add title
+\title{Rapid evolution follows predictable paths on learnable
+low-dimensional manifolds}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add list of authors
+
+% Loop through authors
+\author[1,*]{Manuel Razo-Mejia}
+\author[3,4]{Madhav Mani}
+\author[1,2,5]{Dmitri Petrov}
+
+% Loop through affiliations
+\affil[1]{Department of Biology, Stanford University}
+\affil[2]{Stanford Cancer Institute, Stanford University School of
+Medicine}
+\affil[3]{NSF-Simons Center for Quantitative Biology, Northwestern
+University}
+\affil[4]{Department of Engineering Sciences and Applied Mathematics,
+Northwestern University}
+\affil[5]{Chan Zuckerberg Biohub}
+
+% Add corresponding author
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set affiliations in small font
+\renewcommand\Affilfont{\itshape\small}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Remove date
+\date{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\maketitle
+\begin{abstract}
+TBD
+\end{abstract}
+% Remove main text from the table of contents by specifying not to include
+% any section or subsection
+\addtocontents{toc}{\protect\setcounter{tocdepth}{-1}}
+
+% Define reference segment for main text
+\begin{refsegment}
+% Generate filter to not include references from main text in the
+% supplemental references
+\defbibfilter{notother}{not segment=\therefsegment}
+
+\section{Introduction}\label{introduction}
+
+Over the last decade, evolutionary biology has begun a transition from a
+primarily descriptive field aimed at understanding the history of life
+on Earth to a predictive science forecasting and controlling adaptive
+trajectories of evolving populations \autocite{Lassig2017,lassig2023a}.
+Such predictions have had real-world consequences, from viral dynamics
+\autocite{uksza2014} to cancer immunotherapy \autocite{luksza2017}.
+However, it is still unclear to what extent evolutionary trajectories
+under different environmental pressures can be predicted. Two main
+challenges make this question difficult to answer. First, the vast
+number of genetic changes available to a population makes it impossible
+to exhaustively sample and measure the phenotypic consequences of each
+mutation \autocite{louis2016}. Second, for most organisms but a few
+simple model systems, it is unknown what the phenotypic changes driving
+adaptation are {[}\emph{cite?}{]}.
+
+Nevertheless, an extensive body of empirical studies and theoretical
+work has suggested that the dynamics of adaptation are highly
+constrained, making them potentially predictable. From examples of
+enormous redundancy in the genotype-phenotype map, making the same
+phenotype accessible through many different genetic changes
+\autocite{wagner2008,louis2016}, to examples of a limited number of
+viable adaptive trajectories \autocite{weinreich2006}, reducing the
+number of sequential changes that can lead to adaptation, the evidence
+is mounting that there are general principles governing the dynamics of
+adaptation. Moreover, recent theoretical work on the evolution of
+complex gene regulatory networks has shown that the output space
+available to these networks to adapt to new tasks is highly constrained
+\autocite{kaneko2015,furusawa2018,sato2020,sato2023}.
+
+Inspired by this body of work, we set out to develop a general
+computational framework to assess the predictability of evolutionary
+trajectories. We consider three main ingredients for a computational
+method to tackle this question: 1. The method should be able to take
+advantage of the data-rich landscape of modern biology, where
+high-throughput fitness measurements are becoming increasingly common
+\autocite{kinsler2020,maeda2020,iwasawa2022}. 2. The method should be
+able to uncover the potentially hidden simplicity in the structure of
+the high-dimensional datasets generated by these experiments by
+projecting them in a principled way into a lower-dimensional space
+visualizable by humans. 3. The generated low-dimensional map should be
+accompanied by the corresponding geometric information on how the
+high-dimensional space is folded into the map, making the distances on
+the map meaningful in the high-dimensional space.
+
+\section{Results}\label{results}
+
+\section{Discussion}\label{discussion}
+
+\section*{Materials and Methods}\label{materials-and-methods}
+\addcontentsline{toc}{section}{Materials and Methods}
+
+\section*{Acknowledgements}\label{acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+We would like to thank Griffin Chure and Enrique Amaya for their helpful
+advice and discussion. We are extremely grateful to Junichiro Iwasawa
+for sharing the raw data from his study; his openness and willingness to
+share data and the immediate response are examples of the best practices
+in open science.
+
+% Print main text references
+\printbibliography[segment=\therefsegment]
+% Close reference segment
+\end{refsegment}
+
+\clearpage
+
+
+
+\end{document}
