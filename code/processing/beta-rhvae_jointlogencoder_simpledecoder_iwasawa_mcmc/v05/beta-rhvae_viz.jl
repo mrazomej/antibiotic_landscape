@@ -166,6 +166,7 @@ axislegend(ax, position=:rt)
 fig
 
 save("$(fig_dir)/rhvae_loss_train.pdf", fig)
+save("$(fig_dir)/rhvae_loss_train.png", fig)
 
 ## =============================================================================
 
@@ -238,6 +239,7 @@ scatter!(
 )
 
 save("$(fig_dir)/rhvae_latent_space.pdf", fig)
+save("$(fig_dir)/rhvae_latent_space.png", fig)
 
 fig
 
@@ -276,6 +278,7 @@ end # for
 Legend(fig[1, 2], ax)
 
 save("$(fig_dir)/rhvae_latent_space_env.pdf", fig)
+save("$(fig_dir)/rhvae_latent_space_env.png", fig)
 
 fig
 
@@ -314,6 +317,7 @@ end # for
 Legend(fig[1, 2], ax)
 
 save("$(fig_dir)/rhvae_latent_space_strain.pdf", fig)
+save("$(fig_dir)/rhvae_latent_space_strain.png", fig)
 
 fig
 
@@ -355,6 +359,7 @@ end # for
 Legend(fig[1, 2], ax, "day", nbanks=3)
 
 save("$(fig_dir)/rhvae_latent_space_day.pdf", fig)
+save("$(fig_dir)/rhvae_latent_space_day.png", fig)
 
 fig
 
