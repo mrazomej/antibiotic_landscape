@@ -184,6 +184,10 @@ rhvae = JLD2.load(model_file)["model"]
 Flux.loadmodel!(rhvae, JLD2.load(df_meta.model_state[end])["model_state"])
 # Update metric parameters
 AET.RHVAEs.update_metric!(rhvae)
+# Load training and validation indexes
+idx_train = JLD2.load(model_file)["idx_keep"]
+idx_val = JLD2.load(model_file)["idx_rm"]
+
 
 ## =============================================================================
 
@@ -194,7 +198,15 @@ df_group = DF.groupby(df_logic50, [:day, :strain_num, :env])
 # Initialize empty dataframe to store latent coordinates
 df_latent = DF.DataFrame()
 # Loop over groups
-for data in df_group
+for (i, data) in enumerate(df_group)
+    # Check if data is in training or validation set
+    if idx_train[i]
+        train = true
+    elseif idx_val[i]
+        train = false
+    else
+        error("Data is not in training or validation set")
+    end # if
     # Sort data by drug
     DF.sort!(data, :drug)
     # Run :logic50_mean_std through encoder
@@ -210,6 +222,7 @@ for data in df_group
             :strain .=> split(first(data.env), "_")[1],
             :latent1 => latent[1, :],
             :latent2 => latent[2, :],
+            :train => train,
         )
     )
 end # for 
@@ -511,5 +524,119 @@ end # for
 Colorbar(fig[1, 2], hm, label="√log[det(G̲̲)]")
 
 save("$(fig_dir)/rhvae_latent_space_metric_strain_num.png", fig)
+save("$(fig_dir)/rhvae_latent_space_metric_strain_num.pdf", fig)
 
 fig
+
+## =============================================================================
+
+println("Plotting latent space coordinates colored by training set...")
+
+# Initialize figure
+fig = Figure(size=(600, 300))
+
+# Add axis for training set
+ax_train = Axis(
+    fig[1, 1],
+    xlabel="latent dimension 1",
+    ylabel="latent dimension 2",
+    title="Training set",
+    aspect=AxisAspect(1)
+)
+
+# Add axis for validation set
+ax_val = Axis(
+    fig[1, 2],
+    xlabel="latent dimension 1",
+    ylabel="latent dimension 2",
+    title="Validation set",
+    aspect=AxisAspect(1)
+)
+
+# Plot training set
+scatter!(
+    ax_train,
+    df_latent.latent1[df_latent.train],
+    df_latent.latent2[df_latent.train],
+    markersize=5,
+    color=df_latent.strain_num[df_latent.train],
+    colormap=:glasbey_hv_n256,
+)
+
+
+# Plot validation set
+scatter!(
+    ax_val,
+    df_latent.latent1[.!df_latent.train],
+    df_latent.latent2[.!df_latent.train],
+    markersize=5,
+    color=df_latent.strain_num[.!df_latent.train],
+    colormap=:glasbey_hv_n256,
+)
+
+save("$(fig_dir)/rhvae_latent_space_train_val.png", fig)
+save("$(fig_dir)/rhvae_latent_space_train_val.pdf", fig)
+
+fig
+
+## =============================================================================
+
+
+println("Plotting latent space coordinates colored by training set with metric...")
+
+# Initialize figure
+fig = Figure(size=(600, 300))
+
+# Add axis for training set
+ax_train = Axis(
+    fig[1, 1],
+    xlabel="latent dimension 1",
+    ylabel="latent dimension 2",
+    title="Training set",
+    aspect=AxisAspect(1)
+)
+
+# Add axis for validation set
+ax_val = Axis(
+    fig[1, 2],
+    xlabel="latent dimension 1",
+    ylabel="latent dimension 2",
+    title="Validation set",
+    aspect=AxisAspect(1)
+)
+
+# Add heatmap of metric tensor
+hm_train = heatmap!.(
+    [ax_train, ax_val],
+    Ref(latent1_range),
+    Ref(latent2_range),
+    Ref(logdetG),
+    colormap=ColorSchemes.tokyo,
+)
+
+# Plot training set
+scatter!(
+    ax_train,
+    df_latent.latent1[df_latent.train],
+    df_latent.latent2[df_latent.train],
+    markersize=5,
+    color=df_latent.strain_num[df_latent.train],
+    colormap=:glasbey_hv_n256,
+)
+
+# Plot validation set
+scatter!(
+    ax_val,
+    df_latent.latent1[.!df_latent.train],
+    df_latent.latent2[.!df_latent.train],
+    markersize=5,
+    color=df_latent.strain_num[.!df_latent.train],
+    colormap=:glasbey_hv_n256,
+)
+
+save("$(fig_dir)/rhvae_latent_space_train_val_metric.png", fig)
+save("$(fig_dir)/rhvae_latent_space_train_val_metric.pdf", fig)
+
+fig
+
+## =============================================================================

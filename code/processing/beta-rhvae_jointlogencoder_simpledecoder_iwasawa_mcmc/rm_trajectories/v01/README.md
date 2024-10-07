@@ -30,8 +30,10 @@
 
 ## Notes
 
-This is the first test of removing trajectories from the training data. The
-objective will be to predict the removed trajectories.
+- This is the first test of removing trajectories from the training data. 
 
-This training regime includes a large leapfrog step and twice as many steps
-(from 5 to 10).
+- The centroids are computed from the training data. The validation data is not
+  used to compute the centroids.
+
+- This training regime includes a large leapfrog step and twice as many steps
+  (from 5 to 10).
