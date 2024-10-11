@@ -495,30 +495,35 @@ save("$(fig_dir)/rhvae_latent_spaces_strain_num.png", fig)
 fig
 
 ## =============================================================================
+
 println("Compute Riemannian metric for each model...")
 
 # Define number of points per axis
 n_points = 150
 
-# Extract latent space ranges
-latent1_range = range(
-    minimum(df_latent.latent1) - 1.5,
-    maximum(df_latent.latent1) + 1.5,
-    length=n_points
-)
-latent2_range = range(
-    minimum(df_latent.latent2) - 1.5,
-    maximum(df_latent.latent2) + 1.5,
-    length=n_points
-)
-# Define latent points to evaluate
-z_mat = reduce(hcat, [[x, y] for x in latent1_range, y in latent2_range])
-
-# Initialize dictionary to store metrics
+# Initialize dictionary to store metrics and ranges
 metrics = Dict()
 
 # Compute metric for each model
 for model_evo in unique(df_latent.model_evo)
+    # Filter data for this model
+    df_model = df_latent[df_latent.model_evo.==model_evo, :]
+
+    # Extract latent space ranges for this model
+    latent1_range = range(
+        minimum(df_model.latent1) - 1.5,
+        maximum(df_model.latent1) + 1.5,
+        length=n_points
+    )
+    latent2_range = range(
+        minimum(df_model.latent2) - 1.5,
+        maximum(df_model.latent2) + 1.5,
+        length=n_points
+    )
+
+    # Define latent points to evaluate
+    z_mat = reduce(hcat, [[x, y] for x in latent1_range, y in latent2_range])
+
     # Extract model from dictionary
     rhvae = rhvae_models[model_evo]
 
@@ -531,7 +536,11 @@ for model_evo in unique(df_latent.model_evo)
     )
 
     # Store in dictionary
-    metrics[model_evo] = logdetG
+    metrics[model_evo] = Dict(
+        "logdetG" => logdetG,
+        "latent1" => latent1_range,
+        "latent2" => latent2_range
+    )
 end
 
 ## =============================================================================
@@ -559,9 +568,9 @@ for (idx, model) in enumerate(model_evos)
     # Plot heatmap of log determinant of metric tensor
     hm = heatmap!(
         axes[row, col],
-        latent1_range,
-        latent2_range,
-        metrics[model],
+        metrics[model]["latent1"],
+        metrics[model]["latent2"],
+        metrics[model]["logdetG"],
         colormap=ColorSchemes.tokyo,
     )
 
@@ -608,9 +617,9 @@ for (idx, model) in enumerate(model_evos)
     # Plot heatmap of log determinant of metric tensor
     hm = heatmap!(
         axes[row, col],
-        latent1_range,
-        latent2_range,
-        metrics[model],
+        metrics[model]["latent1"],
+        metrics[model]["latent2"],
+        metrics[model]["logdetG"],
         colormap=ColorSchemes.tokyo,
     )
     # Group dataframe by :strain_num for this model
@@ -648,6 +657,10 @@ gl = fig[1, 1] = GridLayout()
 # Get unique model_evo values
 model_evos = unique(df_latent.model_evo)
 
+# Define colors
+train_color = ColorSchemes.seaborn_colorblind[1]
+validation_color = ColorSchemes.seaborn_colorblind[2]
+
 # Create a 2x2 grid of axes
 axes = [Axis(gl[i, j],
     xlabel="latent dimension 1",
@@ -664,14 +677,14 @@ for (idx, model) in enumerate(model_evos)
     # Group data by :train
     data_group = DF.groupby(data, :train)
     # Loop over groups
-    for (i, group) in enumerate(data_group)
+    for (i, group) in enumerate(data_group[end:-1:1])
         # Plot training set
         scatter!(
             axes[row, col],
             group.latent1,
             group.latent2,
             markersize=5,
-            color=ColorSchemes.seaborn_colorblind[i],
+            color=first(group.train) ? train_color : validation_color,
             label=first(group.train) ? "training" : "validation",
         )
     end # for
