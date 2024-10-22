@@ -1,6 +1,8 @@
 # Import necessary libraries
 import LinearAlgebra
 import Distances
+import StructArrays as SS
+using ConcreteStructs: @concrete
 
 ## =============================================================================
 ## Metropolis-Hastings Evolutionary Dynamics
@@ -9,6 +11,13 @@ import Distances
 ## -----------------------------------------------------------------------------
 ## GaussianPeak struct
 ## -----------------------------------------------------------------------------
+
+@doc raw"""
+    AbstractPeak
+
+An abstract type for representing a peak in a fitness or mutational landscape.
+"""
+abstract type AbstractPeak end
 
 @doc raw"""
     GaussianPeak
@@ -20,10 +29,78 @@ A struct to hold the parameters of a single Gaussian peak.
 - `mean::AbstractVector`: The mean of the peak.
 - `covariance::AbstractMatrix`: The covariance matrix of the peak.
 """
-struct GaussianPeak
+@concrete struct GaussianPeak <: AbstractPeak
     amplitude::AbstractFloat
     mean::AbstractVector
     covariance::AbstractMatrix
+end
+
+@doc raw"""
+    GaussianPeaks
+
+A struct to hold multiple Gaussian peaks.
+
+# Fields
+- `peaks::Vector{GaussianPeak}`: A vector of GaussianPeak objects.
+"""
+@concrete struct GaussianPeaks <: AbstractPeak
+    peaks::SS.StructArray{GaussianPeak}
+end
+
+# Constructor for GaussianPeak for diagonal covariance matrices
+function GaussianPeak(
+    amplitude::AbstractFloat, mean::AbstractVector, variance::AbstractFloat
+)
+    return GaussianPeak(
+        amplitude,
+        mean,
+        LinearAlgebra.Diagonal(repeat([variance], length(mean)))
+    )
+end
+
+# Constructor for GaussianPeaks from separate arrays
+function GaussianPeaks(
+    amplitudes::AbstractVector,
+    means::AbstractMatrix,
+    covariances::AbstractArray
+)
+    # Check that dimensions match
+    @assert size(means, 2) == length(amplitudes) == size(covariances, 3) "Dimensions must match"
+    # Create vector of GaussianPeak objects
+    peaks = [
+        GaussianPeak(amplitudes[i], means[:, i], covariances[:, :, i])
+        for i in 1:length(amplitudes)
+    ]
+    # Return GaussianPeaks object
+    return GaussianPeaks(peaks)
+end
+
+# Constructor for GaussianPeaks with equal amplitude and equal diagonal covariance
+function GaussianPeaks(
+    amplitude::AbstractFloat,
+    mean::AbstractVector{<:AbstractVector},
+    variance::AbstractFloat
+)
+    return GaussianPeaks(
+        SS.StructArray([
+            GaussianPeak(amplitude, mean[i], variance) for i in 1:length(mean)
+        ])
+    )
+end
+
+# Constructor for GaussianPeaks with diagonal covariance
+function GaussianPeaks(
+    amplitude::AbstractVector{<:AbstractFloat},
+    mean::AbstractVector{<:AbstractVector},
+    variance::AbstractVector{<:AbstractFloat}
+)
+    @assert length(amplitude) == length(mean) == length(variance) "Lengths must match"
+    return GaussianPeaks(
+        SS.StructArray([
+            GaussianPeak(amplitude[i], mean[i], variance[i])
+            for i in 1:length(amplitude)
+        ])
+    )
 end
 
 ## -----------------------------------------------------------------------------
@@ -89,7 +166,7 @@ function fitness(
 end
 
 function fitness(
-    x::AbstractVector, peaks::Vector{GaussianPeak}; min_value::AbstractFloat=1.0
+    x::AbstractVector, peaks::GaussianPeaks; min_value::AbstractFloat=1.0
 )
     # Compute the Square Mahalanobis distance
     sq_mahalanobis = [
@@ -99,12 +176,12 @@ function fitness(
                 skipchecks=true
             ),
             x, peak.mean
-        ) for peak in peaks
+        ) for peak in peaks.peaks
     ]
     # Sum the Gaussian contributions from all peaks using broadcasting
     total_gaussian = sum(
         peak.amplitude .* exp.(-0.5 .* sq_mahalanobis[i])
-        for (i, peak) in enumerate(peaks)
+        for (i, peak) in enumerate(peaks.peaks)
     )
 
     # Return the fitness by shifting the Gaussian peak by the minimum value
@@ -112,7 +189,7 @@ function fitness(
 end
 
 function fitness(
-    x::AbstractMatrix, peaks::Vector{GaussianPeak}; min_value::AbstractFloat=1.0
+    x::AbstractMatrix, peaks::GaussianPeaks; min_value::AbstractFloat=1.0
 )
     # Compute the Square Mahalanobis distance
     sq_mahalanobis = [
@@ -122,14 +199,25 @@ function fitness(
                 skipchecks=true
             ),
             x, peak.mean
-        ) for peak in peaks
+        ) for peak in peaks.peaks
     ]
     # Calculate the total Gaussian peak contribution using broadcasting
     total_gaussian = reduce(+, [
         peak.amplitude .* exp.(-0.5 .* sq_mahalanobis[i])
-        for (i, peak) in enumerate(peaks)
+        for (i, peak) in enumerate(peaks.peaks)
     ])
     return total_gaussian .+ min_value
+end
+
+function fitness(
+    x::AbstractVector,
+    y::AbstractVector,
+    peaks::AbstractPeak;
+    min_value::AbstractFloat=1.0
+)
+    return fitness.(
+        [[x, y] for x in x, y in y], Ref(peaks); min_value=min_value
+    )
 end
 
 ## -----------------------------------------------------------------------------
@@ -139,7 +227,7 @@ end
 @doc raw"""
     mutational_landscape(
         x::AbstractVecOrMat,
-        peak::Union{GaussianPeak, Vector{GaussianPeak}};
+        peak::Union{GaussianPeak, GaussianPeaks};
         max_value::Float64 = 1.0
     )
 
@@ -147,7 +235,7 @@ Calculate the mutational landscape value for a given phenotype `x` based on
 Gaussian peak(s).
 
 # Arguments
-- `peak::Union{GaussianPeak, Vector{GaussianPeak}}`: A single Gaussian peak or a
+- `peak::Union{GaussianPeak, GaussianPeaks}`: A single Gaussian peak or a
   vector of Gaussian peaks.
 - `x::AbstractVecOrMat`: The phenotype(s) for which to calculate the mutational
   landscape. Can be a vector for a single phenotype or a matrix for multiple
@@ -195,7 +283,7 @@ function mutational_landscape(
 end
 
 function mutational_landscape(
-    x::AbstractVector, peaks::Vector{GaussianPeak}; max_value::AbstractFloat=1.0
+    x::AbstractVector, peaks::GaussianPeaks; max_value::AbstractFloat=1.0
 )
     # Compute the Square Mahalanobis distance
     sq_mahalanobis = [
@@ -205,12 +293,12 @@ function mutational_landscape(
                 skipchecks=true
             ),
             x, peak.mean
-        ) for peak in peaks
+        ) for peak in peaks.peaks
     ]
     # Sum the Gaussian contributions from all peaks using broadcasting
     total_gaussian = sum(
         peak.amplitude .* exp.(-0.5 .* sq_mahalanobis[i])
-        for (i, peak) in enumerate(peaks)
+        for (i, peak) in enumerate(peaks.peaks)
     )
     # Return the mutational landscape by inverting the Gaussian peak shifted by
     # the maximum value
@@ -218,7 +306,7 @@ function mutational_landscape(
 end
 
 function mutational_landscape(
-    peaks::Vector{GaussianPeak},
+    peaks::GaussianPeaks,
     x::AbstractMatrix;
     max_value::AbstractFloat=1.0
 )
@@ -230,16 +318,27 @@ function mutational_landscape(
                 skipchecks=true
             ),
             x, peak.mean
-        ) for peak in peaks
+        ) for peak in peaks.peaks
     ]
     # Calculate the total Gaussian peak contribution using broadcasting
     total_gaussian = reduce(+, [
         peak.amplitude .* exp.(-0.5 .* sq_mahalanobis[i])
-        for (i, peak) in enumerate(peaks)
+        for (i, peak) in enumerate(peaks.peaks)
     ])
     # Return the mutational landscape by inverting the Gaussian peak shifted by
     # the maximum value
     return -(total_gaussian .- max_value)
+end
+
+function mutational_landscape(
+    x::AbstractVector,
+    y::AbstractVector,
+    peaks::AbstractPeak;
+    max_value::AbstractFloat=1.0
+)
+    return mutational_landscape.(
+        [[x, y] for x in x, y in y], Ref(peaks); max_value=max_value
+    )
 end
 
 ## -----------------------------------------------------------------------------
@@ -290,8 +389,8 @@ where F_E is the fitness function and M is the mutational landscape function.
 """
 function evo_metropolis_hastings(
     x0::AbstractVector,
-    fitness_peaks::Union{GaussianPeak,Vector{GaussianPeak}},
-    mut_peaks::Union{GaussianPeak,Vector{GaussianPeak}},
+    fitness_peaks::AbstractPeak,
+    mut_peaks::AbstractPeak,
     β::Real,
     µ::Real,
     n_steps::Int,
