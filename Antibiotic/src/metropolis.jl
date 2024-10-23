@@ -210,6 +210,37 @@ function fitness(
 end
 
 function fitness(
+    x::AbstractArray{T,3} where {T},
+    peaks::AbstractPeak;
+    min_value::AbstractFloat=1.0
+)
+    # Get the size of the 3D tensor
+    s1, s2, s3 = size(x)
+
+    # Preallocate the result array
+    result = Array{eltype(x)}(undef, s2, s3)
+
+    # Apply the AbstractMatrix method to each slice
+    for i in 1:s3
+        result[:, i] = fitness(view(x, :, :, i), peaks; min_value=min_value)
+    end
+
+    return result
+end
+
+function fitness(
+    x::AbstractArray,
+    peaks::Vector{<:AbstractPeak};
+    min_value::AbstractFloat=1.0
+)
+    # Apply fitness function to each peak and collect results
+    results = [fitness(x, peak; min_value=min_value) for peak in peaks]
+
+    # Concatenate results along a new dimension
+    return cat(results..., dims=ndims(x) + 1)
+end
+
+function fitness(
     x::AbstractVector,
     y::AbstractVector,
     peaks::AbstractPeak;
