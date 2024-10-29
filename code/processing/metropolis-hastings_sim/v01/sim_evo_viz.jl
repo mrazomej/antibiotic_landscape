@@ -83,8 +83,8 @@ x = range(-4, 4, length=100)
 y = range(-4, 4, length=100)
 
 # Create meshgrid
-F = mh.fitness(x, y, fit_evo_peak)
-M = mh.mutational_landscape(x, y, mut_evo_peaks)
+F = mh.fitness(x, y, evolution_condition)
+M = mh.mutational_landscape(x, y, mutational_landscape)
 
 # Initialize figure
 fig = Figure(size=(600, 300))
@@ -157,12 +157,12 @@ contour!(ax1, x, y, F, color=:white)
 contour!(ax2, x, y, M, color=:white)
 
 # Loop over simulations
-for i in DD.dims(x_traj, :lineage)
+for i in DD.dims(fitnotype_profiles, :lineage)
     # Plot trajectory
     scatterlines!.(
         [ax1, ax2],
-        Ref(x_traj.phenotype[phenotype=DD.At(:x1), lineage=i].data),
-        Ref(x_traj.phenotype[phenotype=DD.At(:x2), lineage=i].data),
+        Ref(fitnotype_profiles.phenotype[phenotype=DD.At(:x1), lineage=i].data),
+        Ref(fitnotype_profiles.phenotype[phenotype=DD.At(:x2), lineage=i].data),
         color=ColorSchemes.seaborn_colorblind[i],
         markersize=3
     )
@@ -201,7 +201,7 @@ gl = fig[1, 1] = GridLayout()
 # Loop over fitness landscapes
 for i in 1:(n_rows*n_cols)
     # Extract fitness landscape
-    fit_lan = fit_lans[i]
+    fit_lan = fitness_landscapes[i]
     # Define row and column
     row = (i - 1) ÷ n_cols + 1
     col = (i - 1) % n_cols + 1
@@ -322,9 +322,9 @@ scatterlines!(ax1, S)
 # Add axis for percentage of variance explained
 ax2 = Axis(
     fig[1, 2],
-    title="% Variance Explained",
+    title="Fraction of Variance Explained",
     xlabel="principal component index",
-    ylabel="% variance explained",
+    ylabel="fraction of variance explained",
 )
 # Compute percentage of variance explained
 pve = S .^ 2 ./ sum(S .^ 2)
