@@ -218,8 +218,8 @@ logdetG = reshape(
 ## =============================================================================
 
 # Define number of columns and rows per page
-cols = 4
-rows = 4
+cols = 3
+rows = 3
 panels_per_page = cols * rows
 
 # Group data by :evo
@@ -231,6 +231,12 @@ n_pages = ceil(Int, n_groups / panels_per_page)
 
 # Define file name
 fname = "$(fig_dir)/geodesic_latent_trajectory"
+
+# Remove previous PDF file if it exists
+if isfile("$(fname).pdf")
+    rm("$(fname).pdf")
+end
+
 # Loop through pages
 for page in 1:n_pages
     println("Generating page $(page) of $(n_pages)")

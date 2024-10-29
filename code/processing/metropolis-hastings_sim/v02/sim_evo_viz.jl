@@ -172,6 +172,9 @@ n_pages = ceil(Int, length(fitness_landscapes) / landscapes_per_page)
 # Initialize PDF for appending
 pdf_path = "$(fig_dir)/evolution_condition_trajectories.pdf"
 
+# Define number of replicates
+n_rep = length(DD.dims(fitnotype_profiles, :replicate))
+
 for page in 1:n_pages
     # Initialize figure for this page
     fig = Figure(size=(200 * n_cols, 200 * n_rows))
@@ -209,14 +212,14 @@ for page in 1:n_pages
                 # Plot trajectory
                 lines!(
                     ax,
-                    x_traj.phenotype[
+                    fitnotype_profiles.phenotype[
                         phenotype=DD.At(:x1),
                         lineage=lin,
                         replicate=rep,
                         landscape=idx,
                         evo=idx,
                     ].data,
-                    x_traj.phenotype[
+                    fitnotype_profiles.phenotype[
                         phenotype=DD.At(:x2),
                         lineage=lin,
                         replicate=rep,
@@ -301,7 +304,7 @@ for page in 1:n_pages
                 # Plot trajectory
                 lines!(
                     ax,
-                    x_traj.phenotype[
+                    fitnotype_profiles.phenotype[
                         time=DD.At(1:n_sub:300),
                         phenotype=DD.At(:x1),
                         lineage=lin,
@@ -309,7 +312,7 @@ for page in 1:n_pages
                         landscape=idx,
                         evo=idx,
                     ].data,
-                    x_traj.phenotype[
+                    fitnotype_profiles.phenotype[
                         time=DD.At(1:n_sub:300),
                         phenotype=DD.At(:x2),
                         lineage=lin,
@@ -383,9 +386,9 @@ scatterlines!(ax1, S)
 # Add axis for percentage of variance explained
 ax2 = Axis(
     fig[1, 2],
-    title="% Variance Explained",
+    title="Fraction of Variance Explained",
     xlabel="principal component index",
-    ylabel="% variance explained",
+    ylabel="fraction of variance explained",
 )
 # Compute percentage of variance explained
 pve = S .^ 2 ./ sum(S .^ 2)
