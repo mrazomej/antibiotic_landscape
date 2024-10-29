@@ -151,6 +151,19 @@ log_fitnotype_std = DD.DimArray(
 
 ## =============================================================================
 
+println("Map data to latent space...")
+
+# Define latent space dimensions
+latent = DD.Dim{:latent}([:latent1, :latent2])
+
+# Map data to latent space
+dd_latent = DD.DimArray(
+    rhvae.vae.encoder(log_fitnotype_std.data).μ,
+    (latent, log_fitnotype_std.dims[2:end]...)
+)
+
+## =============================================================================
+
 println("Compute Riemannian metric for latent space...")
 
 # Define number of points per axis
@@ -285,6 +298,7 @@ for i in 1:length(DD.dims(dd_latent, :lineage))
 end # for i in 1:length(DD.dims(dd_latent, :lineage))
 
 # Save figure
+save("$(fig_dir)/geodesic_latent_trajectory.pdf", fig)
 save("$(fig_dir)/geodesic_latent_trajectory.png", fig)
 
 fig
