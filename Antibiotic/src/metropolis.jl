@@ -2,15 +2,17 @@
 import LinearAlgebra
 import Distances
 import StructArrays as SS
+import DimensionalData as DD
+import IterTools
 using ConcreteStructs: @concrete
 
 ## =============================================================================
 ## Metropolis-Hastings Evolutionary Dynamics
 ## =============================================================================
 
-## -----------------------------------------------------------------------------
+## =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ## GaussianPeak struct
-## -----------------------------------------------------------------------------
+## =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 @doc raw"""
     AbstractPeak
@@ -47,6 +49,10 @@ A struct to hold multiple Gaussian peaks.
     peaks::SS.StructArray{GaussianPeak}
 end
 
+## -----------------------------------------------------------------------------
+## Constructors
+## -----------------------------------------------------------------------------
+
 # Constructor for GaussianPeak for diagonal covariance matrices
 function GaussianPeak(
     amplitude::AbstractFloat, mean::AbstractVector, variance::AbstractFloat
@@ -57,6 +63,8 @@ function GaussianPeak(
         LinearAlgebra.Diagonal(repeat([variance], length(mean)))
     )
 end
+
+## -----------------------------------------------------------------------------
 
 # Constructor for GaussianPeaks from separate arrays
 function GaussianPeaks(
@@ -75,6 +83,8 @@ function GaussianPeaks(
     return GaussianPeaks(peaks)
 end
 
+## -----------------------------------------------------------------------------
+
 # Constructor for GaussianPeaks with equal amplitude and equal diagonal covariance
 function GaussianPeaks(
     amplitude::AbstractFloat,
@@ -87,6 +97,8 @@ function GaussianPeaks(
         ])
     )
 end
+
+## -----------------------------------------------------------------------------
 
 # Constructor for GaussianPeaks with diagonal covariance
 function GaussianPeaks(
@@ -104,8 +116,28 @@ function GaussianPeaks(
 end
 
 ## -----------------------------------------------------------------------------
-## Fitness function
+## Size methods
 ## -----------------------------------------------------------------------------
+
+function Base.length(peaks::GaussianPeaks)
+    return length(peaks.peaks)
+end
+
+function Base.length(peak::GaussianPeak)
+    return 1
+end
+
+function Base.size(peaks::GaussianPeaks)
+    return (dim=length(peaks.peaks[1].mean), n_peaks=length(peaks.peaks))
+end
+
+function Base.size(peak::GaussianPeak)
+    return (dim=length(peak.mean), n_peaks=1)
+end
+
+## =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+## Fitness function
+## =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 @doc raw"""
     fitness(peak::GaussianPeak, x::AbstractVecOrMat; min_value::AbstractFloat=0.0)
@@ -248,6 +280,24 @@ function fitness(
 )
     return fitness.(
         [[x, y] for x in x, y in y], Ref(peaks); min_value=min_value
+    )
+end
+
+function fitness(
+    xs::Tuple{AbstractVector,Vararg{AbstractVector}},
+    peaks::AbstractPeak,
+    min_value::AbstractFloat=1.0
+)
+    # Create array of all combinations of coordinates
+    coords = [[x...] for x in IterTools.product(xs...)]
+
+    # Compute fitness
+    fit = fitness.(coords, Ref(peaks); min_value=min_value)
+
+    # Return
+    return DD.DimArray(
+        fit,
+        tuple([DD.Dim{Symbol("x$i")}(1:length(xs[i])) for i in 1:length(xs)]...)
     )
 end
 
