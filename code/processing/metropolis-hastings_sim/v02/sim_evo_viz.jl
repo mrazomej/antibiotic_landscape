@@ -177,7 +177,7 @@ n_rep = length(DD.dims(fitnotype_profiles, :replicate))
 
 for page in 1:n_pages
     # Initialize figure for this page
-    fig = Figure(size=(200 * n_cols, 200 * n_rows))
+    local fig = Figure(size=(200 * n_cols, 200 * n_rows))
     gl = fig[1, 1] = GridLayout()
 
     # Calculate range of landscapes for this page
@@ -192,7 +192,7 @@ for page in 1:n_pages
         row = (i - 1) ÷ n_cols + 1
         col = (i - 1) % n_cols + 1
         # Add axis
-        ax = Axis(gl[row, col], aspect=AxisAspect(1))
+        local ax = Axis(gl[row, col], aspect=AxisAspect(1))
 
         # Evaluate fitness landscape
         F = mh.fitness(x, y, fit_lan)
@@ -269,7 +269,7 @@ pdf_path = "$(fig_dir)/evolution_condition_trajectories_subsampled.pdf"
 
 for page in 1:n_pages
     # Initialize figure for this page
-    fig = Figure(size=(200 * n_cols, 200 * n_rows))
+    local fig = Figure(size=(200 * n_cols, 200 * n_rows))
     gl = fig[1, 1] = GridLayout()
 
     # Calculate range of landscapes for this page
@@ -284,7 +284,7 @@ for page in 1:n_pages
         row = (i - 1) ÷ n_cols + 1
         col = (i - 1) % n_cols + 1
         # Add axis
-        ax = Axis(gl[row, col], aspect=AxisAspect(1))
+        local ax = Axis(gl[row, col], aspect=AxisAspect(1))
 
         # Evaluate fitness landscape
         F = mh.fitness(x, y, fit_lan)
@@ -334,6 +334,126 @@ for page in 1:n_pages
     # Save as PNG
     save(
         "$(fig_dir)/evolution_condition_trajectories_subsampled_$(lpad(page, 2, '0')).png",
+        fig
+    )
+
+    # Save or append to PDF
+    save("temp.pdf", fig)
+    append_pdf!(pdf_path, "temp.pdf", cleanup=true)
+end
+
+## =============================================================================
+
+println("Plotting evolutionary trajectories in evolution condition showing outline of mutational landscape...")
+
+# Define ranges of phenotypes to evaluate
+x = range(-6, 6, length=100)
+y = range(-6, 6, length=100)
+
+# Define number of rows and columns per page
+n_rows = 5
+n_cols = 5
+landscapes_per_page = n_rows * n_cols
+
+# Calculate number of pages needed
+n_pages = ceil(Int, length(fitness_landscapes) / landscapes_per_page)
+
+# Initialize PDF for appending
+pdf_path = "$(fig_dir)/evolution_condition_trajectories_mutational_landscape.pdf"
+
+for page in 1:n_pages
+    # Initialize figure for this page
+    local fig = Figure(size=(200 * n_cols, 200 * n_rows))
+    gl = fig[1, 1] = GridLayout()
+
+    # Calculate range of landscapes for this page
+    start_idx = (page - 1) * landscapes_per_page + 1
+    end_idx = min(page * landscapes_per_page, length(fitness_landscapes))
+
+    # Loop over fitness landscapes for this page
+    for (i, idx) in enumerate(start_idx:end_idx)
+        # Extract fitness landscape
+        fit_lan = fitness_landscapes[idx]
+        # Define row and column
+        row = (i - 1) ÷ n_cols + 1
+        col = (i - 1) % n_cols + 1
+        # Add axis
+        local ax = Axis(gl[row, col], aspect=AxisAspect(1))
+
+        # Evaluate fitness landscape
+        F = mh.fitness(x, y, fit_lan)
+        # Plot fitness landscape
+        heatmap!(ax, x, y, F, colormap=:viridis)
+        # Plot contour plot
+        contour!(ax, x, y, F, color=:white)
+        # Plot mutational landscape contours
+        contour!(ax, x, y, M, color=:black, linestyle=(:dash, :dense))
+
+        # Set limits
+        xlims!(ax, -4, 4)
+        ylims!(ax, -4, 4)
+
+        # Loop over simulations
+        for lin in DD.dims(fitnotype_profiles, :lineage)
+            # Loop over replicates
+            for rep in DD.dims(fitnotype_profiles, :replicate)
+                # Extract x and y coordinates
+                x_data = fitnotype_profiles.phenotype[
+                    time=DD.At(1:300),
+                    phenotype=DD.At(:x1),
+                    lineage=lin,
+                    replicate=rep,
+                    landscape=idx,
+                    evo=idx,
+                ].data
+                y_data = fitnotype_profiles.phenotype[
+                    time=DD.At(1:300),
+                    phenotype=DD.At(:x2),
+                    lineage=lin,
+                    replicate=rep,
+                    landscape=idx,
+                    evo=idx,
+                ].data
+
+                # Plot trajectory
+                lines!(
+                    ax,
+                    x_data,
+                    y_data,
+                    color=ColorSchemes.glasbey_hv_n256[(lin-1)*n_rep+rep],
+                    linewidth=1
+                )
+
+                # Plot initial condition
+                scatter!(
+                    ax,
+                    x_data[1],
+                    y_data[1],
+                    color=ColorSchemes.glasbey_hv_n256[(lin-1)*n_rep+rep],
+                    markersize=8,
+                    marker=:xcross,
+                )
+
+                # Plot final condition
+                scatter!(
+                    ax,
+                    x_data[end],
+                    y_data[end],
+                    color=ColorSchemes.glasbey_hv_n256[(lin-1)*n_rep+rep],
+                    markersize=8,
+                    marker=:utriangle,
+                )
+            end # for rep
+        end # for lin
+    end # for page
+
+    # Add global x and y labels
+    Label(gl[end+1, :], "phenotype 1")
+    Label(gl[:, 0], "phenotype 2", rotation=π / 2)
+
+    # Save as PNG
+    save(
+        "$(fig_dir)/evolution_condition_trajectories_mutational_landscape_$(lpad(page, 2, '0')).png",
         fig
     )
 
@@ -424,69 +544,6 @@ scatter!(ax, fit_pca[1, :], fit_pca[2, :], markersize=5)
 
 # Save figure
 save("$(fig_dir)/fitness_profiles_2DPCA_projection.png", fig)
-
-fig
-
-## =============================================================================
-
-println("Plotting comparison between phenotype and PCA-projected fitness trajectories...")
-
-# Standardize each slice of the fitnotype profiles
-fit_pca_std = StatsBase.transform.(
-    Ref(dt), eachslice(log.(fitnotype_profiles.fitness.data), dims=3)
-)
-
-# Initialize figure
-fig = Figure(size=(600, 300))
-
-# Add axis for original space
-ax1 = Axis(
-    fig[1, 1],
-    title="Phenotype space",
-    aspect=AxisAspect(1),
-    xlabel="phenotype 1",
-    ylabel="phenotype 2",
-)
-
-# Add axis for PCA space
-ax2 = Axis(
-    fig[1, 2],
-    title="PCA space",
-    aspect=AxisAspect(1),
-    xlabel="principal component 1",
-    ylabel="principal component 2",
-)
-
-
-# Loop over lineages
-for lin in DD.dims(fitnotype_profiles, :lineage)
-    # Plot trajectory
-    scatterlines!(
-        ax1,
-        fitnotype_profiles.phenotype[phenotype=DD.At(:x1), lineage=lin].data,
-        fitnotype_profiles.phenotype[phenotype=DD.At(:x2), lineage=lin].data,
-        color=ColorSchemes.seaborn_colorblind[lin],
-        markersize=4
-    )
-end
-
-# Loop through each simulation (2nd dimension)
-for (j, slice) in enumerate(fit_pca_std)
-    # Project slice onto PCA space
-    pca_slice = U[:, 1:2]' * slice
-    # Plot slice
-    scatterlines!(
-        ax2,
-        pca_slice[1, :],
-        pca_slice[2, :],
-        color=ColorSchemes.seaborn_colorblind[j],
-        markersize=4
-    )
-end
-
-# Save figure
-save("$(fig_dir)/fitness_trajectories_phenotype_PCA_projection.pdf", fig)
-save("$(fig_dir)/fitness_trajectories_phenotype_PCA_projection.png", fig)
 
 fig
 
