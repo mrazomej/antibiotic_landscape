@@ -33,7 +33,7 @@ Random.seed!(42)
 # Define model hyperparameters
 
 # Define number of epochs
-n_epoch = 100
+n_epoch = 25
 # Define number of samples in batch
 n_batch = 512
 # Define number of samples when computing loss
@@ -165,7 +165,7 @@ AET.RHVAEs.update_metric!(rhvae)
 println("Checking previous model states...")
 
 # List previous model parameters
-model_states = sort(Glob.glob("$(out_dir)/beta-rhvae_epoch*.jld2"[2:end], "/"))
+model_states = sort(Glob.glob("$(state_dir)/beta-rhvae_epoch*.jld2"[2:end], "/"))
 
 # Check if model states exist
 if length(model_states) > 0
