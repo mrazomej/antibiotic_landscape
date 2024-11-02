@@ -1,0 +1,518 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+# Riemannian Hamiltonian Variational Autoencoders Mathematical Background
+
+The bulk of this work makes use of the variational autoencoder variation
+developed by [@chadebec2020] known as Riemannian Hamiltonian Variational
+Autoencoder (RHVAE). Understanding this model requires some background that we
+provide in the following sections. It is not necessary to follow every
+mathematical derivation in detail for these sections, as they don't directly
+pertain to the main contribution of this work. However, we believe that some
+intuition behind some of the concepts that inspired the RHVAE model can go a
+long way to understand the model. We invite the reader to refer to the original
+paper [@chadebec2020] and the references therein for additional details.
+
+Let us start by reviewing the variational autoencoder model setting and the
+variational inference framework.
+
+## Variational Autoencoder Model Setting
+
+Given a data set $\underline{x}^{1:N} \in \mathcal{X} \subseteq \mathbb{R}^D$,
+where the superscript denotes a set of $N$ observations, i.e.,
+$$
+\underline{x}^{1:N} = 
+\left\{
+    \underline{x}_1, \underline{x}_2, \ldots, \underline{x}_N
+\right\},
+$${#eq-data-set}
+where $\underline{x}_i \in \mathbb{R}^D$ for $i = 1, 2, \ldots, N$, the the
+variational autoencoder aims to fit a joint distribution
+$π_\theta(\underline{x}, \underline{z})$ where the data generative process is
+assumed to involve a set of latent---unobserved---continuous variables
+$\underline{z} \in \mathcal{Z} \subseteq \mathbb{R}^d$, where usually $d \ll D$.
+In other words, the VAE assumes that the data we get to observe is a consequence
+of a set of hidden variables $\underline{z}$ that we cannot measure directly. We
+assume that these variables live in a much lower-dimensional space than the one
+we observe and we are trying to learn this joint distribution such that, if
+desired, we can generate new data points by sampling from this distribution.
+Since the data we observe is a "consequence" of the latent variables, we express
+this joint distribution as
+
+$$
+π_\theta(\underline{x}, \underline{z}) = 
+π_\theta(\underline{x}|\underline{z}) \, π_\text{prior}(\underline{z}),
+$${#eq-joint-dist}
+
+where $π_\text{prior}(\underline{z})$ is the prior distribution over latent
+variables and $π_\theta(\underline{x}|\underline{z})$ is the likelihood of the
+data given the latent variables. This looks exactly as the problem one confronts
+when performing Bayesian inference. What distinguishes the VAE from other
+Bayesian inference problems, as we will see, is that in many cases, we do not
+know the functional form of both the prior and the likelihood function that
+generated our data, but we have enough data samples that we hope to be able to
+learn these function using the neural networks function approximation
+capabilities. Thus, the objective of the VAE is to parameterize this likelihood
+function via a neural network with parameters $\theta$ given some prior
+distribution over the latent variables. For simplicity, it is common to choose a
+standard normal prior distribution, i.e., $π_\text{prior}(\underline{z}) =
+\mathcal{N}(\underline{0}, \underline{\underline{I}}_d)$, where
+$\underline{\underline{I}}_d$ is the $d$-dimensional identity matrix
+[@kingma2014a;@kingma2019]. This way, once we have learned the parameters of the
+neural network, we can generate new data points by sampling from this prior
+distribution and running the resulting samples through the likelihood function
+encoded by this neural network.
+
+Our objective then becomes to find the parameters $\theta$ that maximize the
+probability of observing the data we actually observed. This is equivalent to
+maximizing the so-called marginal likelihood of the data, i.e.,
+
+$$
+\max_\theta \, π_\theta(\underline{x}) = 
+\max_\theta \int d^d\underline{z} \, π_\theta(\underline{x}, \underline{z}).
+$${#eq-marginal-likelihood}
+
+But there are two problems with this objective:
+
+1. The marginalization over the latent variables is intractable for most
+   interesting distributions.
+2. The distribution $π_\theta(\underline{x})$ is in general unknown and we
+   need to somehow approximate it.
+
+The way around these problems is to introduce a family of parametric
+distributions $q_\phi(\underline{z} \mid \underline{x})$, i.e., distributions
+that can be completely characterized by a set of parameters (think of Gaussians
+being a parametric family on the mean and the variance), and to approximate the
+true marginal distribution with one of these parametric distributions. This
+conceptual change is at the core of approximate methods for Bayesian inference
+known as variational inference. The objective then becomes to find the
+parameters $\phi$ that, when used to approximate the posterior distribution
+$π_\theta(\underline{z}|\underline{x})$, it is as close as possible to this
+posterior distribution. To matematize this objective, we establish that we want
+to minimize the Kullback-Leibler divergence between the variational distribution
+$q_\phi(\underline{z} \mid \underline{x})$ and the posterior distribution
+$π_\theta(\underline{z} \mid \underline{x})$, i.e.,
+
+$$
+q_\phi^*(\underline{z} \mid \underline{x}) = 
+\min_\phi \, D_{KL}\left(
+    q_\phi(\underline{z} \mid \underline{x}) \| 
+    π_\theta(\underline{z} \mid \underline{x})
+\right).
+$${#eq-variational-approx}
+
+After some algebraic manipulation, we can show that this objective is equivalent
+to maximizing the so-called evidence lower bound (ELBO) of the marginal
+likelihood, i.e.,
+
+$$
+\text{ELBO} \equiv \left\langle 
+    \log π_\theta(\underline{x}, \underline{z}) - 
+    \log q_\phi(\underline{z} \mid \underline{x}) 
+\right\rangle_{q_\phi} 
+\leq \log π_\theta(\underline{x}).
+$${#eq-elbo}
+
+Using the reparametrization trick, we can compute an unbiased estimate of the
+gradient of this ELBO, such that we can maximize it via gradient ascent
+[@kingma2014a].
+
+More recent attempts have focused on modifying $q_\phi(\underline{z} \mid
+\underline{x})$ to get a better approximation of the true posterior
+$π_\theta(\underline{z} \mid \underline{x})$. The basis of the Riemannian
+Hamiltonian Variational Autoencoder (RHVAE) framework takes inspiration from
+some of these approaches. Let's gain some intuition on each of them.
+
+## MCMC and VI (Salimans & Kingma 2015)
+
+One such approach to improve the accuracy of the variational posterior
+approximation consists in adding a fix number of MCMC steps to the variational
+posterior approximation, targeting the true posterior as follows [@salimans2015]
+
+$$
+\hat{π}_\theta(\underline{x}) = 
+\frac{
+    π_\theta(\underline{x}, \underline{z}_T) 
+    \prod_{t=1}^T r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})
+}{
+    q_\phi(\underline{z}_0 \mid \underline{x}) 
+    \prod_{t=1}^T r(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x})
+},
+$${#eq-mcmc-approx}
+
+where $\underline{z}_0 \sim q_\phi(\underline{z} \mid \underline{x})$ is the
+initial position in the chain, and $r(\underline{z}_t \mid \underline{z}_{t-1},
+\underline{x})$ is the transition kernel from which $\underline{z}_t$ is sampled
+and $r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})$ is the reverse
+kernel. Including a Markov chain into the variational posterior approximation
+has the effect of trading off computational efficiency for better posterior
+approximation. In other words, to improve the quality of the posterior
+approximation we make use of arguably the most accurate family of inference
+methods known to date---Markov Chain Monte Carlo (MCMC)---at the cost of
+increased computational cost. Intuitively, our estimate of the unbiased gradient
+of the ELBO becomes more and more accurate the more steps we include in the
+Markov chain, but at the same time, the cost of computing this gradient becomes
+higher and higher.
+
+## Normalizing Flows (Rezende & Mohamed 2015) {#sec-normalizing-flows}
+
+Another approach, known as normalizing flows, considers the composition of
+simple smooth invertible transformations [@rezende2016], such that a variable
+$\underline{z}_K$ consists of $K$ of such transformations of a random variable
+$\underline{z}_0$, sampled from a simple distribution, i.e., 
+
+$$
+\underline{z}_K = 
+f_x^K \circ f_x^{K-1} \circ \cdots \circ f_x^1(\underline{z}_0).
+$${#eq-normalizing-flow}
+
+Because the transformation is smooth and invertible, the change of variables
+formula tells us that the density of $\underline{z}_K$ writes
+
+$$
+q_\phi(\underline{z}_K \mid \underline{x}) = 
+q_\phi(\underline{z}_0 \mid \underline{x}) \prod_{k=1}^K |\det J_{f_x^k}|^{-1},
+$${#eq-flow-density}
+
+where
+
+$$
+J_{f_x^k} = \frac{\partial f_x^k}{\partial \underline{z}},
+$${#eq-jacobian}
+
+is the Jacobian matrix of the transformation $f_x^k$. In other words, the
+transformation of the random variable upon a composition of simple
+transformations is a product of the Jacobians of each transformation. Thus, if
+we choose a sequence of simple transformations, with a simple Jacobian matrix,
+we can construct a more complex distribution over the latent variables. Again,
+this has the effect of trading off computational efficiency for better posterior
+approximation, this time in the form of smooth invertible transformations of the
+original variational distribution. In other words, say that approximating the
+posterior distribution using a simple distribution, such as a Gaussian, is
+too simple. We can use a sequence of smooth invertible transformations to
+transform this simple distribution into a more complex one that can better
+approximate the true posterior. This again, comes at the cost of increased
+computational cost.
+
+## Hamiltonian Markov Chain Monte Carlo (HMC)
+
+Although seemingly unrelated to the previous two approaches, the Hamiltonian
+Markov Chain Monte Carlo (HMC) framework provides a way to construct a Markov
+chain that is informed by the target distribution we are trying to approximate.
+This property is exploited by the predecessor of the RHVAE framework, the
+Hamiltonian Variational Autoencoder that we will review in the next section. But
+first, let us give a brief overview of the main ideas of the HMC framework. We
+direct the interested reader to the excellent review [@betancourt2017] for a
+more detailed treatment of the topic.
+
+In the HMC framework, a random variable $\underline{z}$ is assumed to live in an
+Euclidean space with a target density $π(\underline{z} \mid \underline{x})$
+derived from a potential $U_{\underline{x}}(\underline{z})$, such that the
+distribution writes
+
+$$
+π(\underline{z} \mid \underline{x}) = 
+\frac{e^{-U_{\underline{x}}(\underline{z})}}
+{\int d^d\underline{z} \, e^{-U_{\underline{x}}(\underline{z})}},
+$${#eq-hmc-dist}
+
+where $U_{\underline{x}}(\underline{z}) = -\log π(\underline{z} \mid
+\underline{x})$. Notice that upon substitution of this definition into
+[@eq-hmc-dist], we get the trivial equality
+
+$$
+π(\underline{z} \mid \underline{x}) = 
+\frac{\exp[-(-\log π(\underline{z} \mid \underline{x}))]}
+{\int d^d\underline{z} \, \exp[-(-\log π(\underline{z} \mid \underline{x}))]} = 
+\frac{
+    π(\underline{z} \mid \underline{x})
+}{
+    \int d^d\underline{z} \, π(\underline{z} \mid \underline{x})
+} = 
+π(\underline{z} \mid \underline{x}).
+$${#eq-trivial-equality}
+
+Since it is most of the time impossible to sample directly from
+$π(\underline{z} \mid \underline{x})$, an independent auxiliary variable
+$\underline{\rho} \in \mathbb{R}^d$ is introduced and used to sample
+$\underline{z}$. This variable ---referred as the momentum---is such that:
+
+$$
+\underline{\rho} \sim \mathcal{N}(\underline{0}, \underline{\underline{M}}),
+$${#eq-momentum-dist}
+
+where $\underline{\underline{M}}$ is the so-called mass matrix. The idea behind
+HMC is then to work with a distribution that extends the target distribution
+$π(\underline{z} \mid \underline{x})$ to a distribution over both position and
+momentum variables, i.e.,
+
+$$
+π(\underline{z}, \underline{\rho} \mid \underline{x}) = 
+π(
+    \underline{z} \mid \underline{x}, \underline{\rho})π(\underline{\rho} 
+    \mid \underline{x}) = 
+π(\underline{z} \mid \underline{x})π(\underline{\rho}),
+$${#eq-extended-target}
+
+where we assume the value of $\underline{z}$ does not directly depend on the
+momentum variable $\underline{\rho}$ but only on the observed data
+$\underline{x}$, and that the momentum distribution $π(\underline{\rho})$ is
+independent of all other variables. Using [@eq-hmc-dist], the density of this
+extended distribution can be analogously written as
+
+$$
+π(\underline{z}, \underline{\rho} \mid \underline{x}) = 
+\frac{e^{-H_{\underline{x}}(\underline{z}, \underline{\rho})}}
+{\iint d^d\underline{z} \, d^d\underline{\rho} \, e^{-H_{\underline{x}}(\underline{z}, \underline{\rho})}}.
+$${#eq-extended-density}
+
+where $H_{\underline{x}}(\underline{z}, \underline{\rho})$ is the Hamiltonian,
+defined as
+
+$$
+H_{\underline{x}}(\underline{z}, \underline{\rho}) = 
+-\log π(\underline{z}, \underline{\rho} \mid \underline{x}) = 
+-\log π(\underline{z} \mid \underline{x}) - \log π(\underline{\rho}).
+$${#eq-hamiltonian}
+
+Substituting $π(\underline{\rho})$ from [@eq-momentum-dist] into 
+[@eq-hamiltonian] gives
+
+$$
+\begin{aligned}
+H_{\underline{x}}(\underline{z}, \underline{\rho}) &= 
+-\log π(\underline{z} \mid \underline{x}) + 
+\frac{1}{2}
+\left[\log((2π)^d|\underline{\underline{M}}|) 
++ \underline{\rho}^T \underline{\underline{M}}^{-1} \underline{\rho}\right] \\
+&= U_{\underline{x}}(\underline{z}) + \kappa(\underline{\rho}).
+\end{aligned}
+$${#eq-hamiltonian-expanded}
+
+In physical systems, the Hamiltonian gives the total energy of a system having a
+position $\underline{z}$ and a momentum $\underline{\rho}$.
+$U_{\underline{x}}(\underline{z})$ is referred as the potential energy (since it
+is position-dependent) and $\kappa(\underline{\rho})$ is the kinetic energy,
+since it is momentum-dependent.
+
+The point of writing the extended target distribution in this form is that we
+can take advantage of one specific desirable property of Hamiltonian dynamics:
+Hamiltonian flows are volume preserving [@betancourt2017]. In other words, the
+volume in phase space defined by the position and momentum variables is
+invariant under Hamiltonian dynamics. What this means for our purposes of
+sampling from a posterior distribution $\pi(\underline{z} \mid \underline{x})$
+is that a walker starting in some position $\underline{z}$ can "traverse" the
+volume of the target distribution very efficiently traveling through lines of
+equal probability. In this sense, the Hamiltonian dynamics can be seen as a way
+to explore the posterior distribution $π(\underline{z} \mid \underline{x})$ very
+efficiently. To do so, we compute the time evolution of a walker exploring the
+space of the position and momentum variables using Hamilton's equations $$
+\begin{aligned} \frac{d\underline{z}}{dt} &= \frac{\partial
+H_{\underline{x}}}{\partial \underline{\rho}}, \\ \frac{d\underline{\rho}}{dt} &=
+-\frac{\partial H_{\underline{x}}}{\partial \underline{z}}. \end{aligned}
+$${#eq-hamilton-eqs}
+
+One can show that for the particular choice of momentum distribution in
+[@eq-momentum-dist], these equations take the form
+$$
+\begin{aligned}
+\frac{d\underline{z}}{dt} &= \underline{\underline{M}}^{-1} \underline{\rho}, \\
+\frac{d\underline{\rho}}{dt} &= 
+-\nabla_{\underline{z}} \log \pi(\underline{z} \mid \underline{x}),
+\end{aligned}
+$${#eq-hamilton-eqs-expanded}
+
+where $\nabla_{\underline{z}}$ is the gradient with respect to the position
+variable $\underline{z}$. Unfortunately, the resulting system of partial
+differential equations is almost always intractable analytically. Therefore, we
+must use specialized numerical integrators to solve it. The most popular choice
+is the so-called leapfrog integrator, which is a symplectic integrator that
+preserves the volume of the phase space. To update the position and momentum
+variables, the leapfrog integrator takes three steps:
+
+1. A half step for the momentum:
+
+$$
+\underline{\rho}\left(t + \frac{\epsilon}{2}\right) = 
+\underline{\rho}(t) - 
+\frac{\epsilon}{2} \nabla_{\underline{z}} H_{\underline{x}}\left(
+    \underline{z}(t), \underline{\rho}(t)
+\right).
+$${#eq-leapfrog-half-step}
+
+2. A full step for the position:
+
+$$
+\underline{z}\left(t + \epsilon\right) = 
+\underline{z}(t) + 
+\epsilon \nabla_{\underline{\rho}} H_{\underline{x}}\left(
+    \underline{z}(t), \underline{\rho}\left(t + \frac{\epsilon}{2}\right)
+\right).
+$${#eq-leapfrog-full-step}
+
+3. A half step for the momentum:
+
+$$
+\underline{\rho}\left(t + \frac{\epsilon}{2}\right) = 
+\underline{\rho}\left(t + \frac{\epsilon}{2}\right) - 
+\frac{\epsilon}{2} \nabla_{\underline{z}} H_{\underline{x}}\left(
+    \underline{z}(t + \epsilon), \underline{\rho}\left(t + \frac{\epsilon}{2}\right)
+\right),
+$${#eq-leapfrog-half-step-2}
+
+where $\epsilon$ is the so-called leapfrog step size.
+
+Without going further into the details of the HMC framework, we hope the reader
+can imagine how using this symplectic integrator, a walker aiming to explore the
+posterior distribution $π(\underline{z} \mid \underline{x})$ can traverse the
+volume of the target distribution very efficiently.
+
+With this conceptual background, we are now ready to review the predecessor of
+the RHVAE framework, the Hamiltonian Variational Autoencoder framework.
+
+## Hamiltonian Variational Autoencoder (HVAE)
+
+Given the dynamics defined in [@eq-hamilton-eqs-expanded], and the numerical
+integrator defined in [@eq-leapfrog-half-step], [@eq-leapfrog-full-step], and
+[@eq-leapfrog-half-step-2], we can now take $K$ iterations of the leapfrog
+integrator to sample a point $(\underline{z}_K, \underline{\rho}_K)$ from the
+extended target distribution defined in [@eq-extended-target]. This transition
+from $(\underline{z}_0, \underline{\rho}_0)$ to $(\underline{z}_K,
+\underline{\rho}_K)$ via the symplectic integrator can be thought of as a
+transformation of the form
+
+$$
+\{\phi_{\epsilon,\underline{x}}^{(K)} : 
+\mathbb{R}^d \times \mathbb{R}^d \to \mathbb{R}^d \times \mathbb{R}^d\},
+$${#eq-iterates}
+
+i.e., $\phi_{\epsilon,\underline{x}}^{(K)}$ is a function that takes some
+input value $(\underline{z}, \underline{\rho})$ and advances it $K$ steps in
+phase space using the leapfrog integrator. The function includes $\epsilon$ to
+remind the step size of the integrator and $\underline{x}$ to remind its data
+dependence. To advance $\ell$ steps, we simply compose a one step iteration
+$(\ell=1)$ with the $\ell-1$ function, i.e.,
+
+$$
+\phi_{\epsilon,\underline{x}}^{(\ell)} = 
+\phi_{\epsilon,\underline{x}}^{(\ell-1)} \circ \phi_{\epsilon,\underline{x}}^{(1)}
+$${#eq-composition}
+
+By induction, we can see that $\phi_{\epsilon,\underline{x}}^{(\ell)}$ can be
+built by $\ell$ compositions of $\phi_{\epsilon,\underline{x}}^{(1)}$,
+defining the entire transformation as
+
+$$
+\phi_{\epsilon,\underline{x}}^{(K)} = \phi_{\epsilon,\underline{x}}^{(1)} \circ
+\phi_{\epsilon,\underline{x}}^{(1)} \circ \cdots \circ \phi_{\epsilon,\underline{x}}^{(1)}.
+$${#eq-transformation}
+
+It is no coincidence that this resembles the composition of functions used in
+the normalizing flows framework described earlier in [@eq-normalizing-flow]. We
+can then think of a $K$-step leapfrog integrator trajectory that takes
+
+$$
+\left(\underline{z}_0, \underline{\rho}_0\right) \rightarrow
+\left(\underline{z}_K, \underline{\rho}_K\right)
+$${#eq-trajectory}
+
+as an invertible transformation formed by composing $K$ one-step leapfrog
+integrator trajectories. The original HVAE framework [@caterini2018] includes an
+extra step in between each leapfrog step that we now review. This step consisted
+of a *tempering* step where an initial temperature $β_0$ is proposed and the
+momentum is decreased by a factor
+
+$$
+α_k = \sqrt{\frac{β_{k-1}}{β_k}},
+$${#eq-momentum-factor}
+
+after each leapfrog step $k$. This simply means that for step $k$, the momentum
+is computed as
+
+$$
+\underline{\rho}_k = α_k \, \underline{\rho}_{k-1}.
+$${#eq-momentum-update}
+
+The temperature is then updated as
+
+$$
+\sqrt{β_k} = \left[
+    \left(1-\frac{1}{\sqrt{β_0}}\right)\frac{k^2}{K^2} + \frac{1}{\sqrt{β_0}}
+\right]^{-1}.
+$${#eq-temp-update}
+
+This tempering step tries to produce an effect similar to that of Annealed
+Importance Sampling (AIS) [@neal], where the temperature is decreased gradually
+to produce a smoother distribution that can be better approximated by the
+variational distribution. Thus, the transformation $\mathcal{H}_{\underline{x}}$
+used in [@caterini2018] takes the form
+
+$$
+\mathcal{H}_{\underline{x}} = g^K \circ \phi_{\epsilon,\underline{x}}^{(1)}
+\circ g^{K-1} \circ \cdots \circ \phi_{\epsilon,\underline{x}}^{(1)} \circ g^0
+\circ \phi_{\epsilon,\underline{x}}^{(1)}.
+$${#eq-transformation-hvae}
+
+Since each transformation is smooth and differentiable, this entire
+transformation is amenable to the reparameterization trick used in the
+variational autoencoder framework. We can then use this transformation to 
+access an unbiased estimator of the gradient of the ELBO with respect to the
+variational parameters $\phi$.
+
+As mentioned in [@sec-normalizing-flows], for a series of smooth invertible
+transformations that define a normalizing flow, the change of variables formula
+tells us that the density of the transformed variable writes
+
+$$
+q_\phi(\underline{z}_K \mid \underline{x}) = 
+q_\phi(\underline{z}_0 \mid \underline{x}) 
+|\det J_{\mathcal{H}_{\underline{x}}}|^{-1}.
+$${#eq-flow-density}
+
+For our extended posterior distribution, we have that the initial point is 
+sampled as
+
+$$
+(\underline{z}_0, \underline{\rho}_0) \sim 
+q_\phi(\underline{z}_0, \underline{\rho}_0 \mid \underline{x}) =
+q_\phi(\underline{z}_0 \mid \underline{x}) \, q_\phi(\underline{\rho}_0),
+$${#eq-extended-posterior-init}
+
+meaning that only the initial position is sampled from the variational
+distribution, while the momentum is sampled from a standard normal distribution.
+For the Jacobian, each step consists of the composition of two functions:
+
+1. The leapfrog integrator step $\phi_{\epsilon,\underline{x}}^{(1)}$.
+2. The tempering step $g^k$.
+
+Therefore, the determinant of the Jacobian of the transformation is given by the
+product of the determinants of each of the steps, i.e.,
+
+$$
+|\det J_{\mathcal{H}_{\underline{x}}}| = 
+\prod_{k=0}^K |\det J_{g^k}| \cdot |\det J_{\phi_{\epsilon,\underline{x}}^{(1)}}|.
+$${#eq-hvae-jacobian}
+
+However, recall that Hamiltonian flows are volume preserving. This means that
+the volume of the phase space is invariant under the transformation and thus the
+determinant of the Jacobian is equal to one, i.e.,
+
+$$
+|\det J_{\phi_{\epsilon,\underline{x}}^{(1)}}| = 1.
+$${#eq-hvae-jacobian-det}
+
+For the tempering step, since $(\underline{z}, \underline{\rho}) \rightarrow
+(\underline{z}, \alpha_k\underline{\rho})$, the determinant of the Jacobian is
+given by
+
+$$
+|\det J_{g^k}| = \alpha_k^d = \left(\frac{β_{k-1}}{β_k}\right)^{\frac{d}{2}}.
+$${#eq-hvae-tempering-step-det}
+
+With this setting in hand [@caterini2018] proposes an algorithm to estimate the
+gradient of the ELBO with respect to the variational parameters that expands the
+the usual procedure -->
