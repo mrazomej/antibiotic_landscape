@@ -258,6 +258,6 @@ JLD2.jldsave(
     "$(sim_dir)/sim_evo.jld2",
     fitnotype_profiles=fitnotype_profiles,
     fitness_landscapes=fit_lans,
-    mutational_landscape=mut_evo_peaks,
+    genetic_density=mut_evo_peaks,
     evolution_condition=fit_evo_peak,
 )

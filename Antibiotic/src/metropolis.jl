@@ -306,7 +306,7 @@ end
 ## -----------------------------------------------------------------------------
 
 @doc raw"""
-    mutational_landscape(
+    genetic_density(
         x::AbstractVecOrMat,
         peak::Union{GaussianPeak, GaussianPeaks};
         max_value::Float64 = 1.0
@@ -327,7 +327,7 @@ Gaussian peak(s).
 # Returns
 The calculated mutational landscape value(s).
 """
-function mutational_landscape(
+function genetic_density(
     x::AbstractVector, peak::GaussianPeak; max_value::AbstractFloat=1.0
 )
     # Compute the Square Mahalanobis distance
@@ -345,7 +345,7 @@ function mutational_landscape(
     return -(gaussian - max_value)
 end
 
-function mutational_landscape(
+function genetic_density(
     x::AbstractMatrix, peak::GaussianPeak; max_value::AbstractFloat=1.0
 )
     # Compute the Square Mahalanobis distance
@@ -363,7 +363,7 @@ function mutational_landscape(
     return -(gaussian .- max_value)
 end
 
-function mutational_landscape(
+function genetic_density(
     x::AbstractVector, peaks::GaussianPeaks; max_value::AbstractFloat=1.0
 )
     # Compute the Square Mahalanobis distance
@@ -386,7 +386,7 @@ function mutational_landscape(
     return -(total_gaussian - max_value)
 end
 
-function mutational_landscape(
+function genetic_density(
     peaks::GaussianPeaks,
     x::AbstractMatrix;
     max_value::AbstractFloat=1.0
@@ -411,14 +411,32 @@ function mutational_landscape(
     return -(total_gaussian .- max_value)
 end
 
-function mutational_landscape(
+function genetic_density(
     x::AbstractVector,
     y::AbstractVector,
     peaks::AbstractPeak;
     max_value::AbstractFloat=1.0
 )
-    return mutational_landscape.(
+    return genetic_density.(
         [[x, y] for x in x, y in y], Ref(peaks); max_value=max_value
+    )
+end
+
+function genetic_density(
+    xs::Tuple{AbstractVector,Vararg{AbstractVector}},
+    peaks::AbstractPeak,
+    max_value::AbstractFloat=1.0
+)
+    # Create array of all combinations of coordinates
+    coords = [[x...] for x in IterTools.product(xs...)]
+
+    # Compute mutational landscape
+    mut = genetic_density.(coords, Ref(peaks); max_value=max_value)
+
+    # Return
+    return DD.DimArray(
+        mut,
+        tuple([DD.Dim{Symbol("x$i")}(1:length(xs[i])) for i in 1:length(xs)]...)
     )
 end
 
@@ -427,7 +445,7 @@ end
 ## -----------------------------------------------------------------------------
 
 @doc raw"""
-    evo_metropolis_hastings(x0, fitness_peaks, mut_peaks, β, µ, n_steps)
+    evo_metropolis_hastings(x0, fitness_peaks, gen_peaks, β, µ, n_steps)
 
 Perform evolutionary Metropolis-Hastings algorithm to simulate phenotypic
 evolution.
@@ -436,8 +454,8 @@ evolution.
 - `x0::AbstractVecOrMat`: Initial phenotype vector or matrix.
 - `fitness_peaks::Union{GaussianPeak, Vector{GaussianPeak}}`: Fitness landscape
   defined by one or more Gaussian peaks.
-- `mut_peaks::Union{GaussianPeak, Vector{GaussianPeak}}`: Mutational landscape
-  defined by one or more Gaussian peaks.
+- `gen_peaks::Union{GaussianPeak, Vector{GaussianPeak}}`: Genetic density
+  landscape defined by one or more Gaussian peaks.
 - `β::AbstractFloat`: Inverse temperature parameter controlling selection
   strength.
 - `µ::AbstractFloat`: Mutation step size standard deviation.
@@ -471,7 +489,7 @@ where F_E is the fitness function and M is the mutational landscape function.
 function evo_metropolis_hastings(
     x0::AbstractVector,
     fitness_peaks::AbstractPeak,
-    mut_peaks::AbstractPeak,
+    gen_peaks::AbstractPeak,
     β::Real,
     µ::Real,
     n_steps::Int,
@@ -483,7 +501,7 @@ function evo_metropolis_hastings(
 
     # Compute fitness and mutational landscape at initial phenotype
     fitness_val = fitness(x0, fitness_peaks)
-    mut_val = mutational_landscape(x0, mut_peaks)
+    gen_val = genetic_density(x0, gen_peaks)
 
     # Loop over steps
     for t in 1:n_steps
@@ -492,11 +510,11 @@ function evo_metropolis_hastings(
 
         # Calculate fitness and mutational landscape
         fitness_val_new = fitness(x_new, fitness_peaks)
-        mut_val_new = mutational_landscape(x_new, mut_peaks)
+        gen_val_new = genetic_density(x_new, gen_peaks)
 
         # Compute acceptance probability
         P_accept = min(
-            1, (fitness_val_new * mut_val_new / (fitness_val * mut_val))^β
+            1, (fitness_val_new * gen_val_new / (fitness_val * gen_val))^β
         )
 
         # Accept or reject proposal
@@ -505,7 +523,7 @@ function evo_metropolis_hastings(
             x[:, t+1] = x_new
             # Update fitness and mutational landscape
             fitness_val = fitness_val_new
-            mut_val = mut_val_new
+            gen_val = gen_val_new
         else
             # Reject proposal
             x[:, t+1] = x[:, t]

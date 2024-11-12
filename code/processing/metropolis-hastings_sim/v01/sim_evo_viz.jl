@@ -66,9 +66,9 @@ fitnotype_profiles = JLD2.load("$(sim_dir)/sim_evo.jld2")["fitnotype_profiles"]
 # Load fitness landscapes
 fitness_landscapes = JLD2.load("$(sim_dir)/sim_evo.jld2")["fitness_landscapes"]
 # Load mutational landscape
-mutational_landscape = JLD2.load(
+genetic_density = JLD2.load(
     "$(sim_dir)/sim_evo.jld2"
-)["mutational_landscape"]
+)["genetic_density"]
 # Load evolution condition
 evolution_condition = JLD2.load(
     "$(sim_dir)/sim_evo.jld2"
@@ -84,7 +84,7 @@ y = range(-4, 4, length=100)
 
 # Create meshgrid
 F = mh.fitness(x, y, evolution_condition)
-M = mh.mutational_landscape(x, y, mutational_landscape)
+M = mh.genetic_density(x, y, genetic_density)
 
 # Initialize figure
 fig = Figure(size=(600, 300))
@@ -116,8 +116,8 @@ contour!(ax1, x, y, F, color=:white)
 contour!(ax2, x, y, M, color=:white)
 
 # Save figure
-save("$(fig_dir)/evolution_fitness_mutational_landscapes.pdf", fig)
-save("$(fig_dir)/evolution_fitness_mutational_landscapes.png", fig)
+save("$(fig_dir)/evolution_fitness_genetic_densitys.pdf", fig)
+save("$(fig_dir)/evolution_fitness_genetic_densitys.png", fig)
 
 fig
 
