@@ -215,6 +215,8 @@ contour!(
     colorrange=[1.0, maximum(F)],
 )
 
+save("$(fig_dir)/fitness_landscape_contour.png", fig)
+
 fig
 
 ## =============================================================================
@@ -257,5 +259,153 @@ end # for
 
 # Plot contour
 contour!(ax, x, y, z, F, alpha=0.05, levels=minimum(F)*1.5:1:maximum(F))
+
+save("$(fig_dir)/fitness_landscape_contour_trajectories.png", fig)
+
+fig
+
+## =============================================================================
+
+println("Evaluating mutational landscape...")
+
+# Evaluate mutational landscape
+M = mh.mutational_landscape(coords, mutational_landscape)
+
+
+## =============================================================================
+
+println("Plotting mutational landscape as contour")
+
+# Initialize figure
+fig = Figure(size=(600, 600))
+# Add axis
+ax = Axis3(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    zlabel="phenotype 3",
+    aspect=(1, 1, 1),
+)
+# Plot contour
+contour!(
+    ax,
+    x,
+    y,
+    z,
+    M.data,
+    alpha=0.05,
+    levels=7,
+    colormap=:magma,
+)
+
+save("$(fig_dir)/mutational_landscape_contour.png", fig)
+
+fig
+
+## =============================================================================
+
+println("Plotting fitness and mutational landscapes in single 3D scene...")
+
+# Initialize figure
+fig = Figure(size=(600, 600))
+# Add axis
+ax = Axis3(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    zlabel="phenotype 3",
+    aspect=(1, 1, 1),
+)
+
+# Plot fitness landscape contour
+contour!(
+    ax,
+    x,
+    y,
+    z,
+    F.data,
+    alpha=0.05,
+    levels=5,
+    colormap=:viridis,
+)
+
+# Plot mutational landscape contour
+contour!(
+    ax,
+    x,
+    y,
+    z,
+    M.data,
+    alpha=0.05,
+    levels=7,
+    colormap=:magma,
+)
+
+save("$(fig_dir)/fitness_mutational_landscape_contour.png", fig)
+
+fig
+
+## =============================================================================
+
+println("Plotting fitness and mutational landscapes with trajectories...")
+
+# Initialize figure
+fig = Figure(size=(600, 600))
+# Add axis
+ax = Axis3(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    zlabel="phenotype 3",
+    aspect=(1, 1, 1),
+)
+
+# Select trajectories evolved in example condition
+fitnotype_evo = fitnotype_profiles[evo=evo, landscape=evo]
+
+# Loop through lineages
+for (i, lin) in enumerate(DD.dims(fitnotype_evo, :lineage))
+    # Loop through replicate
+    for (j, rep) in enumerate(DD.dims(fitnotype_evo, :replicate))
+        # Extract trajectory
+        traj = fitnotype_evo.phenotype[
+            evo=evo, landscape=evo, lineage=lin, replicate=rep
+        ]
+        # Plot trajectory
+        scatterlines!(
+            ax,
+            traj[phenotype=DD.At(:x1)].data,
+            traj[phenotype=DD.At(:x2)].data,
+            traj[phenotype=DD.At(:x3)].data,
+            color=(ColorSchemes.glasbey_hv_n256[i], 0.5),
+            markersize=4,
+        )
+    end # for
+end # for
+
+# Plot fitness landscape contour
+contour!(
+    ax,
+    x,
+    y,
+    z,
+    F.data,
+    alpha=0.05,
+    levels=7,
+    colormap=:viridis,
+)
+# Plot mutational landscape contour
+contour!(
+    ax,
+    x,
+    y,
+    z,
+    M.data,
+    alpha=1,
+    levels=7,
+    colormap=:magma,
+)
+
+save("$(fig_dir)/fitness_mutational_landscape_contour.png", fig)
 
 fig
