@@ -220,8 +220,13 @@ $$
 {\int d^d\underline{z} \, e^{-U_{\underline{x}}(\underline{z})}},
 $${#eq-hmc-dist}
 
-where $U_{\underline{x}}(\underline{z}) = -\log π(\underline{z} \mid
-\underline{x})$. Notice that upon substitution of this definition into
+where we define the potential energy as
+
+$$
+U_{\underline{x}}(\underline{z}) \equiv -\log π(\underline{z} \mid \underline{x}).
+$${#eq-potential-energy}
+
+Notice that upon substitution of this definition into
 [@eq-hmc-dist], we get the trivial equality
 
 $$
@@ -236,10 +241,10 @@ $$
 π(\underline{z} \mid \underline{x}).
 $${#eq-trivial-equality}
 
-Since it is most of the time impossible to sample directly from
-$π(\underline{z} \mid \underline{x})$, an independent auxiliary variable
-$\underline{\rho} \in \mathbb{R}^d$ is introduced and used to sample
-$\underline{z}$. This variable ---referred as the momentum---is such that:
+Since it is most of the time impossible to sample directly from $π(\underline{z}
+\mid \underline{x})$, an independent auxiliary variable $\underline{\rho} \in
+\mathbb{R}^d$ is introduced and used to sample $\underline{z}$ more efficiently.
+This variable---referred as the momentum---is such that:
 
 $$
 \underline{\rho} \sim \mathcal{N}(\underline{0}, \underline{\underline{M}}),
@@ -267,7 +272,11 @@ extended distribution can be analogously written as
 $$
 π(\underline{z}, \underline{\rho} \mid \underline{x}) = 
 \frac{e^{-H_{\underline{x}}(\underline{z}, \underline{\rho})}}
-{\iint d^d\underline{z} \, d^d\underline{\rho} \, e^{-H_{\underline{x}}(\underline{z}, \underline{\rho})}}.
+{\displaystyle\iint 
+    d^d\underline{z} \, 
+    d^d\underline{\rho} \, 
+    e^{-H_{\underline{x}}(\underline{z}, \underline{\rho})}
+}.
 $${#eq-extended-density}
 
 where $H_{\underline{x}}(\underline{z}, \underline{\rho})$ is the Hamiltonian,
@@ -494,7 +503,8 @@ product of the determinants of each of the steps, i.e.,
 
 $$
 |\det J_{\mathcal{H}_{\underline{x}}}| = 
-\prod_{k=0}^K |\det J_{g^k}| \cdot |\det J_{\phi_{\epsilon,\underline{x}}^{(1)}}|.
+\prod_{k=0}^K |\det J_{g^k}| 
+|\det J_{\phi_{\epsilon,\underline{x}}^{(1)}}|.
 $${#eq-hvae-jacobian}
 
 However, recall that Hamiltonian flows are volume preserving. This means that
@@ -515,4 +525,297 @@ $${#eq-hvae-tempering-step-det}
 
 With this setting in hand [@caterini2018] proposes an algorithm to estimate the
 gradient of the ELBO with respect to the variational parameters that expands the
-the usual procedure -->
+the usual procedure to includes a series of leapfrog steps and a tempering step
+(see Algorithm 1 in [@caterini2018] for details).
+
+## Riemannian Hamiltonian MCMC
+
+To improve the representational power of the variational posterior
+approximation, we can make the reasonable assumption that the latent variables
+$\underline{z}$ live in a Riemannian manifold $\mathcal{M}$ endowed with a
+Riemannian metric $\underline{\underline{G}}(\underline{z})$. Although not
+entirely correct, one can think of this Riemannian metric as some sort of
+"position dependent scale bar" for a flat map representing a curved space. In
+the context of the HMC framework, this Riemannian metric can be included if we
+allow the momentum variable to be given by
+
+$$
+\underline{\rho} \sim 
+\mathcal{N}\left(\underline{0}, \underline{\underline{G}}(\underline{z})\right),
+$${#eq-momentum-dist-rhmc}
+
+i.e., the auxuliary momentum variable is no longer independent of the position
+variable $\underline{z}$ but rather is distributed according to a normal
+distribution with mean zero and covariance matrix given by the
+position-dependent Riemannian metric $\underline{\underline{G}}(\underline{z})$.
+The Hamiltonian governing the dynamics of the system then becomes
+
+$$
+H_{\underline{x}}^{\mathcal{M}}(\underline{z}, \underline{\rho}) = 
+U_{\underline{x}}^{\mathcal{M}}(\underline{z}) + 
+\kappa_{\underline{x}}^{\mathcal{M}}(\underline{z}, \underline{\rho}),
+$${#eq-hamiltonian-rhmc}
+
+where the $\mathcal{M}$ superscript reminds us that we now consider the latent
+variables $\underline{z}$ living on a Riemannian manifold. Although the potential
+energy $U_{\underline{x}}^{\mathcal{M}}(\underline{z})$ is still given by
+[@eq-potential-energy], the kinetic energy term is now position-dependent, given
+by
+
+$$
+\kappa_{\underline{x}}^{\mathcal{M}}(\underline{z}, \underline{\rho}) = 
+\frac{1}{2} 
+\log((2π)^d|\underline{\underline{G}}(\underline{z})|) +
+\frac{1}{2} 
+\underline{\rho}^T \underline{\underline{G}}(\underline{z})^{-1} \underline{\rho}
+$${#eq-kinetic-energy-rhmc}
+
+Our target distribution $\pi(\underline{z} \mid \underline{x})$ is still given
+by [@eq-extended-target], but with the Hamiltonian given by
+[@eq-hamiltonian-rhmc]. To show that we still recover the target distribution
+with this change in the Hamiltonian, let us substitute [@eq-hamiltonian-rhmc]
+into [@eq-extended-target]. This results in
+
+$$
+\pi(\underline{z} \mid \underline{x}) = 
+\frac{
+    \displaystyle\int d^d\underline{\rho} \, 
+    \exp\left\{
+        -U_{\underline{x}}^{\mathcal{M}}(\underline{z}) - 
+        \frac{1}{2} \log((2π)^d|\underline{\underline{G}}(\underline{z})|) -
+        \frac{1}{2} \underline{\rho}^T \underline{\underline{G}}(\underline{z})^{-1} \underline{\rho}
+    \right\}
+}{
+    \displaystyle\iint d^d\underline{z} \, d^d\underline{\rho} \, 
+    \exp\left\{
+        -U_{\underline{x}}^{\mathcal{M}}(\underline{z}) - 
+        \frac{1}{2} \log((2π)^d|\underline{\underline{G}}(\underline{z})|) -
+        \frac{1}{2} \underline{\rho}^T \underline{\underline{G}}(\underline{z})^{-1} \underline{\rho}
+    \right\}
+}.
+$${#eq-target-rhmc}
+
+Rearranging terms, we can see that the target distribution is given by
+
+$$
+\pi(\underline{z} \mid \underline{x}) = 
+\frac{
+    e^{-U_{\underline{x}}^{\mathcal{M}}(\underline{z})} 
+    \displaystyle\int d^d\underline{\rho} \, 
+    \left[ 
+        \frac{
+            e^{-\frac{1}{2} 
+            \underline{\rho}^T 
+            \underline{\underline{G}}(\underline{z})^{-1} 
+            \underline{\rho}}
+        }{
+            (2\pi)^d \sqrt{|\underline{\underline{G}}(\underline{z})|}
+        } 
+    \right]
+}
+{
+    \displaystyle\int d^d\underline{z} \, 
+    e^{-U_{\underline{x}}^{\mathcal{M}}(\underline{z})} 
+    \displaystyle\int d^d\underline{\rho} \, 
+    \left[ 
+        \frac{
+            e^{
+                -\frac{1}{2}
+                \underline{\rho}^T
+                \underline{\underline{G}}(\underline{z})^{-1} 
+                \underline{\rho}
+            }
+        }{
+            (2\pi)^d \sqrt{|\underline{\underline{G}}(\underline{z})|}
+        } 
+    \right]
+}.
+$${#eq-target-rhmc-expanded}
+
+where we can recognize the terms in square brackets as the probability density
+function of a normal distribution. Thus, integrating out the momentum variable
+$\underline{\rho}$ from the target distribution, we obtain
+
+$$
+\pi(\underline{z} \mid \underline{x}) = 
+\frac{e^{-U_{\underline{x}}^{\mathcal{M}}(\underline{z})}}
+{
+    \displaystyle\int d^d\underline{z} \, 
+    e^{-U_{\underline{x}}^{\mathcal{M}}(\underline{z})}
+},
+$${#eq-target-rhmc-marginal}
+
+i.e., the correct target distribution as defined in [@eq-hmc-dist]. Therefore,
+including the position-dependent Riemannian metric in the momentum variable
+does not change the target distribution. However, the same cannot be said for
+the Hamiltonian equations of motion, as we will see next.
+
+Recall that the Hamiltonian equations in [@eq-hamilton-eqs] require us to
+compute the gradient of the potential energy with respect to the position
+variable $\underline{z}$ and the gradient of the kinetic energy with respect to
+the momentum variable $\underline{\rho}$. For the position variable, our result
+from [@eq-hamilton-eqs-expanded] still holds, with the only difference that the
+mass matrix is now given by the Riemannian metric
+$\underline{\underline{G}}(\underline{z})$. For a single entry of
+$z_i$, dynamics are given by
+
+$$
+\frac{d z_i}{d t} = 
+\frac{\partial H_{\underline{x}}^{\mathcal{M}}(\underline{z}, \underline{\rho})}
+{
+    \partial \rho_i
+} = 
+\left(
+    \nabla_{\underline{z}} H_{\underline{x}}^{\mathcal{M}}
+    (\underline{z}, \underline{\rho})
+\right)_i = 
+\left(
+    \underline{\underline{G}}(\underline{z})^{-1} \underline{\rho}
+\right)_i,
+$${#eq-gradient-hamiltonian-position-rhmc}
+where $\left(\cdot\right)_i$ denotes the $i$-th entry of a vector.
+
+For the momentum variable, we use three relatively standard results from matrix
+calculus:
+
+1. The gradient of the inverse of a matrix function with respect to the argument
+is given by
+
+$$
+\frac{
+    \partial \underline{\underline{G}}(\underline{z})^{-1}
+}{
+    \partial \underline{z}
+} = 
+-\underline{\underline{G}}(\underline{z})^{-1} 
+\frac{d \underline{\underline{G}}(\underline{z})}{d \underline{z}} 
+\underline{\underline{G}}(\underline{z})^{-1}.
+$${#eq-gradient-inverse-matrix}
+
+2. The gradient of the determinant of a matrix function with respect to the 
+argument is given by
+
+$$
+\frac{
+    d
+}{
+    d \underline{z}
+} \operatorname{det} \underline{\underline{G}}(\underline{z}) = 
+\operatorname{tr}\left(
+    \operatorname{adj}(\underline{\underline{G}}(\underline{z})) 
+    \frac{d \underline{\underline{G}}(\underline{z})}{d \underline{z}}
+\right) = 
+\operatorname{det} \underline{\underline{G}}(\underline{z}) 
+\operatorname{tr}\left(
+    \underline{\underline{G}}(\underline{z})^{-1} 
+    \frac{d \underline{\underline{G}}(\underline{z})}{d \underline{z}}
+\right),
+$${#eq-gradient-determinant-matrix}
+where $\operatorname{adj}$ is the adjoint operator, $\operatorname{tr}$ is the
+trace operator, and $\operatorname{det}$ is the determinant operator.
+
+3. The gradient of the logarithm of the determinant of a matrix function with 
+respect to the argument is given by
+$$  
+\frac{d}{d \underline{z}} 
+\log (\operatorname{det} \underline{\underline{G}}(\underline{z})) = 
+\operatorname{tr}\left(
+    \underline{\underline{G}}(\underline{z})^{-1} 
+    \frac{d \underline{\underline{G}}(\underline{z})}{d \underline{z}}
+\right).
+$${#eq-gradient-log-determinant-matrix}
+
+Given these results, we can now compute the dynamics of the momentum variable.
+For a single entry of $\underline{\rho}$, $\rho_i$, the resulting expression
+is of the form
+
+$$
+\frac{d \rho_i}{d t} = 
+\frac{
+    \partial H_{\underline{x}}^{\mathcal{M}}(\underline{z}, \underline{\rho})
+}{
+    \partial z_i
+} = 
+\frac{\partial \ln \pi(\underline{z} \mid \underline{x})}{\partial z_i} -
+\frac{1}{2} \operatorname{tr}\left(
+    \underline{\underline{G}}(\underline{z}) 
+    \frac{\partial \underline{\underline{G}}(\underline{z})}{\partial z_i}
+\right) +
+\frac{1}{2} 
+\underline{\rho}^T 
+\underline{\underline{G}}(\underline{z})^{-1} 
+\frac{\partial \underline{\underline{G}}(\underline{z})}{\partial z_i} 
+\underline{\underline{G}}(\underline{z})^{-1} \underline{\rho}.
+$${#eq-gradient-hamiltonian-momentum-rhmc}
+
+As before, we can adapt the leapfrog integrator to this setting to produce an
+unbiased estimator of the gradient of the ELBO with respect to the variational
+parameters. However, the previously presented leapfrog integrator is no longer
+volume preserving in this setting due to the position-dependent Riemannian
+metric. Thus, we need to use a generalized version of the leapfrog integrator.
+This has been previously derived and [@chadebec2020] lists the following steps
+for the generalized leapfrog integrator as
+
+1. A half step for the momentum variable
+
+$$
+\underline{\rho}\left(t+\frac{\varepsilon}{2}\right) = 
+\underline{\rho}(t) - 
+\frac{\varepsilon}{2} 
+\nabla_{\underline{z}} H_{\underline{x}}^{\mathcal{M}}\left(
+    \underline{z}(t), 
+    \underline{\rho}\left(t+\frac{\varepsilon}{2}\right)
+\right).
+$${#eq-generalized-leapfrog-momentum-half-step}
+
+2. A full step for the position variable
+
+$$
+\underline{z}(t+\varepsilon) = 
+\underline{z}(t) + 
+\frac{\varepsilon}{2}
+\left[
+    \nabla_{\underline{z}} H_{\underline{x}}^{\mathcal{M}}\left(
+        \underline{z}(t), 
+        \underline{\rho}\left(t+\frac{\varepsilon}{2}\right)
+    \right) +
+    \nabla_{\underline{\rho}} H_{\underline{x}}^{\mathcal{M}}\left(
+        \underline{z}(t+\varepsilon), 
+        \underline{\rho}\left(t+\frac{\varepsilon}{2}\right)
+    \right)
+\right].
+$${#eq-generalized-leapfrog-position-full-step}
+
+3. A half step for the momentum variable
+
+$$
+\underline{\rho}(t+\varepsilon) = 
+\underline{\rho}\left(t+\frac{\varepsilon}{2}\right) - 
+\frac{\varepsilon}{2} 
+\nabla_{\underline{z}} H_{\underline{x}}^{\mathcal{M}}\left(
+    \underline{z}(t+\varepsilon), 
+    \underline{\rho}\left(t+\frac{\varepsilon}{2}\right)
+\right).
+$${#eq-generalized-leapfrog-momentum-full-step}
+
+Since the left hand side terms appear on the right hand side, these equations
+must be solved using fixed point iterations. This means that the numerical
+impolementation of this generalized integrator iterates a step multiple times 
+until it finds a "fixed point", i.e., a point that, when fed to the right hand
+side of the equation, does not change the value of the left hand side. In 
+practice, we set the number of iterations to a small number.
+
+## Riemannian Hamiltonian Variational Autoencoder
+
+The proposed Riemannian Hamiltonian Variational Autoencoder (RHVAE) method
+extends the HVAE idea to account for non-Euclidean geometry of the latent space.
+As with the HAVE, using the generalized leapfrog integrator along with a 
+tempering step creates a smooth mapping
+
+$$
+(\underline{z}_0, \underline{\rho}_0) \rightarrow 
+(\underline{z}_K, \underline{\rho}_K),
+$${#eq-rhvae-mapping}
+
+that can be thought of as a kind of normalizing flow informed by the target
+distribution and the geometry of the latent space.
