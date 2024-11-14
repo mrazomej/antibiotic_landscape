@@ -1,4 +1,5 @@
-We would like to thank Griffin Chure and Enrique Amaya for their helpful advice
-and discussion. We are extremely grateful to Junichiro Iwasawa for sharing the
-raw data from his study; his openness and willingness to share data and the
-immediate response are examples of the best practices in open science. 
+We would like to thank Griffin Chure, David Larios, and Enrique Amaya for their
+helpful advice and discussion. We are extremely grateful to Junichiro Iwasawa
+for sharing the raw data from his study; his openness and willingness to share
+data and the immediate response are examples of the best practices in open
+science. 
