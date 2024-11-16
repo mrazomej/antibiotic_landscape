@@ -66,9 +66,9 @@ fitnotype_profiles = JLD2.load("$(sim_dir)/sim_evo.jld2")["fitnotype_profiles"]
 # Load fitness landscapes
 fitness_landscapes = JLD2.load("$(sim_dir)/sim_evo.jld2")["fitness_landscapes"]
 # Load mutational landscape
-mutational_landscape = JLD2.load(
+genetic_density = JLD2.load(
     "$(sim_dir)/sim_evo.jld2"
-)["mutational_landscape"]
+)["genetic_density"]
 
 ## =============================================================================
 
@@ -211,7 +211,7 @@ ax = Axis(
 )
 
 # Evaluate mutational landscape
-M = mh.mutational_landscape(x, y, mutational_landscape)
+M = mh.genetic_density(x, y, genetic_density)
 
 # Plot mutational landscape
 heatmap!(ax, x, y, M, colormap=:magma)
@@ -220,8 +220,8 @@ heatmap!(ax, x, y, M, colormap=:magma)
 contour!(ax, x, y, M, color=:white)
 
 # Save figure
-save("$(fig_dir)/mutational_landscape.pdf", fig)
-save("$(fig_dir)/mutational_landscape.png", fig)
+save("$(fig_dir)/genetic_density.pdf", fig)
+save("$(fig_dir)/genetic_density.png", fig)
 
 fig
 

@@ -118,7 +118,7 @@ mut_evo_peaks = mh.GaussianPeaks(
 mut_evo_grid = range(peak_mean_min, peak_mean_max, length=100)
 
 # Evaluate mutational landscape on grid
-mut_evo_grid_points = mh.mutational_landscape(
+mut_evo_grid_points = mh.genetic_density(
     tuple(repeat([mut_evo_grid], n_dim)...),
     mut_evo_peaks
 )
@@ -295,5 +295,5 @@ JLD2.jldsave(
     "$(sim_dir)/sim_evo.jld2",
     fitnotype_profiles=x_traj,
     fitness_landscapes=fit_lans,
-    mutational_landscape=mut_evo_peaks,
+    genetic_density=mut_evo_peaks,
 )

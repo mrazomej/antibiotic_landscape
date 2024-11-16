@@ -66,9 +66,9 @@ fitnotype_profiles = JLD2.load("$(sim_dir)/sim_evo.jld2")["fitnotype_profiles"]
 # Load fitness landscapes
 fitness_landscapes = JLD2.load("$(sim_dir)/sim_evo.jld2")["fitness_landscapes"]
 # Load mutational landscape
-mutational_landscape = JLD2.load(
+genetic_density = JLD2.load(
     "$(sim_dir)/sim_evo.jld2"
-)["mutational_landscape"]
+)["genetic_density"]
 
 ## =============================================================================
 
@@ -269,7 +269,7 @@ fig
 println("Evaluating mutational landscape...")
 
 # Evaluate mutational landscape
-M = mh.mutational_landscape(coords, mutational_landscape)
+M = mh.genetic_density(coords, genetic_density)
 
 
 ## =============================================================================
@@ -298,7 +298,7 @@ contour!(
     colormap=:magma,
 )
 
-save("$(fig_dir)/mutational_landscape_contour.png", fig)
+save("$(fig_dir)/genetic_density_contour.png", fig)
 
 fig
 
@@ -341,7 +341,7 @@ contour!(
     colormap=:magma,
 )
 
-save("$(fig_dir)/fitness_mutational_landscape_contour.png", fig)
+save("$(fig_dir)/fitness_genetic_density_contour.png", fig)
 
 fig
 
@@ -406,6 +406,6 @@ contour!(
     colormap=:magma,
 )
 
-save("$(fig_dir)/fitness_mutational_landscape_contour.png", fig)
+save("$(fig_dir)/fitness_genetic_density_contour.png", fig)
 
 fig
