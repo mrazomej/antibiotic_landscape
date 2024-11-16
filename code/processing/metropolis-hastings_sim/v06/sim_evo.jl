@@ -115,7 +115,7 @@ mut_evo_peaks = mh.GaussianPeaks(
 )
 
 # Define grid on which to evaluate mutational landscape
-mut_evo_grid = range(peak_mean_min - 1.0, peak_mean_max + 1.0, length=100)
+mut_evo_grid = range(peak_mean_min, peak_mean_max, length=100)
 
 # Evaluate mutational landscape on grid
 mut_evo_grid_points = mh.genetic_density(
@@ -192,7 +192,7 @@ end # for
 
 ## =============================================================================
 
-Random.seed!(42)
+Random.seed!(1)
 
 println("Simulating evolution and computing fitnotype profiles...")
 
