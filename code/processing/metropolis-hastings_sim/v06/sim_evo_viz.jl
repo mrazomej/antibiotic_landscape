@@ -202,8 +202,8 @@ for page in 1:n_pages
         contour!(ax, x, y, F, color=:white)
 
         # Set limits
-        xlims!(ax, -4, 4)
-        ylims!(ax, -4, 4)
+        xlims!(ax, -6, 6)
+        ylims!(ax, -6, 6)
 
         # Loop over simulations
         for lin in DD.dims(fitnotype_profiles, :lineage)
@@ -294,8 +294,8 @@ for page in 1:n_pages
         contour!(ax, x, y, F, color=:white)
 
         # Set limits
-        xlims!(ax, -4, 4)
-        ylims!(ax, -4, 4)
+        xlims!(ax, -6, 6)
+        ylims!(ax, -6, 6)
 
         # Loop over simulations
         for lin in DD.dims(fitnotype_profiles, :lineage)
@@ -390,8 +390,8 @@ for page in 1:n_pages
         contour!(ax, x, y, M, color=:black, linestyle=(:dash, :dense))
 
         # Set limits
-        xlims!(ax, -4, 4)
-        ylims!(ax, -4, 4)
+        xlims!(ax, -6, 6)
+        ylims!(ax, -6, 6)
 
         # Loop over simulations
         for lin in DD.dims(fitnotype_profiles, :lineage)

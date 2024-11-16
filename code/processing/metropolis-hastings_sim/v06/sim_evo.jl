@@ -13,6 +13,9 @@ import StructArrays as SA
 # Import JLD2 for saving results
 import JLD2
 
+# Import IterTools for Cartesian product
+import IterTools
+
 # Import basic math libraries
 import StatsBase
 import LinearAlgebra
@@ -82,8 +85,8 @@ fit_amp_min = 1.0
 fit_amp_max = 5.0
 
 # Define covariance range
-fit_cov_min = 0.5
-fit_cov_max = 3.0
+fit_cov_min = 2.0
+fit_cov_max = 5.0
 
 # Define possible number of fitness peaks
 n_fit_peaks_min = 1
@@ -110,6 +113,18 @@ mut_evo_peaks = mh.GaussianPeaks(
     mut_means,
     mut_evo_covariance
 )
+
+# Define grid on which to evaluate mutational landscape
+mut_evo_grid = range(peak_mean_min - 1.0, peak_mean_max + 1.0, length=100)
+
+# Evaluate mutational landscape on grid
+mut_evo_grid_points = mh.genetic_density(
+    tuple(repeat([mut_evo_grid], n_dim)...),
+    mut_evo_peaks
+)
+
+# Define grid of possible initial conditions
+init_grid = [[x...] for x in IterTools.product(fill(mut_evo_grid, 2)...)]
 
 ## =============================================================================
 
@@ -181,16 +196,20 @@ Random.seed!(42)
 
 println("Simulating evolution and computing fitnotype profiles...")
 
-# Sample initial positions on phenotype space from uniform distribution
-# between peak bounds
-x0 = rand(Distributions.Uniform(peak_mean_min, peak_mean_max), (n_dim, n_sim))
+# Sample initial positions on phenotype space from uniform distribution taking
+# into account mutational landscape (not to start at a low mutational peak)
+x0 = StatsBase.sample(
+    vec(init_grid),
+    StatsBase.Weights(vec(mut_evo_grid_points)),
+    n_sim
+)
 
 # Select initial conditions for replicates from multivariate normal distribution
 # around each initial condition
 x0_reps = reduce(
     (x, y) -> cat(x, y, dims=3),
     [
-        rand(Distributions.MvNormal(x0[:, i], 0.1), n_rep)
+        rand(Distributions.MvNormal(x0[i], 0.1), n_rep)
         for i in 1:n_sim
     ]
 )
