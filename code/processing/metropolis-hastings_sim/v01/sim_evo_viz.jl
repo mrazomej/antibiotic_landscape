@@ -103,7 +103,7 @@ ax2 = Axis(
     xlabel="phenotype 1",
     ylabel="phenotype 2",
     aspect=AxisAspect(1),
-    title="Mutational landscape",
+    title="Genetic density",
 )
 
 # Plot a heatmap of the fitness landscape
@@ -144,7 +144,7 @@ ax2 = Axis(
     xlabel="phenotype 1",
     ylabel="phenotype 2",
     aspect=AxisAspect(1),
-    title="Mutational landscape",
+    title="Genetic density",
 )
 
 # Plot fitness landscape
