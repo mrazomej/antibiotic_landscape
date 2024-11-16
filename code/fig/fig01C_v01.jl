@@ -172,7 +172,7 @@ fig = Figure(size=(150 * n_cols, 200 * n_rows))
 gl = fig[1, 1] = GridLayout()
 
 # Compute genetic density
-G = mh.mutational_landscape(x, y, genetic_density)
+G = mh.genetic_density(x, y, genetic_density)
 
 # Loop over fitness landscapes
 for i in 1:(n_rows*n_cols)

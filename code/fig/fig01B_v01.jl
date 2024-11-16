@@ -74,7 +74,7 @@ y = range(-4, 4, length=100)
 
 # Create meshgrid
 F = mh.fitness(x, y, evolution_condition)
-M = mh.mutational_landscape(x, y, mutational_landscape)
+M = mh.genetic_density(x, y, mutational_landscape)
 
 # Initialize figure
 fig = Figure(size=(700, 300))

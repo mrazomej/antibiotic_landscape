@@ -189,7 +189,7 @@ y = range(-4, 4, length=100)
 
 # Create meshgrid
 F = mh.fitness(x, y, evolution_condition)
-M = mh.mutational_landscape(x, y, mutational_landscape)
+M = mh.genetic_density(x, y, mutational_landscape)
 
 # Add GridLayout for genetic density
 gl_mut = GridLayout(gl01B[1, 1])
@@ -408,7 +408,7 @@ x = range(-4, 4, length=100)
 y = range(-4, 4, length=100)
 
 # Compute genetic density
-G = mh.mutational_landscape(x, y, genetic_density)
+G = mh.genetic_density(x, y, genetic_density)
 
 # Loop over fitness landscapes
 for i in 1:(n_rows*n_cols)
