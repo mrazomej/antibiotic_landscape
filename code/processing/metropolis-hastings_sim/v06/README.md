@@ -1,5 +1,12 @@
 # metropolis-hastings evolution simulation
 
+## simple description
+
+Evolution simulation with one fixed and 49 random evolution conditions and a
+four-peak genetic density landscape. The fitness peaks do not have large
+covariances, thus, there are peaks that are not accessible from most
+positions in phenotype space.
+
 ## simulation setup
 
 - phenotype space dimensionality: 2
@@ -23,6 +30,11 @@
         - [-1.5, 1.5]
     - peak amplitudes: 1.0
     - peak covariance: 0.45
+- random evolution condition parameters:
+    - number of fitness peaks: random uniform in range [1, 3]
+    - peak means: random uniform in range [-4.0, 4.0]
+    - peak amplitudes: random uniform in range [1.0, 5.0]
+    - peak covariance: random uniform in range [2.0, 5.0]
 
 ## `RHVAE` specific features
 
