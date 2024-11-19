@@ -92,7 +92,7 @@ pdf_path = "$(fig_dir)/fitness_landscapes.pdf"
 
 for page in 1:n_pages
     # Initialize figure for this page
-    fig = Figure(size=(200 * n_cols, 200 * n_rows))
+    local fig = Figure(size=(200 * n_cols, 200 * n_rows))
     gl = fig[1, 1] = GridLayout()
 
     # Calculate range of landscapes for this page
@@ -105,7 +105,7 @@ for page in 1:n_pages
         row = (i - 1) ÷ n_cols + 1
         col = (i - 1) % n_cols + 1
 
-        ax = Axis(gl[row, col], aspect=AxisAspect(1))
+        local ax = Axis(gl[row, col], aspect=AxisAspect(1))
         F = mh.fitness(x, y, fit_lan)
         heatmap!(ax, x, y, F, colormap=:viridis)
         contour!(ax, x, y, F, color=:white)
@@ -150,6 +150,45 @@ contour!(ax, x, y, M, color=:white)
 # Save figure
 save("$(fig_dir)/genetic_density.pdf", fig)
 save("$(fig_dir)/genetic_density.png", fig)
+
+fig
+
+## =============================================================================
+
+println("Plotting mutational landscape with initial conditions...")
+
+# Initialize figure
+fig = Figure(size=(300, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+)
+
+# Evaluate mutational landscape
+M = mh.genetic_density(x, y, genetic_density)
+
+# Plot mutational landscape
+heatmap!(ax, x, y, M, colormap=:magma)
+
+# Add contour plot
+contour!(ax, x, y, M, color=:white)
+
+# Plot initial conditions
+scatter!(
+    ax,
+    vec(fitnotype_profiles.phenotype[time=1, evo=1, phenotype=DD.At(:x1)]),
+    vec(fitnotype_profiles.phenotype[time=1, evo=1, phenotype=DD.At(:x2)]),
+    markersize=8,
+    marker=:star5,
+)
+
+# Save figure
+save("$(fig_dir)/genetic_density_initial_conditions.pdf", fig)
+save("$(fig_dir)/genetic_density_initial_conditions.png", fig)
 
 fig
 

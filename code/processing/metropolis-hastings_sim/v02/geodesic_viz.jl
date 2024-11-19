@@ -72,7 +72,7 @@ end
 ## =============================================================================
 
 # List all files in the directory
-geodesic_files = Glob.glob("$(geodesic_dir)/*.jld2"[2:end], "/")
+geodesic_files = Glob.glob("$(geodesic_dir)/*rhvaeepoch0075*.jld2"[2:end], "/")
 
 # Initialize dataframe to store files metadata
 df_meta = DF.DataFrame()

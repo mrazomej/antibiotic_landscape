@@ -33,7 +33,7 @@ Random.seed!(42)
 # Define model hyperparameters
 
 # Define number of epochs
-n_epoch = 25
+n_epoch = 75
 # Define number of samples in batch
 n_batch = 512
 # Define number of samples when computing loss
