@@ -36,7 +36,7 @@ Random.seed!(42)
 println("Defining directories...")
 
 # Define simulation directory
-sim_dir = "$(git_root())/output/metropolis-hastings_sim/v06/sim_evo"
+sim_dir = "$(git_root())/output/metropolis-hastings_sim/v05/sim_evo"
 
 # Define output directory
 fig_dir = "$(git_root())/fig/main"
@@ -355,6 +355,12 @@ println("Plotting fitness profiles over time...")
 rows = 2
 cols = 4
 
+# Define y-axis limits
+y_lims = (
+    minimum(fitnotype_profiles.fitness[evo=1, landscape=1:(rows*cols)]) - 0.2,
+    maximum(fitnotype_profiles.fitness[evo=1, landscape=1:(rows*cols)]) + 0.2
+)
+
 # Loop through rows and columns
 for i in 1:(rows*cols)
     # Define row and column
@@ -387,7 +393,7 @@ for i in 1:(rows*cols)
     counter = 1
 
     # Set axis limits
-    ylims!(ax, 0.8, 6.5)
+    ylims!(ax, y_lims...)
 
     # Loop through replicates
     for rep in DD.dims(fitnotype_profiles, :replicate)
@@ -435,7 +441,7 @@ Label(
     "fitness (a.u.)",
     fontsize=16,
     rotation=π / 2,
-    padding=(-15, 20, 0, 0),
+    padding=(-15, 30, 0, 0),
 )
 
 # ------------------------------------------------------------------------------
@@ -446,7 +452,7 @@ Label(
 Label(
     gl02A[1, 1, TopLeft()], "(A)",
     fontsize=20,
-    padding=(0, 10, 0, 0),
+    padding=(0, 20, 0, 0),
     halign=:right,
     tellwidth=false,
     tellheight=false
@@ -464,7 +470,7 @@ Label(
 Label(
     gl02C[1, 1, TopLeft()], "(C)",
     fontsize=20,
-    padding=(0, 10, 20, 0),
+    padding=(0, 20, 20, 0),
     halign=:right,
     tellwidth=false,
     tellheight=false
@@ -474,4 +480,3 @@ Label(
 save("$(fig_dir)/fig02_v02.pdf", fig)
 
 fig
-

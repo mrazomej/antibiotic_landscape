@@ -36,7 +36,7 @@ Random.seed!(42)
 println("Defining directories...")
 
 # Define simulation directory
-sim_dir = "$(git_root())/output/metropolis-hastings_sim/v06/sim_evo"
+sim_dir = "$(git_root())/output/metropolis-hastings_sim/v05/sim_evo"
 
 # Define output directory
 fig_dir = "$(git_root())/fig/main"
