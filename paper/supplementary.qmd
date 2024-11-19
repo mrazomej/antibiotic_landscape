@@ -1,0 +1,6 @@
+::: {.sitext}
+# Supplementary Materials {.unnumbered}
+
+<!-- notes on RHVAE -->
+{{< include _rhvae.qmd >}}
+:::

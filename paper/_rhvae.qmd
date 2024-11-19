@@ -5,7 +5,7 @@ bibliography: references.bib
 csl: ieee.csl
 ---
 
-# Riemannian Hamiltonian Variational Autoencoders Mathematical Background
+## Riemannian Hamiltonian Variational Autoencoders Mathematical Background
 
 The bulk of this work makes use of the variational autoencoder variation
 developed by [@chadebec2020] known as Riemannian Hamiltonian Variational
@@ -20,7 +20,7 @@ paper [@chadebec2020] and the references therein for additional details.
 Let us start by reviewing the variational autoencoder model setting and the
 variational inference framework.
 
-## Variational Autoencoder Model Setting
+### Variational Autoencoder Model Setting
 
 Given a data set $\underline{x}^{1:N} \in \mathcal{X} \subseteq \mathbb{R}^D$,
 where the superscript denotes a set of $N$ observations, i.e.,
@@ -127,7 +127,7 @@ $π_\theta(\underline{z} \mid \underline{x})$. The basis of the Riemannian
 Hamiltonian Variational Autoencoder (RHVAE) framework takes inspiration from
 some of these approaches. Let's gain some intuition on each of them.
 
-## MCMC and VI (Salimans & Kingma 2015)
+### MCMC and VI (Salimans & Kingma 2015)
 
 One such approach to improve the accuracy of the variational posterior
 approximation consists in adding a fix number of MCMC steps to the variational
@@ -158,7 +158,7 @@ of the ELBO becomes more and more accurate the more steps we include in the
 Markov chain, but at the same time, the cost of computing this gradient becomes
 higher and higher.
 
-## Normalizing Flows (Rezende & Mohamed 2015) {#sec-normalizing-flows}
+### Normalizing Flows (Rezende & Mohamed 2015) {#sec-normalizing-flows}
 
 Another approach, known as normalizing flows, considers the composition of
 simple smooth invertible transformations [@rezende2016], such that a variable
@@ -198,7 +198,7 @@ transform this simple distribution into a more complex one that can better
 approximate the true posterior. This again, comes at the cost of increased
 computational cost.
 
-## Hamiltonian Markov Chain Monte Carlo (HMC)
+### Hamiltonian Markov Chain Monte Carlo (HMC)
 
 Although seemingly unrelated to the previous two approaches, the Hamiltonian
 Markov Chain Monte Carlo (HMC) framework provides a way to construct a Markov
@@ -383,7 +383,7 @@ volume of the target distribution very efficiently.
 With this conceptual background, we are now ready to review the predecessor of
 the RHVAE framework, the Hamiltonian Variational Autoencoder framework.
 
-## Hamiltonian Variational Autoencoder (HVAE)
+### Hamiltonian Variational Autoencoder (HVAE)
 
 Given the dynamics defined in [@eq-hamilton-eqs-expanded], and the numerical
 integrator defined in [@eq-leapfrog-half-step], [@eq-leapfrog-full-step], and
@@ -528,7 +528,7 @@ gradient of the ELBO with respect to the variational parameters that expands the
 the usual procedure to includes a series of leapfrog steps and a tempering step
 (see Algorithm 1 in [@caterini2018] for details).
 
-## Riemannian Hamiltonian MCMC
+### Riemannian Hamiltonian MCMC
 
 To improve the representational power of the variational posterior
 approximation, we can make the reasonable assumption that the latent variables
@@ -805,7 +805,7 @@ until it finds a "fixed point", i.e., a point that, when fed to the right hand
 side of the equation, does not change the value of the left hand side. In 
 practice, we set the number of iterations to a small number.
 
-## Riemannian Hamiltonian Variational Autoencoder
+### Riemannian Hamiltonian Variational Autoencoder
 
 The proposed Riemannian Hamiltonian Variational Autoencoder (RHVAE) method
 extends the HVAE idea to account for non-Euclidean geometry of the latent space.
