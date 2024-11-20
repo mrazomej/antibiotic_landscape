@@ -203,7 +203,7 @@ mask = (maximum(logdetG) * 0.90 .< logdetG .≤ maximum(logdetG))
 println("Plotting fitness landscapes...")
 
 # Initialize figure
-fig = Figure(size=(175 * 4, 200 * 2))
+fig = Figure(size=(160 * 4, 200 * 2))
 
 # Add global grid layout
 gl = GridLayout(fig[1, 1])
@@ -246,7 +246,7 @@ Label(
     "comparison of ground truth and latent space inferred fitness landscapes",
     padding=(0, 0, 0, 0),
     halign=:left,
-    alignmode=Mixed(; left=-200),
+    alignmode=Mixed(; left=-10),
 )
 
 # Ground truth fitness landscape
@@ -337,8 +337,7 @@ for (i, env_idx) in enumerate(env_idxs)
         linestyle=:dash,
         levels=7
     )
-
-end
+end # for env_idx
 
 # Add global axis labels
 Label(
