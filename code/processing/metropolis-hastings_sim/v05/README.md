@@ -73,3 +73,6 @@ multiple fitness peaks that can be reached.
 - `geodesic_model.jl`: implementation of the geodesic model
 - `geodesic_train.jl`: training script for the geodesic model
 - `geodesic_viz.jl`: diagnostic plots for the geodesic model
+- `latent_to_phenotype.jl`: script to train a neural network to map latent space
+    coordinates to phenotype space coordinates
+- `latent_to_phenotype_viz.jl`: diagnostic plots for the neural network
