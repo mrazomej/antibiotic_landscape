@@ -75,7 +75,7 @@ genetic_density = JLD2.load(
 println("Evaluating example fitness landscape...")
 
 # Define evolution condition
-evo = 50
+evo = 1
 # Select fitness landscape
 fit_lan = fitness_landscapes[evo]
 
@@ -221,7 +221,7 @@ fig
 
 ## =============================================================================
 
-println("Plotting fitness lanscape as contour with trajectories...")
+println("Plotting fitness landscapes as contour with trajectories...")
 
 # Initialize figure
 fig = Figure(size=(600, 600))
@@ -258,11 +258,277 @@ for (i, lin) in enumerate(DD.dims(fitnotype_evo, :lineage))
 end # for
 
 # Plot contour
-contour!(ax, x, y, z, F, alpha=0.05, levels=minimum(F)*1.5:1:maximum(F))
+contour!(
+    ax,
+    x,
+    y,
+    z,
+    F,
+    alpha=0.05,
+    levels=minimum(F)*1.5:1:maximum(F),
+    colormap=:algae,
+)
 
 save("$(fig_dir)/fitness_landscape_contour_trajectories.png", fig)
 
 fig
+
+## =============================================================================
+
+println("Plotting multiple fitness landscapes...")
+
+# Define number of rows and columns
+n_rows = 3
+n_cols = 3
+
+# Define ranges of phenotypes to evaluate
+x = y = z = range(-6, 6, length=50)
+coords = (x, y, z)
+
+# Initialize figure
+fig = Figure(size=(200 * n_cols, 200 * n_rows))
+
+# Add global grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Loop through each fitness landscape
+for i = 1:(n_rows*n_cols)
+    # Define row and column
+    row = (i - 1) ÷ n_cols + 1
+    col = (i - 1) % n_cols + 1
+    # Add axis to figure
+    # Add axis
+    ax = Axis3(
+        gl[row, col],
+        aspect=(1, 1, 1),
+        title="env. $i",
+        titlesize=12,
+        xlabel="phenotype 1",
+        ylabel="phenotype 2",
+        zlabel="phenotype 3",
+        xticklabelsvisible=false,
+        yticklabelsvisible=false,
+        zticklabelsvisible=false,
+        xlabelsize=8,
+        ylabelsize=8,
+        zlabelsize=8,
+        xlabeloffset=3,
+        ylabeloffset=3,
+        zlabeloffset=3,
+    )
+    # Hide decorations
+    # hidedecorations!(ax)
+
+    # Select fitness landscape
+    fit_lan = fitness_landscapes[i]
+    # Evaluate fitness landscape
+    F = mh.fitness(coords, fit_lan)
+    # Plot fitness landscape
+    contour!(
+        ax,
+        x,
+        y,
+        z,
+        F,
+        colormap=:viridis,
+        alpha=0.05,
+        levels=7,
+        colorrange=[1.0, maximum(F)],
+    )
+end # for
+
+# Adjust spacing between plots
+colgap!(gl, -40)
+rowgap!(gl, -40)
+
+save("$(fig_dir)/fitness_landscape_examples.png", fig)
+
+fig
+## =============================================================================
+
+println("Plotting all fitness landscapes across multiple figures...")
+
+# Define number of rows and columns per figure
+n_rows = 5
+n_cols = 5
+landscapes_per_page = n_rows * n_cols
+
+# Calculate total number of landscapes and required figures
+total_landscapes = length(fitness_landscapes)
+n_figures = ceil(Int, total_landscapes / landscapes_per_page)
+
+# Define ranges of phenotypes to evaluate
+x = y = z = range(-6, 6, length=50)
+coords = (x, y, z)
+
+# Loop through each required figure
+for fig_num = 1:n_figures
+    println("Plotting figure $fig_num...")
+    # Initialize figure
+    fig = Figure(size=(200 * n_cols, 200 * n_rows))
+
+    # Add global grid layout
+    gl = fig[1, 1] = GridLayout()
+
+    # Calculate start and end indices for this figure
+    start_idx = (fig_num - 1) * landscapes_per_page + 1
+    end_idx = min(fig_num * landscapes_per_page, total_landscapes)
+
+    # Loop through landscapes for this figure
+    for i = start_idx:end_idx
+        # Define row and column within this figure
+        local_i = i - (fig_num - 1) * landscapes_per_page
+        row = (local_i - 1) ÷ n_cols + 1
+        col = (local_i - 1) % n_cols + 1
+
+        # Add axis
+        ax = Axis3(
+            gl[row, col],
+            aspect=(1, 1, 1),
+            title="env. $i",
+            titlesize=12,
+            xlabel="phenotype 1",
+            ylabel="phenotype 2",
+            zlabel="phenotype 3",
+            xticklabelsvisible=false,
+            yticklabelsvisible=false,
+            zticklabelsvisible=false,
+            xlabelsize=8,
+            ylabelsize=8,
+            zlabelsize=8,
+            xlabeloffset=3,
+            ylabeloffset=3,
+            zlabeloffset=3,
+        )
+
+        # Select and plot fitness landscape
+        fit_lan = fitness_landscapes[i]
+        F = mh.fitness(coords, fit_lan)
+        contour!(
+            ax,
+            x, y, z,
+            F,
+            colormap=:viridis,
+            alpha=0.05,
+            levels=7,
+            colorrange=[1.0, maximum(F)],
+        )
+    end # for
+
+    # Adjust spacing between plots
+    colgap!(gl, -40)
+    rowgap!(gl, -40)
+
+    # Save this figure
+    save("$(fig_dir)/fitness_landscape_page$(lpad(fig_num, 2, '0')).png", fig)
+
+    # Display the figure
+    display(fig)
+end # for
+
+
+## =============================================================================
+
+println("Plotting all fitness landscapes with trajectories...")
+
+# Define number of rows and columns per figure
+n_rows = 5
+n_cols = 5
+landscapes_per_page = n_rows * n_cols
+
+# Calculate total number of landscapes and required figures
+total_landscapes = length(fitness_landscapes)
+n_figures = ceil(Int, total_landscapes / landscapes_per_page)
+
+# Define ranges of phenotypes to evaluate
+x = y = z = range(-6, 6, length=50)
+coords = (x, y, z)
+
+# Loop through each required figure
+for fig_num = 1:n_figures
+    println("Plotting figure $fig_num...")
+    # Initialize figure
+    fig = Figure(size=(200 * n_cols, 200 * n_rows))
+
+    # Add global grid layout
+    gl = fig[1, 1] = GridLayout()
+
+    # Calculate start and end indices for this figure
+    start_idx = (fig_num - 1) * landscapes_per_page + 1
+    end_idx = min(fig_num * landscapes_per_page, total_landscapes)
+
+    # Loop through landscapes for this figure
+    for i = start_idx:end_idx
+        # Define row and column within this figure
+        local_i = i - (fig_num - 1) * landscapes_per_page
+        row = (local_i - 1) ÷ n_cols + 1
+        col = (local_i - 1) % n_cols + 1
+
+        # Add axis
+        ax = Axis3(
+            gl[row, col],
+            aspect=(1, 1, 1),
+            title="env. $i",
+            titlesize=12,
+            xlabel="phenotype 1",
+            ylabel="phenotype 2",
+            zlabel="phenotype 3",
+            xticklabelsvisible=false,
+            yticklabelsvisible=false,
+            zticklabelsvisible=false,
+            xlabelsize=8,
+            ylabelsize=8,
+            zlabelsize=8,
+            xlabeloffset=3,
+            ylabeloffset=3,
+            zlabeloffset=3,
+        )
+
+        # Loop through lineages
+        for (j, lin) in enumerate(DD.dims(fitnotype_profiles, :lineage))
+            # Loop through replicate
+            for (k, rep) in enumerate(DD.dims(fitnotype_profiles, :replicate))
+                # Extract trajectory
+                traj = fitnotype_profiles.phenotype[
+                    evo=i, landscape=i, lineage=lin, replicate=rep
+                ]
+                # Plot trajectory
+                scatterlines!(
+                    ax,
+                    traj[phenotype=DD.At(:x1)].data,
+                    traj[phenotype=DD.At(:x2)].data,
+                    traj[phenotype=DD.At(:x3)].data,
+                    color=(ColorSchemes.glasbey_hv_n256[j], 0.5),
+                    markersize=4,
+                )
+            end # for
+        end # for       
+
+        # Select and plot fitness landscape
+        fit_lan = fitness_landscapes[i]
+        F = mh.fitness(coords, fit_lan)
+        contour!(
+            ax,
+            x, y, z,
+            F,
+            colormap=:viridis,
+            alpha=0.05,
+            levels=7,
+            colorrange=[1.0, maximum(F)],
+        )
+    end # for
+
+    # Adjust spacing between plots
+    colgap!(gl, -40)
+    rowgap!(gl, -40)
+
+    # Save this figure
+    save("$(fig_dir)/fitness_landscape_trajectories_page$(lpad(fig_num, 2, '0')).png", fig)
+
+    # Display the figure
+    display(fig)
+end # for
+
 
 ## =============================================================================
 
@@ -277,14 +543,21 @@ M = mh.genetic_density(coords, genetic_density)
 println("Plotting mutational landscape as contour")
 
 # Initialize figure
-fig = Figure(size=(600, 600))
+fig = Figure(size=(400, 400))
 # Add axis
 ax = Axis3(
     fig[1, 1],
     xlabel="phenotype 1",
     ylabel="phenotype 2",
     zlabel="phenotype 3",
+    title="genotype to phenotype density",
     aspect=(1, 1, 1),
+    xticklabelsvisible=false,
+    yticklabelsvisible=false,
+    zticklabelsvisible=false,
+    xlabeloffset=3,
+    ylabeloffset=3,
+    zlabeloffset=3,
 )
 # Plot contour
 contour!(
@@ -314,7 +587,14 @@ ax = Axis3(
     xlabel="phenotype 1",
     ylabel="phenotype 2",
     zlabel="phenotype 3",
+    title="fitness landscape + genotype to phenotype density",
     aspect=(1, 1, 1),
+    xticklabelsvisible=false,
+    yticklabelsvisible=false,
+    zticklabelsvisible=false,
+    xlabeloffset=3,
+    ylabeloffset=3,
+    zlabeloffset=3,
 )
 
 # Plot fitness landscape contour
@@ -336,12 +616,12 @@ contour!(
     y,
     z,
     M.data,
-    alpha=0.05,
+    alpha=0.08,
     levels=7,
-    colormap=:magma,
+    colormap=:grays,
 )
 
-save("$(fig_dir)/fitness_genetic_density_contour.png", fig)
+save("$(fig_dir)/genotype_phenotype_fitness_landscape.png", fig)
 
 fig
 
@@ -392,7 +672,7 @@ contour!(
     F.data,
     alpha=0.05,
     levels=7,
-    colormap=:viridis,
+    colormap=:algae,
 )
 # Plot mutational landscape contour
 contour!(
@@ -403,9 +683,9 @@ contour!(
     M.data,
     alpha=1,
     levels=7,
-    colormap=:magma,
+    colormap=:grays,
 )
 
-save("$(fig_dir)/fitness_genetic_density_contour.png", fig)
+save("$(fig_dir)/genotype_phenotype_fitness_trajectories.png", fig)
 
 fig

@@ -60,9 +60,9 @@ println("Defining evolution parameters...")
 # Phenotype space dimensionality
 n_dim = 3
 # Number of initial conditions (positions in phenotype space)
-n_sim = 5
+n_sim = 10
 # Number of replicates (evolving strains per initial condition)
-n_rep = 3
+n_rep = 2
 # Inverse temperature
 β = 10.0
 # mutation step size
@@ -82,8 +82,8 @@ fit_amp_min = 1.0
 fit_amp_max = 5.0
 
 # Define covariance range
-fit_cov_min = 0.5
-fit_cov_max = 3.0
+fit_cov_min = 3.0
+fit_cov_max = 10.0
 
 # Define possible number of fitness peaks
 n_fit_peaks_min = 1
@@ -117,6 +117,23 @@ mut_evo_peaks = mh.GaussianPeaks(
 
 ## =============================================================================
 
+println("Defining FIXED evolution condition...")
+
+# Evolution condition amplitude
+fit_evo_amplitude = 5.0
+# Evolution condition mean
+fit_evo_mean = [0.0, 0.0, 0.0]
+# Evolution condition covariance
+fit_evo_covariance = 3.0
+# Create peak
+fit_evo_peak = mh.GaussianPeak(
+    fit_evo_amplitude,
+    fit_evo_mean,
+    fit_evo_covariance
+)
+
+## =============================================================================
+
 Random.seed!(42)
 
 println("Generating alternative fitness landscapes...")
@@ -124,8 +141,11 @@ println("Generating alternative fitness landscapes...")
 # Initialize array to hold fitness landscapes
 fit_lans = Array{mh.AbstractPeak}(undef, n_fit_lans)
 
+# Add fixed evolution condition to fitness landscapes
+fit_lans[1] = fit_evo_peak
+
 # Loop over number of fitness landscapes
-for i in 1:n_fit_lans
+for i in 2:n_fit_lans
     # Sample number of fitness peaks
     n_fit_peaks = rand(n_fit_peaks_min:n_fit_peaks_max)
 
