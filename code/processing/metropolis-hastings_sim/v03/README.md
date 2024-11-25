@@ -7,6 +7,9 @@ Evolution simulation with one fixed and 49 random evolution conditions and a
 relatively large covariances to promote that from any position in phenotype
 space, there are multiple fitness peaks that can be reached.
 
+The trained RHVAE has a latent space dimensionality of 2, one less than the
+phenotype space dimensionality.
+
 ## simulation setup
 
 - phenotype space dimensionality: 3
@@ -22,7 +25,11 @@ space, there are multiple fitness peaks that can be reached.
     - peak mean: [0.0, 0.0, 0.0]
     - peak amplitude: 5.0
     - peak covariance: 3.0
-- mutational fitness landscape:
+- random evolution condition parameters:
+    - peak amplitude range: [1.0, 5.0]
+    - peak covariance range: [3.0, 10.0]
+    - number of peaks range: [1, 4]
+- fixed mutational fitness landscape:
     - peak means:
         - [-1.5, -1.5, -1.5]
         - [1.5, -1.5, -1.5]
