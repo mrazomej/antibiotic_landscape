@@ -64,7 +64,6 @@ loss_kwargs = (
     βₒ=βₒ,
     logp_prefactor=logp_prefactor,
     logq_prefactor=logq_prefactor,
-    :∇H_kwargs => (adtype=:TaylorDiff,)
 )
 
 ## =============================================================================

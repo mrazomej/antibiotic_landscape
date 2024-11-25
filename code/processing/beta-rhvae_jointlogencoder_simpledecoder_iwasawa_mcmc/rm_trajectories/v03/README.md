@@ -1,4 +1,4 @@
-# `RHVAE v05`
+# `RHVAE rm trajectories v01`
 
 ## `RHVAE` specific features
 
@@ -13,7 +13,8 @@
 ## `RHVAE` training
 
 - training data: logic50 mcmc samples
-- training split: 85% training, 15% validation
+- training split: For evolution conditions with more than one biological
+  replicate, one of the replicate is used as validation data.
 - loss function hyperparameters:
     - leapfrog step size: 1E-3
     - leapfrog steps: 10
@@ -29,5 +30,9 @@
 
 ## Notes
 
-This training regime includes a larger leapfrog step (10x compared to v04)
-and twice as many steps (from 5 to 10).
+- This is the first test of removing trajectories from the training data. 
+
+- The centroids are computed from all of the data, including the validation set.
+
+- This training regime includes a large leapfrog step and twice as many steps
+  (from 5 to 10).

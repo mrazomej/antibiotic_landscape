@@ -5,7 +5,7 @@
 - latent space dimensionality: 2
 - number of neurons in hidden layers: 128
 - activation function: leaky ReLU
-- temperature parameter: 0.5
+- temperature parameter: 0.25
 - regularization parameter: 1E-2
 - number of centroids: 256
 - centroid determination: k-medoids
@@ -29,5 +29,7 @@
 
 ## Notes
 
-This training regime includes a larger leapfrog step (10x compared to v04)
-and twice as many steps (from 5 to 10).
+- This training regime includes a larger leapfrog step (10x compared to v04)
+  and twice as many steps (from 5 to 10).
+
+- The temperature parameter was halved from 0.5 to 0.25.

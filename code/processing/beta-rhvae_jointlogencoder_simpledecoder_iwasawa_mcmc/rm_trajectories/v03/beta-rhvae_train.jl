@@ -31,15 +31,13 @@ Random.seed!(42)
 # Define model hyperparameters
 
 # Define number of epochs
-n_epoch = 102
+n_epoch = 100
 # Define number of samples in batch
 n_batch = 256
 # Define number of samples when computing loss
 n_batch_loss = 256
 # Define learning rate
 η = 10^-3
-# Define fraction of data to be used for training
-split_frac = 0.85
 
 # Define loss function hyper-parameters
 ϵ = Float32(1E-3) # Leapfrog step size
@@ -64,7 +62,6 @@ loss_kwargs = (
     βₒ=βₒ,
     logp_prefactor=logp_prefactor,
     logq_prefactor=logq_prefactor,
-    :∇H_kwargs => (adtype=:TaylorDiff,)
 )
 
 ## =============================================================================
@@ -93,6 +90,22 @@ end
 
 ## =============================================================================
 
+println("Load model...\n")
+
+# Load model
+rhvae = JLD2.load("$(model_dir)/model.jld2")["model"]
+# Load parameters
+model_state = JLD2.load("$(model_dir)/model.jld2")["model_state"]
+# Load indexes to keep and remove
+idx_keep = JLD2.load("$(model_dir)/model.jld2")["idx_keep"]
+idx_rm = JLD2.load("$(model_dir)/model.jld2")["idx_rm"]
+# Input parameters to model
+Flux.loadmodel!(rhvae, model_state)
+# Update metric parameters
+AET.RHVAEs.update_metric!(rhvae)
+
+## =============================================================================
+
 println("Loading data into memory...")
 
 # Define data directory
@@ -103,27 +116,9 @@ data = JLD2.load(
     "$(data_dir)/logic50_preprocess.jld2"
 )["logic50_mcmc_std"]
 
-# Split indexes of data into training and validation
-train_idx, val_idx = Flux.splitobs(
-    1:size(data, 2), at=split_frac, shuffle=true
-)
-
 # Extract train and validation data
-train_data = data[:, train_idx, :] |> Flux.gpu
-val_data = data[:, val_idx, :] |> Flux.gpu
-
-## =============================================================================
-
-println("Load model...\n")
-
-# Load model
-rhvae = JLD2.load("$(model_dir)/model.jld2")["model"]
-# Load parameters
-model_state = JLD2.load("$(model_dir)/model.jld2")["model_state"]
-# Input parameters to model
-Flux.loadmodel!(rhvae, model_state)
-# Update metric parameters
-AET.RHVAEs.update_metric!(rhvae)
+train_data = data[:, idx_keep, :] |> Flux.gpu
+val_data = data[:, idx_rm, :] |> Flux.gpu
 
 ## =============================================================================
 
@@ -250,7 +245,7 @@ for epoch in epoch_init:n_epoch
         loss_val=loss_val,
         mse_train=mse_train,
         mse_val=mse_val,
-        train_idx=train_idx,
-        val_idx=val_idx,
+        train_idx=idx_keep,
+        val_idx=idx_rm,
     )
 end # for n_epoch
