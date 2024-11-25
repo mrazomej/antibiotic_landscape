@@ -218,8 +218,8 @@ logdetG = reshape(
 ## =============================================================================
 
 # Define number of columns and rows per page
-cols = 5
-rows = 5
+cols = 3
+rows = 3
 panels_per_page = cols * rows
 
 # Group data by :evo
@@ -246,7 +246,7 @@ for page in 1:n_pages
     end_idx = min(page * panels_per_page, n_groups)
 
     # Initialize figure for this page
-    fig = Figure(size=(250 * cols, 250 * rows))
+    fig = Figure(size=(200 * cols, 200 * rows))
     # Add grid layout
     gl = fig[1, 1] = GridLayout()
 
@@ -292,8 +292,8 @@ for page in 1:n_pages
                 vec(dd_lin[latent=DD.At(:latent1), replicate=1].data),
                 vec(dd_lin[latent=DD.At(:latent2), replicate=1].data),
                 markersize=6,
-                linewidth=1.5,
-                color=ColorSchemes.glasbey_hv_n256[j],
+                linewidth=2,
+                color=ColorSchemes.Paired_12[j*2],
             )
         end
 
@@ -324,14 +324,8 @@ for page in 1:n_pages
                 ax,
                 eachrow(curve)...,
                 linewidth=3,
-                color=:white,
-            )
-            lines!(
-                ax,
-                eachrow(curve)...,
-                linewidth=3,
                 linestyle=(:dot, :dense),
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.Paired_12[j*2-1],
             )
         end
 
@@ -352,7 +346,7 @@ for page in 1:n_pages
                 first(vec(dd_lin[latent=DD.At(:latent2), replicate=1].data)),
                 markersize=7,
                 marker=:xcross,
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.Paired_12[j*2],
             )
 
             # Add last point
@@ -368,7 +362,7 @@ for page in 1:n_pages
                 ax,
                 last(vec(dd_lin[latent=DD.At(:latent1), replicate=1].data)),
                 last(vec(dd_lin[latent=DD.At(:latent2), replicate=1].data)),
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.Paired_12[j*2],
                 markersize=7,
                 marker=:utriangle
             )
