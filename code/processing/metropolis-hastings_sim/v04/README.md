@@ -1,5 +1,13 @@
 # metropolis-hastings evolution simulation
 
+## simple description
+
+- 2D phenotype space with 50 random evolution conditions.
+    - small covariance making some peaks not reachable.
+    - small inverse temperature making evolution less directed.
+
+- 8-peak genetic density landscape.
+
 ## simulation setup
 
 - phenotype space dimensionality: 2

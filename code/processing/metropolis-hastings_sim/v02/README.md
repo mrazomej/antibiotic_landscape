@@ -1,5 +1,15 @@
 # metropolis-hastings evolution simulation
 
+## simple description
+
+- 2D phenotype space with 50 random evolution conditions.
+    - small covariance making some peaks not reachable.
+    - small inverse temperature making evolution less directed.
+
+- 2D latent space with 256 centroids determined by k-medoids.
+
+- 85%/15% training/validation split.
+
 ## simulation setup
 
 - phenotype space dimensionality: 2
@@ -10,6 +20,11 @@
 - type of evolution condition: random
 - number of fitness landscapes: 50
 - number of evolution conditions: 50
+- random evolution condition parameters:
+    - peak mean range: [-4.0, 4.0]
+    - peak amplitude range: [1.0, 5.0]
+    - peak covariance range: [0.5, 3.0]
+    - number of peaks range: [1, 3]
 - type of mutational landscape: fixed
 - mutational fitness landscape:
     - peak means:

@@ -1,5 +1,16 @@
 # metropolis-hastings evolution simulation
 
+## simple description
+
+- 2D phenotype space with a single fixed evolution condition and 50 random
+  non-evolution conditions.
+    - small covariance making some peaks not reachable.
+    - small inverse temperature making evolution less directed.
+
+- 2D latent space with 256 centroids determined by k-medoids.
+
+- 85%/15% training/validation split.
+
 ## simulation setup
 
 - phenotype space dimensionality: 2

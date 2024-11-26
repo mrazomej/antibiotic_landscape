@@ -2,13 +2,13 @@
 
 ## simple description
 
-Evolution simulation with one fixed and 49 random evolution conditions and a
-8-peak genetic density landscape in 3D phenotype space. The fitness peaks have
-relatively large covariances to promote that from any position in phenotype
-space, there are multiple fitness peaks that can be reached.
+- 3D phenotype space with one fixed and 49 random evolution conditions.
+    - large covariance making most peaks reachable.
+    - small inverse temperature making evolution less directed.
 
-The trained RHVAE has a latent space dimensionality of 3, matching that of the
-phenotype space.
+- 3D latent space with 256 centroids determined by k-medoids.
+
+- 85%/15% training/validation split.
 
 ## simulation setup
 
@@ -26,6 +26,7 @@ phenotype space.
     - peak amplitude: 5.0
     - peak covariance: 3.0
 - random evolution condition parameters:
+    - peak mean range: [-4.0, 4.0]
     - peak amplitude range: [1.0, 5.0]
     - peak covariance range: [3.0, 10.0]
     - number of peaks range: [1, 4]

@@ -2,10 +2,13 @@
 
 ## simple description
 
-Evolution simulation with one fixed and 49 random evolution conditions and a
-four-peak genetic density landscape. The fitness peaks have relatively large
-covariances to promote that from any position in phenotype space, there are
-multiple fitness peaks that can be reached.
+- 2D phenotype space with one fixed and 49 random evolution conditions.
+    - large covariance making most peaks reachable.
+    - small inverse temperature making evolution less directed.
+
+- 2D latent space with 256 centroids determined by k-medoids.
+
+- 85%/15% training/validation split.
 
 ## simulation setup
 
@@ -22,6 +25,11 @@ multiple fitness peaks that can be reached.
     - peak mean: [0.0, 0.0]
     - peak amplitude: 5.0
     - peak covariance: 3.0
+- random evolution condition parameters:
+    - peak mean range: [-4.0, 4.0]
+    - peak amplitude range: [1.0, 5.0]
+    - peak covariance range: [3.0, 10.0]
+    - number of peaks range: [1, 4]
 - genetic density peak parameters:
     - peak means:
         - [-1.5, -1.5]
