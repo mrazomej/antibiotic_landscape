@@ -218,8 +218,8 @@ logdetG = reshape(
 ## =============================================================================
 
 # Define number of columns and rows per page
-cols = 3
-rows = 3
+cols = 5
+rows = 5
 panels_per_page = cols * rows
 
 # Group data by :evo

@@ -449,7 +449,7 @@ fig
 println("Plotting latent space metric as contour...")
 
 # Define subset of data (now only fixing replicate and evolution condition)
-subset = (rep=1, evo=3)
+subset = (rep=1, evo=1)
 
 # Get unique lineages for this replicate and evolution condition
 lineages = unique(

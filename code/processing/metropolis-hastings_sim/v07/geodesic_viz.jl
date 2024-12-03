@@ -293,7 +293,7 @@ for page in 1:n_pages
                 vec(dd_lin[latent=DD.At(:latent2), replicate=1].data),
                 markersize=6,
                 linewidth=1.5,
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.tab20[j*2-1],
             )
         end
 
@@ -331,7 +331,7 @@ for page in 1:n_pages
                 eachrow(curve)...,
                 linewidth=3,
                 linestyle=(:dot, :dense),
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.tab20[j*2],
             )
         end
 
@@ -352,7 +352,7 @@ for page in 1:n_pages
                 first(vec(dd_lin[latent=DD.At(:latent2), replicate=1].data)),
                 markersize=7,
                 marker=:xcross,
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.tab20[j*2-1],
             )
 
             # Add last point
@@ -368,7 +368,7 @@ for page in 1:n_pages
                 ax,
                 last(vec(dd_lin[latent=DD.At(:latent1), replicate=1].data)),
                 last(vec(dd_lin[latent=DD.At(:latent2), replicate=1].data)),
-                color=ColorSchemes.glasbey_hv_n256[j],
+                color=ColorSchemes.tab20[j*2-1],
                 markersize=7,
                 marker=:utriangle
             )
