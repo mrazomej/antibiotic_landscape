@@ -45,7 +45,7 @@ Random.seed!(42)
 println("Defining directories...")
 
 # Define version directory
-version_dir = "$(git_root())/output/metropolis-hastings_sim/v05"
+version_dir = "$(git_root())/output/metropolis-hastings_sim/v07"
 
 # Define simulation directory
 sim_dir = "$(version_dir)/sim_evo"
@@ -437,7 +437,7 @@ colgap!(gl_fitness, -10)
 colgap!(gl_latent, -10)
 
 # Save figure
-# save("$(fig_dir)/fig04B.pdf", fig)
+save("$(fig_dir)/fig04B.pdf", fig)
 
 fig
 
