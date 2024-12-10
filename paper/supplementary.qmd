@@ -1,6 +1,9 @@
 ::: {.sitext}
 # Supplementary Materials {.unnumbered}
 
+<!-- notes on Bayesian inference -->
+{{< include _bayes_ic50.qmd >}}
+
 <!-- notes on RHVAE -->
 {{< include _rhvae.qmd >}}
 :::

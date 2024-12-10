@@ -1,0 +1,207 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Bayesian inference of $IC_{50}$ resistance values
+
+The experimental data used throughout this work was gently provided by the first
+author of the excellent paper [@iwasawa2022]. In there, the authors evolved
+*E. coli* strains on different antibiotics via an automated liquid handling
+platform. Here, we will detail our analysis of the raw data to infer the
+$IC_{50}$ values of the strains on a panel of antibiotics.
+
+### Experimental design
+
+To justify the analysis, we first need to understand the experimental design. To
+determine the antibiotic resistance on multiple antibiotics, the authors adopted
+a 96-well plate design depicted in @fig-iwasawa-design. On a 96-well plate, each
+row contained a titration of one of eight antibiotics. This format allowed
+measuring the optical density of the bacterial culture in each well as a
+function of each of the antibiotic concentrations. To evolve the strains on a
+particular antibiotic (e.g., tetracycline as in @fig-iwasawa-design), the
+authors propagated the strains every day by inoculating a fresh plate with the
+same panel of antibiotic titrations solely from the well with the highest
+tetracycline concentration in which there was still measurable growth the day
+before. In this way, the authors selected for the strains with the highest 
+antibiotic resistance while still measuring the effects of this adaptation on
+the other antibiotics.
+
+![**Iwasawa et al. experimental design.** Schematic of the experimental design
+used by Iwasawa et al. [@iwasawa2022]. On a 96-well plate, each of the eight
+rows contained a titration of one of eight antibiotics. For strains evolved in
+tetracycline (`TET`), the plate for each day $t+1$ was inoculated by propagating
+from the well with the highest tetracycline concentration in which there was
+still measurable growth on day $t$ to all 96
+wells.](./fig/supplementary/figSI_iwasawa_experiment){#fig-iwasawa-design}
+
+@fig-ic50-progression shows a typical progression of the optical density curves
+over the course of the experimental evolution. When adapted to a particular
+antibiotic, the optical density curves with their sigmoidal shape shifted to the
+right, indicating that the strains were able to grow at higher concentrations of
+the antibiotic.
+
+![**Iwasawa et al. typical experimental data.** The optical density curves of
+the bacterial culture in the evolution antibiotic over the course of the
+experiment. The curves are shifted to the right, indicating that the strains
+were able to grow at higher concentrations of the antibiotic.](./fig/supplementary/figSI_ic50_progression){#fig-ic50-progression}
+
+### Bayesian inference of $IC_{50}$ values
+
+Given the natural sigmoidal shape of the optical density curves, we can model
+the optical density $OD(x)$ of the bacterial culture as a function of the
+antibiotic concentration $x$. Following the approach of [@iwasawa2022], we model
+the optical density as a function of the antibiotic concentration $x$ as
+
+$$
+f(x) = \frac{a}
+{1+\exp \left[b\left(\log _2 x-\log _2 \mathrm{IC}_{50}\right)\right]} + c
+$${#eq-ic50-model}
+
+where $a$, $b$, and $c$ are nuisance parameters of the model, $\mathrm{IC}_{50}$
+is the parameter of interest, and $x$ is the antibiotic concentration. We can
+define a function to compute this model.
+
+Given the model presented in @eq-ic50-model, and the data, our objective is to
+infer the value of all parameters (including the nuisance parameters). By Bayes
+theorem, we write
+$$
+\pi(\mathrm{IC}_{50}, a, b, c \mid \text{data}) = 
+\frac{\pi(\text{data} \mid \mathrm{IC}_{50}, a, b, c) 
+\pi(\mathrm{IC}_{50}, a, b, c)}
+{\pi(\text{data})},
+$${#eq-bayes-ic50}
+
+where $\text{data}$ consists of the pairs of antibiotic concentration and
+optical density. Let's begin by defining the likelihood function. For
+simplicity, we assume each datum is independent and identically distributed
+(i.i.d.) and write
+
+$$
+\pi(\text{data} \mid \mathrm{IC}_{50}, a, b, c) = 
+\prod_{i=1}^n \pi(d_i \mid \mathrm{IC}_{50}, a, b, c),
+$${#eq-bayes-ic50-likelihood}
+
+where $d_i = (x_i, y_i)$ is the $i$-th pair of antibiotic concentration and
+optical density, respectively, and $n$ is the total number of data points. We
+assume that our experimental measurements can be expressed as
+
+$$
+y_i = f(x_i, \mathrm{IC}_{50}, a, b, c) + \epsilon_i,
+$${#eq-bayes-ic50-likelihood-data}
+
+where $\epsilon_i$ is the experimental error. Furthermore, we assume that the
+experimental error is normally distributed, i.e.,
+
+$$
+\epsilon_i \sim \mathcal{N}(0, \sigma^2),
+$${#eq-bayes-ic50-likelihood-error}
+
+where $\sigma^2$ is an unknown variance parameter that must be included in our
+inference. Notice that we assume the same variance parameter for all data points
+since $\sigma^2$ is not indexed by $i$.
+
+Given this likelihood function, we must update our inference on the parameters
+as
+
+$$
+\pi(\mathrm{IC}_{50}, a, b, c, \sigma^2 \mid \text{data}) = 
+\frac{\pi(\text{data} \mid \mathrm{IC}_{50}, a, b, c, \sigma^2) 
+\pi(\mathrm{IC}_{50}, a, b, c, \sigma^2)}
+{\pi(\text{data})},
+$${#eq-bayes-ic50-posterior}
+
+to include the new parameter $\sigma^2$. Our likelihood function is then of the
+form
+
+$$
+y_i \mid \mathrm{IC}_{50}, a, b, c, \sigma^2 \sim 
+\mathcal{N}(f(x_i, \mathrm{IC}_{50}, a, b, c), \sigma^2).
+$${#eq-bayes-ic50-likelihood-model}
+
+For the prior, we assume that all parameters are independent and write
+$$
+\pi(\mathrm{IC}_{50}, a, b, c, \sigma^2) = 
+\pi(\mathrm{IC}_{50}) \pi(a) \pi(b) \pi(c) \pi(\sigma^2).
+$${#eq-bayes-ic50-prior}
+
+Let's detail each prior.
+
+1. $\mathrm{IC}_{50}$: The $IC_{50}$ is a strictly positive parameter. However,
+we will fit for $\log_2(\mathrm{IC}_{50})$. Thus, we will use a normal prior
+for $\log_2(\mathrm{IC}_{50})$. This means we have
+$$
+\log_2(\mathrm{IC}_{50}) \sim 
+\mathcal{N}(
+    \mu_{\log_2(\mathrm{IC}_{50})}, \sigma_{\log_2(\mathrm{IC}_{50})}^2
+).
+$${#eq-bayes-ic50-prior-ic50}
+
+2. $a$: This nuisance parameter scales the logistic function. Again, the natural
+scale for this parameter is a strictly positive real number. Thus, we will
+use a lognormal prior for $a$. This means we have
+$$
+a \sim \text{LogNormal}(\mu_a, \sigma_a^2).
+$${#eq-bayes-ic50-prior-a}
+
+3. $b$: This parameter controls the steepness of the logistic function. Again,
+the natural scale for this parameter is a strictly positive real number. Thus,
+we will use a lognormal prior for $b$. This means we have
+$$
+b \sim \text{LogNormal}(\mu_b, \sigma_b^2).
+$${#eq-bayes-ic50-prior-b}
+
+4. $c$: This parameter controls the minimum value of the logistic function. 
+Since this is a strictly positive real number that does not necessarily scale
+with the data, we will use a half-normal prior for $c$. This means we have
+$$
+c \sim \text{Half-}\mathcal{N}(0, \sigma_c^2).
+$${#eq-bayes-ic50-prior-c}
+
+5. $\sigma^2$: This parameter controls the variance of the experimental error.
+Since this is a strictly positive real number that does not necessarily scale
+with the data, we will use a half-normal prior for $\sigma^2$. This means we
+have
+$$
+\sigma^2 \sim \text{Half-}\mathcal{N}(0, \sigma_{\sigma^2}^2).
+$${#eq-bayes-ic50-prior-sigma}
+
+#### Residual-based outlier detection
+
+To identify and remove outliers from our optical density measurements, we
+implemented a residual-based outlier detection method. First, we fit the
+logistic model (@eq-ic50-model) to the data using a deterministic least-squares
+approach. We then computed the residuals between the fitted model and the
+experimental measurements. Points with residuals exceeding a threshold of two
+standard deviations from the mean residual were classified as outliers and
+removed from subsequent analysis. This approach helped eliminate experimental
+artifacts while preserving the underlying sigmoidal relationship between
+antibiotic concentration and optical density.
+
+### MCMC sampling of the posterior
+
+With this setup, we can sample the posterior distribution using Markov Chain
+Monte Carlo (MCMC) methods. In particular, we used the `Turing.jl` package
+[@ge2018] implementation of the No-U-Turn Sampler (NUTS). All code is available
+in the GitHub repository for this work. @fig-ic50-ppc shows the posterior
+predictive checks of the posterior distribution for the $IC_{50}$ parameter.
+Briefly, the posterior predictive checks are a visual method to assess the
+fit of the model to the data. The idea is to generate samples from the
+posterior distribution and compare them to the data. If the model is a good fit,
+the samples should be able to reproduce the data.
+
+The effectiveness of the residual-based outlier detection method is demonstrated
+in @fig-ic50-ppc, where the posterior predictive checks show significantly
+tighter credible intervals after outlier removal, particularly in regions of
+high antibiotic concentration where experimental noise tends to be more
+pronounced. experimental noise tends to be more pronounced.
+
+![**Posterior predictive check.** The posterior predictive check of the
+posterior distribution for the $IC_{50}$ parameter inference. The blue line is
+the mean of the posterior distribution, the different shades of blue represent
+the 95%, 68%, and 50% credible regions. The black dots are the raw optical
+density measurements as provided by Iwasawa et al.
+[@iwasawa2022].](./fig/supplementary/figSI_ic50_ppc){#fig-ic50-ppc}
+
