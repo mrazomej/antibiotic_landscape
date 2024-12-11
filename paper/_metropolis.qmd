@@ -166,3 +166,34 @@ $${#eq-acceptance}
 This expression shows that the acceptance probability depends on the difference
 in fitness and genotype-phenotype density between the current and proposed
 phenotypes.
+
+### Effect of Inverse Temperature
+
+@fig-metropolis-inverse-temperature shows the effect of the inverse temperature
+parameter $\beta$ influences evolutionary trajectories in our
+Metropolis-Hastings framework. Through a series of panels showing both
+phenotypic trajectories (upper) and fitness dynamics (lower), we can observe how
+different $\beta$ values affect the balance between exploration and exploitation
+in phenotypic space.
+
+At low $\beta$ values (left panels), the evolutionary trajectories exhibit
+highly stochastic behavior, with populations taking meandering paths through the
+phenotypic landscape. This represents a regime where genetic drift plays a
+dominant role. As $\beta$ increases (moving right), the trajectories become
+increasingly deterministic, with populations taking more direct paths toward
+fitness peaks, while avoiding genotype-to-phenotype density valleys. This
+transition reflects a shift from drift-dominated to selection-dominated
+dynamics, where populations more strictly follow the local fitness gradient. The
+fitness trajectories in the lower panels further reinforce this pattern, showing
+more erratic fitness fluctuations at low $\beta$ and more monotonic increases at
+high $\beta$, consistent with stronger selective pressures.
+
+![**Effect of inverse temperature on adaptive dynamics**. Upper panels:
+Population trajectories on a landscape with a single fitness peak and four
+genotype-phenotype density peaks. Black dashed lines indicate fitness landscape
+contours, while white solid lines show genotype-phenotype density contours.
+Colored lines represent independent population trajectories, with initial
+positions (crosses) and final positions (triangles). Lower panels: Temporal
+evolution of population fitness. Panels from left to right show increasing
+values of inverse temperature ($\beta$), demonstrating increasingly
+deterministic adaptive trajectories.](./fig/supplementary/figSI_sim_beta_effect){#fig-metropolis-inverse-temperature}
