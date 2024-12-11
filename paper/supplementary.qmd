@@ -4,6 +4,9 @@
 <!-- notes on Bayesian inference -->
 {{< include _bayes_ic50.qmd >}}
 
+<!-- notes on Metropolis-Hastings -->
+{{< include _metropolis.qmd >}}
+
 <!-- notes on RHVAE -->
 {{< include _rhvae.qmd >}}
 :::
