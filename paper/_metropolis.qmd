@@ -7,3 +7,162 @@ csl: ieee.csl
 
 ## Metropolis-Hastings Evolutionary Dynamics
 
+In the main text, we describe a simple algorithm for evolving a population as a
+biased random walk on a phenotypic space controlled by both a fitness function
+and a genotype-phenotype density function. Here, we provide a more detailed
+description of the algorithm and its implementation. 
+
+### Landscape Description
+
+We assume that phenotypes driving adaptation can be described by real-valued
+numbers. Let $\underline{x}(t) = (x_1(t), x_2(t), \cdots, x_N(t))$ be an $N$
+dimensional vector describing the phenotype of a population at time $t$. The
+fitness for a given environment $E$ is a scalar function $F_E(\underline{x})$
+such that
+
+$$
+F_E: \mathbb{R}^N \to \mathbb{R},
+$${#eq-fitnes}
+
+i.e, the coordinates in phenotype space map to a fitness value. Throughout this
+work, we consider a series of Gaussian fitness peaks, i.e.,
+
+$$
+F_E(\underline{x}) = 
+\sum_{p=1}^P A_p 
+\exp\left(
+    -\frac{1}{2}
+    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-fitness-peaks}
+
+where $P$ is the number of peaks, $A_p$ is the amplitude of the $p$-th peak,
+$\underline{\hat{x}}^{(p)}$ is the $N$-dimensional vector of optimal phenotypes
+for the $p$-th peak, and $\Sigma_p$ is the $N \times N$ covariance matrix for
+the $p$-th peak. This formulation allows for multiple peaks in the fitness
+landscape, each potentially having different heights, widths, and covariance
+structures between dimensions. The covariance matrix $\Sigma_p$ captures
+potential interactions between different phenotypic dimensions, allowing for
+more complex and realistic fitness landscapes.
+
+In the same vein, we define a genotype-phenotype density function
+$GP(\underline{x})$ as a scalar function that maps a phenotype to a mutational
+effect, i.e.,
+
+$$
+GP: \mathbb{R}^N \to \mathbb{R},
+$${#eq-genotype-phenotype-density}
+
+where $GP(\underline{x})$ is related to the probability of a genotype mapping to
+a phenotype $\underline{x}$. As a particular density function we will consider a
+set of negative Gaussian peaks that will serve as "mutational barriers" that
+limit the range of phenotypes that can be reached. The deeper the peak, the less
+probable it is that a genotype will map to a phenotype within the peak. This
+idea captured by the following mutational landscape
+
+$$
+GP(\underline{x}) = 
+\sum_{p=1}^P -B_p 
+\exp\left(
+    -\frac{1}{2}
+    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-genotype-phenotype-density-peaks}
+
+where $B_p$ is the depth of the $p$-th peak, and $\underline{\hat{x}}^{(p)}$ is
+the $N$-dimensional vector of optimal phenotypes for the $p$-th peak.
+
+### Metropolis-Hastings Algorithm
+
+The Metropolis-Hastings algorithm is a Markov Chain Monte Carlo (MCMC) method
+used to sample from a target probability distribution $\pi(\underline{x})$. In
+our evolutionary context, $\pi(\underline{x})$ can be thought of as the
+steady-state distribution of phenotypes under the combined influence of
+selection and mutation. We can define this distribution as
+
+$$
+\pi(\underline{x}) \propto \exp\left(
+    -\beta U(\underline{x})
+\right),
+$${#eq-metropolis-hastings-target-distribution}
+
+where $U(\underline{x})$ is the potential function defined as
+
+$$
+U(\underline{x}) = \ln F_E(\underline{x}) + \ln GP(\underline{x}).
+$${#eq-metropolis-hastings-potential-function}
+
+This functional form of the potential function is motivated by the desired
+property of the potential function being a sum of the fitness and
+genotype-phenotype density functions. $\beta$ in
+@eq-metropolis-hastings-target-distribution is an inverse temperature parameter
+(from statistical mechanics) that controls the level of stochasticity in the
+system. A higher $\beta$ means the system is more likely to move towards higher
+fitness and genotype-phenotype density. In a sense, $\beta$ can be related to
+the effective population size, controlling the directness of the evolutionary
+dynamics.
+
+At each step, we propose a new phenotype $\underline{x}{\prime}$ from a proposal
+distribution $q(\underline{x}{\prime} | \underline{x})$. For simplicity, we can
+use a symmetric proposal distribution, such as a Gaussian centered at the
+current phenotype. Furthere, we constrain the proposal distribution to be
+symmetric, i.e.,
+
+$$
+q(\underline{x}{\prime} | \underline{x}) = 
+q(\underline{x} | \underline{x}{\prime}).
+$${#eq-metropolis-hastings-proposal-distribution-symmetry}
+
+This symmetry simplifies the acceptance probability later on.
+
+The acceptance probability  $P_{\text{accept}}$  for moving from
+$\underline{x}$  to  $\underline{x}{\prime}$  is given by
+
+$$
+P_{\text{accept}} = 
+\min\left(1, 
+    \frac{\pi(\underline{x}{\prime}) q(\underline{x} | \underline{x}{\prime})}
+    {\pi(\underline{x}) q(\underline{x}{\prime} | \underline{x})}
+\right).
+$${#eq-metropolis-hastings-acceptance-probability}
+
+Given the symmetry of the proposal distribution,  $q(\underline{x}{\prime} |
+\underline{x}) = q(\underline{x} | \underline{x}{\prime})$ , so the acceptance
+probability simplifies to
+
+$$
+P_{\text{accept}} = \min\left(
+    1, 
+    \frac{\pi(\underline{x}{\prime})}{\pi(\underline{x})}
+    \right).
+$${#eq-metropolis-hastings-acceptance-probability-simplified}
+
+Substituting @eq-metropolis-hastings-target-distribution and
+@eq-metropolis-hastings-potential-function into
+@eq-metropolis-hastings-acceptance-probability-simplified, we get:
+
+$$
+P_{\text{accept}} = \min\left(
+    1, 
+    e^{\beta [\ln F_E(\underline{x}{\prime}) + \ln M(\underline{x}{\prime})] - 
+    \beta [\ln F_E(\underline{x}) + \ln M(\underline{x})]}
+    \right).
+$${#eq-metropolis-hastings-acceptance-probability-simplified-2}
+
+This can be rewritten as
+
+$$
+P_{\text{accept}} = \min\left(
+    1,
+    \frac{F_E(\underline{x}{\prime})^β M(\underline{x}{\prime})^β}
+    {F_E(\underline{x})^β M(\underline{x})^β}
+\right),
+$${#eq-acceptance}
+
+This expression shows that the acceptance probability depends on the difference
+in fitness and genotype-phenotype density between the current and proposed
+phenotypes.
