@@ -1,0 +1,177 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Neural Network Architecture
+
+### RHVAE Overview
+
+The neural network architecture implemented in this study is a Riemannian
+Hamiltonian Variational Autoencoder (RHVAE) [@chadebec2020]. The network was
+implemented using the `Flux.jl` framework [@innes2018] via the
+`AutoEncoderToolkit.jl` package [@razo-mejia2024], and consists of three main
+components: an encoder, a decoder, and a metric chain network for the Riemannian
+metric computations.
+
+### Model Parameters
+
+| Parameter           | Value | Description                                        |
+| ------------------- | ----- | -------------------------------------------------- |
+| Latent Dimensions   | 2     | Dimensionality of the latent space                 |
+| Hidden Layer Size   | 128   | Number of neurons in hidden layers                 |
+| Temperature (T)     | 0.8   | Temperature parameter for RHVAE                    |
+| Regularization (λ)  | 0.01  | Regularization parameter                           |
+| Number of Centroids | 256   | Number of centroids for the manifold approximation |
+
+### Encoder Architecture
+
+The encoder implements a joint Gaussian log-encoder with the following
+structure:
+
+| Layer       | Output Dimensions | Activation Function |
+| ----------- | ----------------- | ------------------- |
+| Input       | `n_env`$^*$       | -                   |
+| Dense 1     | 128               | Identity            |
+| Dense 2     | 128               | LeakyReLU           |
+| Dense 3     | 128               | LeakyReLU           |
+| Dense 4     | 128               | LeakyReLU           |
+| µ output    | 2                 | Identity            |
+| logσ output | 2                 | Identity            |
+
+$^*$ `n_env` is the number of environments on which fitness is determined to
+train the model.
+
+### Decoder Architecture
+
+The decoder implements a simple Gaussian decoder with the following structure:
+
+| Layer   | Output Dimensions | Activation Function |
+| ------- | ----------------- | ------------------- |
+| Input   | 2                 | -                   |
+| Dense 1 | 128               | Identity            |
+| Dense 2 | 128               | LeakyReLU           |
+| Dense 3 | 128               | LeakyReLU           |
+| Dense 4 | 128               | LeakyReLU           |
+| Output  | `n_env`           | Identity            |
+
+### Metric Chain Architecture
+
+The metric chain computes the Riemannian metric tensor with the following
+structure:
+
+| Layer                   | Output Dimensions | Activation Function |
+| ----------------------- | ----------------- | ------------------- |
+| Input                   | `n_env`           | -                   |
+| Dense 1                 | 128               | Identity            |
+| Dense 2                 | 128               | LeakyReLU           |
+| Dense 3                 | 128               | LeakyReLU           |
+| Dense 4                 | 128               | LeakyReLU           |
+| Diagonal Output         | 2                 | Identity            |
+| Lower Triangular Output | 1                 | Identity            |
+
+### Data Preprocessing
+
+The input data underwent the following preprocessing steps:
+
+1. Logarithmic transformation of fitness values.
+
+2. Z-score standardization (mean = 0, std = 1) per environment.
+
+3. K-medoids clustering to select centroids for the manifold approximation.
+
+### Implementation Details
+
+The model was implemented using:
+
+- `Julia` programming language.
+
+- `Flux.jl` for neural network architecture.
+
+- `AutoEncoderToolkit.jl` for RHVAE-specific components.
+
+- Random seed set to 42 for reproducibility.
+
+The complete model state and architecture were saved in `JLD2` format for
+reproducibility and future use.
+
+All of the code used to implement the model is available in the GitHub
+repository for this project.
+
+## Neural Geodesic Architecture
+
+The neural network architecture implemented in this study is a Neural Geodesic
+model designed to find geodesics on the latent space manifold of a Riemannian
+Hamiltonian Variational Autoencoder (RHVAE) [@chen2018a]. The network is
+implemented using the Flux.jl framework and learns to parameterize geodesic
+curves between points in the latent space.
+
+### Model Parameters
+
+| Parameter         | Value                     | Description                          |
+| ----------------- | ------------------------- | ------------------------------------ |
+| Hidden Layer Size | 32                        | Number of neurons in hidden layers   |
+| Input Dimension   | 1                         | Time parameter t ∈ [0,1]             |
+| Output Dimension  | 2                         | Dimensionality of the latent space   |
+| Endpoints         | z_init=[0,0], z_end=[1,1] | Start and end points of the geodesic |
+
+### Neural Geodesic Architecture
+
+The neural geodesic implements a feed-forward network that maps from the time
+domain to the latent space with the following structure:
+
+| Layer   | Output Dimensions | Activation Function |
+| ------- | ----------------- | ------------------- |
+| Input   | 1                 | -                   |
+| Dense 1 | 32                | Identity            |
+| Dense 2 | 32                | TanH                |
+| Dense 3 | 32                | TanH                |
+| Dense 4 | 32                | TanH                |
+| Output  | 2                 | Identity            |
+
+### Architectural Details
+
+1. **Input Processing**
+   - Takes a single time parameter $t \in [0,1]$.
+   - Maps to the latent space dimension (2D in this implementation).
+   - Designed to learn smooth geodesic curves.
+
+2. **Network Structure**
+   - Follows a deep architecture with 4 hidden layers.
+   - Uses `tanh` activation for smooth curve generation.
+   - Identity activation at input and output layers for unrestricted range.
+
+3. **Output Constraints**
+   - Network outputs must satisfy boundary conditions:
+     - $\gamma(0) = \underline{z}_{\text{init}}$.
+     - $\gamma(1) = \underline{z}_{\text{end}}$.
+   - Generated curve represents path in latent space.
+
+### Implementation Details
+
+The model is implemented with:
+
+- `Julia` programming language.
+
+- `Flux.jl` for neural network architecture.
+
+- `AutoEncode.diffgeo` package for geodesic-specific components.
+
+- Random seed set to 42 for reproducibility.
+
+The model is designed to work in conjunction with a pre-trained RHVAE model,
+using its latent space structure to inform the geodesic computation. The
+complete model state and architecture are saved in `JLD2` format for
+reproducibility and future use.
+
+### Integration with RHVAE
+
+This neural geodesic model complements the RHVAE architecture by:
+
+1. Using the same latent space dimensionality.
+
+2. Learning geodesics that respect the Riemannian metric of the RHVAE
+
+3. Providing a parameterized way to interpolate between latent points

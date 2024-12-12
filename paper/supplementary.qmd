@@ -9,4 +9,7 @@
 
 <!-- notes on RHVAE -->
 {{< include _rhvae.qmd >}}
+
+<!-- notes on Neural Geodesic -->
+{{< include _architecture.qmd >}}
 :::
