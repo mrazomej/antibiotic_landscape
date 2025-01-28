@@ -26,7 +26,6 @@ Random.seed!(42)
 
 # Load Plotting packages
 using WGLMakie
-using Bonito
 import ColorSchemes
 import Colors
 # Activate backend
@@ -58,7 +57,7 @@ model_dir = "$(git_root())/output$(out_prefix)/model_state"
 geodesic_dir = "$(git_root())/output$(out_prefix)/geodesic_state/"
 
 # Define figure directory
-fig_dir = "$(git_root())/fig$(out_prefix)/geodesic"
+fig_dir = "$(git_root())/fig$(out_prefix)"
 
 # Create figure directory if it does not exist
 if !isdir(fig_dir)
@@ -170,18 +169,18 @@ n_points = 100
 
 # Extract latent space ranges
 latent1_range = range(
-    minimum(df_latent.latent1) - 1,
-    maximum(df_latent.latent1) + 1,
+    minimum(df_latent.latent1) - 1.5,
+    maximum(df_latent.latent1) + 1.5,
     length=n_points
 )
 latent2_range = range(
-    minimum(df_latent.latent2) - 1,
-    maximum(df_latent.latent2) + 1,
+    minimum(df_latent.latent2) - 1.5,
+    maximum(df_latent.latent2) + 1.5,
     length=n_points
 )
 latent3_range = range(
-    minimum(df_latent.latent3) - 1,
-    maximum(df_latent.latent3) + 1,
+    minimum(df_latent.latent3) - 1.5,
+    maximum(df_latent.latent3) + 1.5,
     length=n_points
 )
 
@@ -205,91 +204,95 @@ logdetG = map(
 
 ## =============================================================================
 
-# Extract all unique pairs
-unique_pairs = unique(df_meta[:, [:env, :strain_num]])
+# Define (:env, :strain_num) pairs to plot
+pairs = [
+    ("KM", 16), ("NFLX", 33), ("TET", 8), ("KM", 28), ("NFLX", 35), ("TET", 3)
+]
 
-# Loop over pairs
-for p in eachrow(Matrix(unique_pairs))
-    println("Plotting geodesic for $(p[1]) $(p[2])...")
-    # Extract latent coordinates
-    df_latent_subset = df_latent[
-        (df_latent.env.==p[1]).&(df_latent.strain_num.==p[2]),
-        :
-    ]
+# Select example pair
+p = pairs[1]
 
-    # Load geodesic state
-    geo_state = JLD2.load(
-        first(
-            df_meta[
-                (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]),
-                :geodesic_state]
-        )
+p = ("TET", 3)
+
+# Extract latent coordinates
+df_latent_subset = df_latent[
+    (df_latent.env.==p[1]).&(df_latent.strain_num.==p[2]),
+    :
+]
+
+# Load geodesic state
+geo_state = JLD2.load(
+    first(
+        df_meta[
+            (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]),
+            :geodesic_state]
     )
+)
 
-    # Define NeuralGeodesic model
-    nng = NG.NeuralGeodesic(
-        nng_template,
-        geo_state["latent_init"],
-        geo_state["latent_end"],
-    )
-    # Update model state
-    Flux.loadmodel!(nng, geo_state["model_state"])
-    # Generate curve
-    curve = nng(t_array)
+# Define NeuralGeodesic model
+nng = NG.NeuralGeodesic(
+    nng_template,
+    geo_state["latent_init"],
+    geo_state["latent_end"],
+)
+# Update model state
+Flux.loadmodel!(nng, geo_state["model_state"])
+# Generate curve
+curve = nng(t_array)
 
 
-    # Initialize figure
-    fig = Figure(size=(500, 500))
+# Initialize figure
+fig = Figure(size=(500, 500))
 
-    # Add axis
-    ax = Axis3(
-        fig[1, 1],
-        xlabel="latent dimension 1",
-        ylabel="latent dimension 2",
-        zlabel="latent dimension 3",
-        aspect=(1, 1, 1),
-    )
+# Add axis
+ax = Axis3(
+    fig[1, 1],
+    xlabel="latent dimension 1",
+    ylabel="latent dimension 2",
+    zlabel="latent dimension 3",
+    aspect=(1, 1, 1),
+)
 
-    # Plot contour
-    contour!(
-        ax,
-        collect(latent_ranges[1]),
-        collect(latent_ranges[2]),
-        collect(latent_ranges[3]),
-        logdetG,
-        alpha=0.05,
-        levels=7,
-        colormap=ColorSchemes.tokyo,
-    )
+# Plot contour
+contour!(
+    ax,
+    collect(latent_ranges[1]),
+    collect(latent_ranges[2]),
+    collect(latent_ranges[3]),
+    logdetG,
+    alpha=0.05,
+    levels=7,
+    colormap=ColorSchemes.tokyo,
+)
 
-    # Plot geodesic line
-    lines!(
-        ax,
-        eachrow(curve)...,
-        linewidth=2,
-        color=:black
-    )
+# Plot data points
+# scatter!(
+#     ax,
+#     df_latent.latent1,
+#     df_latent.latent2,
+#     df_latent.latent3,
+#     markersize=5,
+#     color=(:white, 0.1),
+# )
 
-    # Plot data trajectory
-    scatterlines!(
-        ax,
-        df_latent_subset.latent1,
-        df_latent_subset.latent2,
-        df_latent_subset.latent3,
-        markersize=8,
-        linewidth=2,
-        color=:red,
-    )
+# Plot geodesic line
+lines!(
+    ax,
+    eachrow(curve)...,
+    linewidth=2,
+    color=:black
+)
 
-    # Save figure as HTML
-    open("$(fig_dir)/geodesic_$(p[1])_$(p[2]).html", "w") do io
-        println(io, "<html><head></head><body>")
-        app = App() do
-            Card(fig; height="fit-content", width="fit-content")
-        end
-        show(io, MIME"text/html"(), app)
-        println(io, "</body></html>")
-    end
+# Plot data trajectory
+scatterlines!(
+    ax,
+    df_latent_subset.latent1,
+    df_latent_subset.latent2,
+    df_latent_subset.latent3,
+    markersize=8,
+    linewidth=2,
+    color=:red,
+)
 
-end # for p in unique_pairs
+fig
 

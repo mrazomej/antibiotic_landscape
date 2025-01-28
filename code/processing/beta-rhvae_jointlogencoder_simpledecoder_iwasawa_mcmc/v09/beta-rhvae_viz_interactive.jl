@@ -27,7 +27,6 @@ Random.seed!(42)
 using WGLMakie
 import ColorSchemes
 import Colors
-using Bonito
 # Activate backend
 WGLMakie.activate!()
 # Set plotting style
@@ -161,8 +160,7 @@ lines!(
 # Add legend
 axislegend(ax, position=:rt)
 
-# Save figure
-save("$(fig_dir)/rhvae_training_loss.png", fig)
+fig
 
 ## =============================================================================
 
@@ -236,15 +234,7 @@ scatter!(
     markersize=5,
 )
 
-# Create HTML file with interactive plot
-open("$(fig_dir)/latent_space_3d.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+fig
 
 ## =============================================================================
 
@@ -282,15 +272,7 @@ end # for
 # Add legend
 Legend(fig[1, 2], ax)
 
-# Create HTML file with interactive plot
-open("$(fig_dir)/latent_space_3d_colored_by_env.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+fig
 
 ## =============================================================================
 
@@ -328,15 +310,7 @@ end # for
 # Add legend
 Legend(fig[1, 2], ax)
 
-# Create HTML file with interactive plot
-open("$(fig_dir)/latent_space_3d_colored_by_strain.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+fig
 
 ## =============================================================================
 
@@ -377,15 +351,7 @@ end # for
 # Add legend
 Legend(fig[1, 2], ax, "day", nbanks=3)
 
-# Create HTML file with interactive plot
-open("$(fig_dir)/latent_space_3d_colored_by_day.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+fig
 
 ## =============================================================================
 
@@ -396,18 +362,18 @@ n_points = 100
 
 # Extract latent space ranges
 latent1_range = range(
-    minimum(df_latent.latent1) - 1,
-    maximum(df_latent.latent1) + 1,
+    minimum(df_latent.latent1) - 1.5,
+    maximum(df_latent.latent1) + 1.5,
     length=n_points
 )
 latent2_range = range(
-    minimum(df_latent.latent2) - 1,
-    maximum(df_latent.latent2) + 1,
+    minimum(df_latent.latent2) - 1.5,
+    maximum(df_latent.latent2) + 1.5,
     length=n_points
 )
 latent3_range = range(
-    minimum(df_latent.latent3) - 1,
-    maximum(df_latent.latent3) + 1,
+    minimum(df_latent.latent3) - 1.5,
+    maximum(df_latent.latent3) + 1.5,
     length=n_points
 )
 
@@ -458,15 +424,9 @@ contour!(
 )
 
 # Save figure
-# Create HTML file with interactive plot
-open("$(fig_dir)/rhvae_latent_space_metric_contour.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+save("$(fig_dir)/rhvae_latent_space_metric_contour.png", fig)
+
+fig
 
 ## =============================================================================
 
@@ -503,73 +463,10 @@ scatter!(
     df_latent.latent2,
     df_latent.latent3,
     markersize=5,
-    color=(:white, 1),
+    color=:white
 )
 
-# Create HTML file with interactive plot
-open("$(fig_dir)/rhvae_latent_space_metric_contour_with_data.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+# Save figure
+save("$(fig_dir)/rhvae_latent_space_metric_contour_with_data.png", fig)
 
-## =============================================================================
-
-println("Plotting latent space metric as contour colored by strain...")
-
-# Initialize figure
-fig = Figure(size=(500, 400))
-
-# Add axis
-ax = Axis3(
-    fig[1, 1],
-    xlabel="latent dimension 1",
-    ylabel="latent dimension 2",
-    zlabel="latent dimension 3",
-    aspect=(1, 1, 1),
-)
-
-# Plot contour
-contour!(
-    ax,
-    collect(latent_ranges[1]),
-    collect(latent_ranges[2]),
-    collect(latent_ranges[3]),
-    logdetG,
-    alpha=0.05,
-    levels=7,
-    colormap=ColorSchemes.tokyo,
-)
-
-# Group dataframe by :env
-df_group = DF.groupby(df_latent, :strain)
-
-# Loop over groups
-for (i, data) in enumerate(df_group)
-    # Plot latent space
-    scatter!(
-        ax,
-        data.latent1,
-        data.latent2,
-        data.latent3,
-        label=first(data.strain),
-        markersize=5,
-        color=ColorSchemes.Dark2_7[i],
-    )
-end # for 
-
-# Add legend
-Legend(fig[1, 2], ax)
-
-# Create HTML file with interactive plot
-open("$(fig_dir)/rhvae_latent_space_metric_contour_colored_by_strain.html", "w") do io
-    println(io, "<html><head></head><body>")
-    app = App() do
-        Card(fig; height="fit-content", width="fit-content")
-    end
-    show(io, MIME"text/html"(), app)
-    println(io, "</body></html>")
-end
+fig
