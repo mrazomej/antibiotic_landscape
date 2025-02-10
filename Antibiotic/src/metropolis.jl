@@ -80,7 +80,7 @@ function GaussianPeaks(
         for i in 1:length(amplitudes)
     ]
     # Return GaussianPeaks object
-    return GaussianPeaks(peaks)
+    return GaussianPeaks(SS.StructArray(peaks))
 end
 
 ## -----------------------------------------------------------------------------
@@ -532,3 +532,76 @@ function evo_metropolis_hastings(
     return x
 end # function
 
+@doc raw"""
+    evo_metropolis_hastings(x0, fitness_peaks, gen_peaks, β, µ, n_steps, bounds)
+
+Similar to the unbounded version, but with bounds on the phenotype space.
+
+# Additional Arguments
+- `bounds::Vector{Tuple{Float64, Float64}}`: Vector of (min, max) tuples
+  specifying the allowed range for each dimension.
+"""
+function evo_metropolis_hastings(
+    x0::AbstractVector,
+    fitness_peaks::AbstractPeak,
+    gen_peaks::AbstractPeak,
+    β::Real,
+    µ::Real,
+    n_steps::Int,
+    bounds::Vector{Tuple{Float64,Float64}}
+)
+    # Check that number of bounds matches dimensions
+    if length(bounds) != length(x0)
+        throw(ArgumentError("Number of bounds ($(length(bounds))) must match number of dimensions ($(length(x0)))"))
+    end
+
+    # Check that initial point is within bounds
+    if !all(b[1] <= x <= b[2] for (x, b) in zip(x0, bounds))
+        throw(ArgumentError("Initial point must be within bounds"))
+    end
+
+    # Initialize array to hold phenotypes
+    x = Matrix{Float64}(undef, length(x0), n_steps + 1)
+    # Set initial phenotype
+    x[:, 1] = x0
+
+    # Compute fitness and mutational landscape at initial phenotype
+    fitness_val = fitness(x0, fitness_peaks)
+    gen_val = genetic_density(x0, gen_peaks)
+
+    # Loop over steps
+    for t in 1:n_steps
+        # Propose new phenotype
+        x_new = x[:, t] + µ * randn(length(x0))
+
+        # Check if proposal is within bounds
+        within_bounds = all(b[1] <= x <= b[2] for (x, b) in zip(x_new, bounds))
+
+        if within_bounds
+            # Calculate fitness and mutational landscape
+            fitness_val_new = fitness(x_new, fitness_peaks)
+            gen_val_new = genetic_density(x_new, gen_peaks)
+
+            # Compute acceptance probability
+            P_accept = min(
+                1, (fitness_val_new * gen_val_new / (fitness_val * gen_val))^β
+            )
+
+            # Accept or reject proposal
+            if rand() < P_accept
+                # Accept proposal
+                x[:, t+1] = x_new
+                # Update fitness and mutational landscape
+                fitness_val = fitness_val_new
+                gen_val = gen_val_new
+            else
+                # Reject proposal
+                x[:, t+1] = x[:, t]
+            end
+        else
+            # Automatically reject out-of-bounds proposals
+            x[:, t+1] = x[:, t]
+        end
+    end
+    return x
+end
