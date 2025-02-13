@@ -1,0 +1,66 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Evolutionary Dynamics on Phenotype Space
+
+Having defined a simple phenotype-fitness model, we now instantiate a set of
+rules for evolutionary dynamics on this phenotypic space. We implement a model
+that captures two key features of evolutionary processes: the tendency of
+populations to move towards higher fitness and the constraints imposed by the
+accessibility of different phenotypes. We frame evolution as a biased random
+walk where each step is influenced by both the fitness landscape
+$F(\underline{p})$ and the genotype-phenotype density $GP(\underline{p})$.
+
+At each time step, the population can transition from its current phenotype
+$\underline{p}$ to a new phenotype $\underline{p}'$. The proposed phenotype
+$\underline{p}'$ is drawn from a proposal distribution $q(\underline{p}' \mid
+\underline{p})$. Whether this transition occurs depends on both the relative
+fitness of the new phenotype and how easily it can be reached through mutations.
+Specifically, the probability of accepting a transition is given by
+
+$$
+P_{\text{accept}} = \min\left(
+    1,
+    \frac{F(\underline{p}')^\beta GP(\underline{p}')^\beta}
+    {F(\underline{p})^\beta GP(\underline{p})^\beta}
+\right),
+$${#eq-acceptance-probability}
+
+where $\beta$ is a parameter that controls the balance between selection and
+drift. This parameter can be interpreted as the strength of selection – higher
+values of $\beta$ lead to more deterministic trajectories that closely follow
+fitness gradients, while lower values allow for more stochastic exploration of
+the phenotype space. Detailed mathematical derivations and analysis of this
+algorithm can be found in the Supplementary Materials (see @sec-metropolis).
+
+This formulation captures several key aspects of evolution. First, transitions
+to phenotypes with higher fitness are always accepted, reflecting the power of
+natural selection. Second, even transitions to lower fitness phenotypes can
+occur with some probability, capturing the role of genetic drift. Finally, the
+$GP(\underline{p})$ term ensures that transitions are influenced by the
+accessibility of phenotypes – even a high-fitness phenotype is unlikely to be
+reached if it requires extremely rare genetic variants. @fig-02(A, top) shows
+some example trajectories of multiple lineages evolving over time on a simple
+single-peaked fitness landscape. @fig-02(A, bottom) shows the fitness trajectory
+of these evolving lineages over time. When we examine these same evolutionary
+trajectories under different environmental conditions (@fig-02(B)), we observe
+that, as expected, while the path through phenotype space remains fixed – since
+it represents the adaptive walk on the selection environment – the fitness
+values we measure vary because each environment imposes its own unique fitness
+landscape.
+
+![**Evolutionary dynamics on phenotype space**. (A) Top: Metropolis-like
+evolutionary dynamics on phenotype space. Each line represents the trajectory of
+lineage as it evolves over time with crosses  and triangles denoting the initial
+phenotypic coordinate of a few selected lineages. Note that trajectories tend to
+move towards higher fitness values, avoiding low genotype-to-phenotype density
+regions. Bottom: Fitness over time of the same trajectories shown above. (B) The
+same trajectories shown in (A) overlaid on different fitness maps determined by
+different environments. Although the phenotypic coordinates of the genotypes
+remain the same (top panels) the resulting fitness readouts change as the
+topology of the environments changes (bottom
+panels).](./fig/main/fig02_v04){#fig-02}
