@@ -30,6 +30,12 @@ structure of the phenotypic space in which adaptation unfolds.
 
 # Results
 
+<!-- Model framework -->
+{{< include _model_framework.qmd >}}
+
+<!-- Evolutionary dynamics -->
+{{< include _evolutionary_dynamics.qmd >}}
+
 <!-- Experimental results -->
 <!-- {{< include _experiment.qmd >}} -->
 
