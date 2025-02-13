@@ -5,7 +5,7 @@ bibliography: references.bib
 csl: ieee.csl
 ---
 
-## Metropolis-Hastings Evolutionary Dynamics
+## Metropolis-Hastings Evolutionary Dynamics {#sec-metropolis}
 
 In the main text, we describe a simple algorithm for evolving a population as a
 biased random walk on a phenotypic space controlled by both a fitness function
