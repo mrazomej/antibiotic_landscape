@@ -16,11 +16,12 @@ walk where each step is influenced by both the fitness landscape
 $F(\underline{p})$ and the genotype-phenotype density $GP(\underline{p})$.
 
 At each time step, the population can transition from its current phenotype
-$\underline{p}$ to a new phenotype $\underline{p}'$. The proposed phenotype
-$\underline{p}'$ is drawn from a proposal distribution $q(\underline{p}' \mid
-\underline{p})$. Whether this transition occurs depends on both the relative
-fitness of the new phenotype and how easily it can be reached through mutations.
-Specifically, the probability of accepting a transition is given by
+$\underline{p}$ to a new phenotype $\underline{p}'$, where the proposed
+phenotype $\underline{p}'$ is drawn from a proposal distribution
+$q(\underline{p}' \mid \underline{p})$. Whether this transition occurs depends
+on both the relative fitness of the new phenotype and how easily it can be
+reached through mutations. Specifically, the probability of accepting a
+transition is given by
 
 $$
 P_{\text{accept}} = \min\left(
@@ -31,7 +32,7 @@ P_{\text{accept}} = \min\left(
 $${#eq-acceptance-probability}
 
 where $\beta$ is a parameter that controls the balance between selection and
-drift. This parameter can be interpreted as the strength of selection – higher
+drift. This parameter can be interpreted as the strength of selection---higher
 values of $\beta$ lead to more deterministic trajectories that closely follow
 fitness gradients, while lower values allow for more stochastic exploration of
 the phenotype space. Detailed mathematical derivations and analysis of this
@@ -42,16 +43,23 @@ to phenotypes with higher fitness are always accepted, reflecting the power of
 natural selection. Second, even transitions to lower fitness phenotypes can
 occur with some probability, capturing the role of genetic drift. Finally, the
 $GP(\underline{p})$ term ensures that transitions are influenced by the
-accessibility of phenotypes – even a high-fitness phenotype is unlikely to be
+accessibility of phenotype---even a high-fitness phenotype is unlikely to be
 reached if it requires extremely rare genetic variants. @fig-02(A, top) shows
 some example trajectories of multiple lineages evolving over time on a simple
 single-peaked fitness landscape. @fig-02(A, bottom) shows the fitness trajectory
 of these evolving lineages over time. When we examine these same evolutionary
 trajectories under different environmental conditions (@fig-02(B)), we observe
-that, as expected, while the path through phenotype space remains fixed – since
-it represents the adaptive walk on the selection environment – the fitness
-values we measure vary because each environment imposes its own unique fitness
-landscape.
+that, as expected, while the path through phenotype space remains fixed---since
+it represents the adaptive walk on the selection environment in @fig-02(A)---the
+fitness values we measure vary because each environment imposes its own unique
+fitness landscape.
+
+In what follows, we use synthetic data generated from this model, where ten
+lineages (initial phenotype coordinates) in two replicates (different
+instantiations of the random dynamics) evolve for 300 time steps on 50 different
+fitness landscapes (different topologies). For each of these conditions, the
+fitness in all other environments is also determined, giving a high-dimensional
+dataset that we can use to validate the proposed data-driven method.
 
 ![**Evolutionary dynamics on phenotype space**. (A) Top: Metropolis-like
 evolutionary dynamics on phenotype space. Each line represents the trajectory of
