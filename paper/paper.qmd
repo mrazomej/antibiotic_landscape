@@ -36,6 +36,9 @@ structure of the phenotypic space in which adaptation unfolds.
 <!-- Evolutionary dynamics -->
 {{< include _evolutionary_dynamics.qmd >}}
 
+<!-- Latent space geometry -->
+{{< include _latent_space_geometry.qmd >}}
+
 <!-- Experimental results -->
 <!-- {{< include _experiment.qmd >}} -->
 
