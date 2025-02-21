@@ -47,6 +47,8 @@ cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
 Bonito = "3.2.4"
+ColorSchemes = "3.28.0"
+Colors = "0.13.0"
 ConcreteStructs = "0.2.3"
 DimensionalData = "0.28.3"
 FileIO = "1.16.4"
