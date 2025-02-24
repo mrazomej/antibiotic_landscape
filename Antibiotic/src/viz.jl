@@ -346,9 +346,8 @@ function colors()
 
     # Loop through elements
     for (key, item) in col
-        # Convert element to dictionary
-        setindex!(colors, Colors.color(item), key)
-    end # for
+        setindex!(colors, Colors.parse(Colors.Colorant, item), key)
+    end
 
     return colors
 end # function
