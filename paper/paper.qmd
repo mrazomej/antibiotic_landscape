@@ -26,18 +26,18 @@ structure of the phenotypic space in which adaptation unfolds.
 
 # Introduction
 
-{{< include _intro.qmd >}}
+{{< include _00intro.qmd >}}
 
 # Results
 
 <!-- Model framework -->
-{{< include _model_framework.qmd >}}
+{{< include _01model_framework.qmd >}}
 
 <!-- Evolutionary dynamics -->
-{{< include _evolutionary_dynamics.qmd >}}
+{{< include _02evolutionary_dynamics.qmd >}}
 
 <!-- Latent space geometry -->
-{{< include _latent_space_geometry.qmd >}}
+{{< include _03latent_space_geometry.qmd >}}
 
 <!-- Experimental results -->
 <!-- {{< include _experiment.qmd >}} -->

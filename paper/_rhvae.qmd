@@ -106,20 +106,26 @@ q_\phi^*(\underline{z} \mid \underline{x}) =
 $${#eq-variational-approx}
 
 After some algebraic manipulation, we can show that this objective is equivalent
-to maximizing the so-called evidence lower bound (ELBO) of the marginal
-likelihood, i.e.,
+to maximizing the so-called evidence lower bound (ELBO), $\mathcal{L}$, of the
+marginal likelihood, i.e.,
 
 $$
-\text{ELBO} \equiv \left\langle 
+\mathcal{L} = \left\langle 
     \log π_\theta(\underline{x}, \underline{z}) - 
     \log q_\phi(\underline{z} \mid \underline{x}) 
 \right\rangle_{q_\phi} 
 \leq \log π_\theta(\underline{x}).
 $${#eq-elbo}
 
-Using the reparametrization trick, we can compute an unbiased estimate of the
-gradient of this ELBO, such that we can maximize it via gradient ascent
-[@kingma2014a].
+Thus, the optimization problem we want to solve invovles estimating the ELBO
+given some data $\underline{x}$. However, the ELBO is an expectation over the
+variational distribution $q_\phi(\underline{z} \mid \underline{x})$, which is
+unknown. Therefore, we need to somehow estimate this expectation. Arguably, the
+most important contribution of the VAE framework is the introduction of the
+reparametrization trick [@kingma2014a]. This seemingly innocuous trick allows us
+to compute an unbiased estimate of the ELBO and its gradient, such that we can
+maximize it via gradient ascent. For more details on the reparametrization
+trick, we refer the reader to [@kingma2014a].
 
 More recent attempts have focused on modifying $q_\phi(\underline{z} \mid
 \underline{x})$ to get a better approximation of the true posterior
@@ -130,8 +136,81 @@ some of these approaches. Let's gain some intuition on each of them.
 ### MCMC and VI (Salimans & Kingma 2015)
 
 One such approach to improve the accuracy of the variational posterior
-approximation consists in adding a fix number of MCMC steps to the variational
-posterior approximation, targeting the true posterior as follows [@salimans2015]
+approximation consists in adding a fix number of Markov Chain Monte Carlo (MCMC)
+steps to the variational posterior approximation, targeting the true posterior
+[@salimans2015]. In MCMC, rather than optimizing the parameters of a parametric
+distribution, we sample an initial position $\underline{z}_0$ from a simple
+distribution $q(\underline{z}_0)$ or $q(\underline{z}_0 \mid \underline{x})$ and
+subsequently, apply a stochastic transition operator $r(\underline{z}_{t+1} \mid
+\underline{z}_t)$ to draw a new value $\underline{z}_{t+1}$ from the distribution
+
+$$
+\underline{z}_{t + 1} \sim r(\underline{z}_{t+1} \mid \underline{z}_t).
+$${#eq-mcmc-transition}
+
+Applying this operator over and over again, we build a Markov chain
+
+$$
+\underline{z}_0 \to \underline{z}_1 \to \underline{z}_2 \to \cdots 
+\to \underline{z}_T,
+$${#eq-mcmc-chain}
+
+whose long-term behavior---the so-called stationary distribution---is a very
+good approximation of the true posterior distribution $π_\theta(\underline{z}
+\mid \underline{x})$. In other words, by carefully engineering the transition
+operator $r(\underline{z}_{t+1} \mid \underline{z}_t)$, and applying it over and
+over again, the "histogram" of the samples $\{\underline{z}_t\}_{t=0}^T$ will
+converge to the true posterior distribution $π_\theta(\underline{z} \mid
+\underline{x})$.
+
+The central idea to combine MCMC with variational inference is to interpret the
+Markov chain
+
+$$
+q(\underline{Z} | \underline{x}) = 
+q(\underline{z}_0 \mid \underline{x}) \prod_{t=1}^T r(\underline{z}_t \mid
+\underline{z}_{t-1}, \underline{x})
+$${#eq-mcmc-chain-def}
+
+as a variational approximation with an auxiliary variable $\underline{Z} =
+\{\underline{z}_0, \underline{z}_1, \ldots, \underline{z}_T\}$ that we can use
+to approximate the true posterior distribution $π_\theta(\underline{z} \mid
+\underline{x})$. Integrating this expression into the ELBO, we get
+
+$$
+\begin{aligned}
+\mathcal{L}_{\text {aux }} & =
+\left\langle\log 
+    \left[
+        p\left(\underline{x}, \underline{z}_T\right) 
+        r\left(\underline{Z} \mid \underline{x}, \underline{z}_T\right)
+    \right] - 
+    \log q\left(\underline{Z}, \underline{z}_T \mid \underline{x}\right)
+\right\rangle_{q\left(\underline{Z}, \underline{z}_T \mid \underline{x}\right)} \\
+& =\mathcal{L} - 
+\left\langle 
+    D_{K L}\left[
+        q\left(\underline{Z} \mid \underline{z}_T, \underline{x}\right) \| 
+        r\left(\underline{Z} \mid \underline{z}_T, \underline{x}\right)
+    \right]
+\right\rangle_{q\left(\underline{z}_T \mid \underline{x}\right)} \\
+& \leq \mathcal{L} \leq \log [p(\underline{x})].
+\end{aligned}
+$${#eq-elbo-aux}
+
+We are free to choose the transition operator $r(\underline{Z} \mid
+\underline{x}, \underline{z}_T)$. 
+
+
+$q_\phi(\underline{z} \mid \underline{x})$. In
+other words, we can interpret the Markov chain as a parametric distribution over
+the latent variables $\underline{z}$ that we can use to approximate the true
+posterior distribution $π_\theta(\underline{z} \mid \underline{x})$.
+
+
+
+
+
 
 $$
 \hat{π}_\theta(\underline{x}) = 
@@ -144,8 +223,33 @@ $$
 },
 $${#eq-mcmc-approx}
 
+Let's unpack this expression. When performing MCMC, we build a Markov chain
+
+$$
+\underline{z}_0 \to \underline{z}_1 \to \underline{z}_2 \to \cdots 
+\to \underline{z}_T,
+$${#eq-mcmc-chain}
+
 where $\underline{z}_0 \sim q_\phi(\underline{z} \mid \underline{x})$ is the
-initial position in the chain, and $r(\underline{z}_t \mid \underline{z}_{t-1},
+initial position in the chain. At each step, we sample a new position from the
+transition kernel $r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})$,
+which is a function of the current position and the observed data. This way, we
+build a Markov chain that converges to the true posterior distribution.
+Therefore, the denominator of [@eq-mcmc-approx] computes the probability of the
+initial position of the chain $q_\phi(\underline{z}_0 \mid \underline{x})$ times
+the product of the transition probabilities for each of the $T$ steps,
+$\prod_{t=1}^T r(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x})$.
+
+The numerator of [@eq-mcmc-approx] computes the equivalent probability, but in
+reverse order, i.e., starts by sampling the final position of the chain
+$\underline{z}_T$ from the joint distribution $π_\theta(\underline{x},
+\underline{z}_T)$ and then samples the previous positions of the chain
+$\underline{z}_{T-1}, \underline{z}_{T-2}, \ldots, \underline{z}_0$ from the
+transition kernel run backwards, $r(\underline{z}_t \mid \underline{z}_{t+1},
+\underline{x})$.
+
+
+ and $r(\underline{z}_t \mid \underline{z}_{t-1},
 \underline{x})$ is the transition kernel from which $\underline{z}_t$ is sampled
 and $r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})$ is the reverse
 kernel. Including a Markov chain into the variational posterior approximation

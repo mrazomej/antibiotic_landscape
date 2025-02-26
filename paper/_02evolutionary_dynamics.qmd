@@ -52,7 +52,9 @@ trajectories under different environmental conditions (@fig-02(B)), we observe
 that, as expected, while the path through phenotype space remains fixed---since
 it represents the adaptive walk on the selection environment in @fig-02(A)---the
 fitness values we measure vary because each environment imposes its own unique
-fitness landscape.
+fitness landscape. The fitness values in all environments for a given lineage
+at a given time point define one fitness profile as the ones depicted in
+@fig-01(D).
 
 In what follows, we use synthetic data generated from this model, where ten
 lineages (initial phenotype coordinates) in two replicates (different

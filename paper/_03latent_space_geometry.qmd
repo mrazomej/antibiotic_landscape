@@ -1,0 +1,84 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Data-Driven Dimensionality Reduction via Geometric Variational Autoencoders
+
+Given the high-dimensional dataset of simulated fitness profiles emulating a
+plausible picture of the underlying data generating process of many modern
+experimental evolution setups
+[@kinsler2020;@maeda2020;@iwasawa2022;@ascensao2023], we next seek to uncover a
+low-dimensional representation of the data that captures the underlying
+structure of the simulated low-dimensional phenotypic space. @fig-03(A) shows a
+schematic depiction of the idea behind dimensionality reduction applied to
+fitness profiles. With fitness profiles as vectors on a high-dimensional data
+space, dimensionality reduction techniques implicitly assume that the positions
+of points in the data space occupy only a subset of the available space. More
+specifically, it is assumed that the data points lie on a low-dimensional
+manifold embedded in the high-dimensional data space. The goal of dimensionality
+reduction is to find such embedded manifold that captures the underlying
+structure of the data. When possible, plotting this embedded manifold as a flat
+space (either two or three dimensions) allows for the visualization of the
+underlying structure of the data. Given the conceptual picture developed so far,
+the hope is that the low-dimensional latent spaces captures features of the
+structure of the underlying phenotypic space.
+
+Traditionally, the field has focused on linear dimensionality reduction
+techniques such as singular value decomposition [@kinsler2020] or related
+methods such as sparse structure discovery [@petti2022]. Although
+computationally efficient, these methods are limited by the rigid assumption
+that fitness is a linear function of some latent phenotypes. To step away from
+such strong assumptions, we can take advantage of the advances in deep-learning
+based dimensionality reduction techniques, such as the variational autoencoder
+(VAE) [@kingma2014a]. However, the traditional VAE framework comes with the
+limitation that the learned latent representation---built from non-linear
+transformations of the input data---does not contain any geometric information
+of how such non-linear transformations affect the geometry of the learned space,
+making distances between points in the latent space meaningless
+[@arvanitidis2021].
+
+To address both limitations on the linear and non-geometric nature of popular
+methods, we propose the use of a recent extension of the VAE framework---the
+Riemannian Hamiltonian VAE (RHVAE) [@chadebec2020]---which models the latent
+space as a Riemannian manifold whose metric tensor is also learned from the
+data, allowing for the computation of meaningful distances between points.
+@fig-03(B) shows a schematic depiction of the RHVAE architecture. The network
+consists of three main components: an encoder network, a decoder network, and a
+specialized network that learns the metric tensor of the latent space. The
+numbers below the architecture point to the conceptual steps of the RHVAE
+workflow shown in @fig-03(C). The RHVAE is conceptually similar to the
+traditional VAE, taking a high-dimensional fitness input $\underline{f}$ as
+input into an encoder network. This encoder network (along with the
+reparametrization trick [@kingma2014a]) outputs a sampled latent coordinate
+$\underline{z}$. However, before passing this sampled coordinate through a
+decoder network to reconstruct the fitness profile, the RHVAE uses concepts from
+Riemannian geometry and Hamiltonian mechanics to jointly train a separate
+network that learns the metric tensor of the latent space. This metric tensor
+network, thus, contains all the information needed to map distances in the
+low-dimensional map to distances in the original data space. We direct the
+reader to the supplementary material for a mathematically rigorous description
+of the model. 
+
+We next turn our attention to the application of the RHVAE to the simulated
+fitness profiles. It is important to highlight that at no point the RHVAE
+obtains any knowledge about the identity of the input data. In other words, the
+RHVAE has no information about the lineage or time point of the fitness profile
+that it is processing. The network only uses the unidentified fitness profiles
+to learn the geometric structure of the latent space.
+
+![**Dimensionality reduction via geometric variational autoencoder**. (A)
+Schematic of dimensionality reduction applied to fitness profiles.
+High-dimensional fitness vectors are embedded onto a lower-dimensional manifold
+that captures the underlying structure of the data. (B) Architecture of the
+Riemannian Hamiltonian VAE (RHVAE). The network consists of three components: an
+encoder that maps high-dimensional fitness profiles to latent coordinates, a
+decoder that reconstructs the original fitness profiles, and a metric tensor
+network that learns the geometric structure of the latent space. (C) RHVAE
+workflow. The high-dimensional input is map into a low-dimensional latent space
+coordinate. From there, the network learns the metric tensor of the latent space
+via a specialized network. The latent coordinate is then decoded into an
+accurate reconstruction of the original fitness profile
+input.](./fig/main/fig03_v03){#fig-03}
