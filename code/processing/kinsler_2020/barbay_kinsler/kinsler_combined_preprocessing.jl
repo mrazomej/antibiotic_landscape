@@ -289,6 +289,8 @@ df_kinsler = DF.leftjoin(df_kinsler, df_kinsler_standard, on=[:id, :env])
 
 ## =============================================================================
 
+println("Loading metadata...")
+
 # Read dataframe with id metadata
 df_meta = CSV.read(
     "$(git_root())/data/Kinsler_2020/tidy_counts.csv",
@@ -317,6 +319,8 @@ df_meta.id = string.(df_meta.id)
 # Keep only ids that are in df_kinsler
 df_meta = df_meta[in.(df_meta.id, Ref(df_kinsler.id)), :]
 
+println("Adding metadata to dataframe...")
+
 # Combine dataframes
 df_kinsler_meta = DF.leftjoin(df_kinsler, df_meta, on=:id)
 
@@ -325,4 +329,4 @@ df_kinsler_meta = DF.leftjoin(df_kinsler, df_meta, on=:id)
 println("Saving data...")
 
 # Save the dataframe
-CSV.write("$(data_dir)/kinsler_combined_hyperfitness.csv", df_kinsler)
+CSV.write("$(data_dir)/kinsler_combined_hyperfitness.csv", df_kinsler_meta)
