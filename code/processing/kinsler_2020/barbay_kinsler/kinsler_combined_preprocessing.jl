@@ -186,7 +186,6 @@ println("Concatenating hierarchical and joint dataframes...")
 # Concatenate hierarchical and joint dataframes
 df_kinsler = DF.append!(df_kinsler_hier, df_kinsler_joint)
 
-
 ## =============================================================================
 
 println("Checking if all environments contain the same set of IDs...")
@@ -287,6 +286,39 @@ df_kinsler_standard = DF.leftjoin(
 
 # Combine dataframes
 df_kinsler = DF.leftjoin(df_kinsler, df_kinsler_standard, on=[:id, :env])
+
+## =============================================================================
+
+# Read dataframe with id metadata
+df_meta = CSV.read(
+    "$(git_root())/data/Kinsler_2020/tidy_counts.csv",
+    DF.DataFrame
+)
+
+# List relevant columns
+cols = [
+    :additional_muts,
+    :barcode,
+    :class,
+    :gene,
+    :ploidy,
+    :type,
+]
+
+# Extract relevant columns
+df_meta = unique(df_meta[:, cols])
+
+# Rename :barcode => :id, :type => :mut_type
+DF.rename!(df_meta, :barcode => :id, :type => :mut_type)
+
+# Convert :id column to string
+df_meta.id = string.(df_meta.id)
+
+# Keep only ids that are in df_kinsler
+df_meta = df_meta[in.(df_meta.id, Ref(df_kinsler.id)), :]
+
+# Combine dataframes
+df_kinsler_meta = DF.leftjoin(df_kinsler, df_meta, on=:id)
 
 ## =============================================================================
 
