@@ -83,7 +83,6 @@ rhvae_kwargs = (K=K, ϵ=ϵ, βₒ=βₒ,)
 model_file = first(Glob.glob("$(vae_dir)/model*.jld2"[2:end], "/"))
 # List epoch parameters
 original_model_states = Glob.glob("$(original_state_dir)/*.jld2"[2:end], "/")
-cross_model_states = Glob.glob("$(cross_state_dir)/*.jld2"[2:end], "/")
 
 # Initialize dataframe to store files metadata
 df_meta = DF.DataFrame()
@@ -109,32 +108,9 @@ for f in original_model_states
         :model_file => model_file,
         :model_state => f,
         :model_type => "original",
-    )
-    # Append temporary dataframe to main dataframe
-    global df_meta = DF.vcat(df_meta, df_tmp)
-end # for f in model_states
-
-# Loop over files
-for f in cross_model_states
-    # Extract epoch number from file name using regular expression
-    epoch = parse(Int, match(r"epoch(\d+)", f).captures[1])
-    # Load model_state file
-    f_load = JLD2.load(f)
-    # Extract values
-    loss_train = f_load["loss_train"]
-    loss_val = f_load["loss_val"]
-    mse_train = f_load["mse_train"]
-    mse_val = f_load["mse_val"]
-    # Generate temporary dataframe to store metadata
-    df_tmp = DF.DataFrame(
-        :epoch => epoch,
-        :loss_train => loss_train,
-        :loss_val => loss_val,
-        :mse_train => mse_train,
-        :mse_val => mse_val,
-        :model_file => model_file,
-        :model_state => f,
-        :model_type => "cross",
+        :split => "train",
+        :train_frac => 0.85,
+        :val_frac => 0.15,
     )
     # Append temporary dataframe to main dataframe
     global df_meta = DF.vcat(df_meta, df_tmp)
@@ -142,75 +118,167 @@ end # for f in model_states
 
 ## =============================================================================
 
+# List cross-validation split directories
+cross_model_splits = readdir(cross_state_dir)
+
+for split in cross_model_splits
+    # List model states
+    cross_model_states = Glob.glob(
+        "$(cross_state_dir)/$(split)/*.jld2"[2:end], "/"
+    )
+    # Extract train and validation fractions from split name
+    train_frac = parse(Float64, match(r"(\d+)train", split).captures[1])
+    val_frac = parse(Float64, match(r"(\d+)val", split).captures[1])
+    # Loop over files
+    for f in cross_model_states
+        # Extract epoch number from file name using regular expression
+        epoch = parse(Int, match(r"epoch(\d+)", f).captures[1])
+        # Load model_state file
+        f_load = JLD2.load(f)
+        # Extract values
+        loss_train = f_load["loss_train"]
+        loss_val = f_load["loss_val"]
+        mse_train = f_load["mse_train"]
+        mse_val = f_load["mse_val"]
+        # Generate temporary dataframe to store metadata
+        df_tmp = DF.DataFrame(
+            :epoch => epoch,
+            :loss_train => loss_train,
+            :loss_val => loss_val,
+            :mse_train => mse_train,
+            :mse_val => mse_val,
+            :model_file => model_file,
+            :model_state => f,
+            :model_type => "cross",
+            :split => replace(split, "split_" => ""),
+            :train_frac => train_frac / 100,
+            :val_frac => val_frac / 100,
+        )
+        # Append temporary dataframe to main dataframe
+        global df_meta = DF.vcat(df_meta, df_tmp)
+    end # for f in model_states
+end # for split in cross_model_splits
+
+## =============================================================================
+
 println("Plotting training loss...")
 
-# Initialize figure
-fig = Figure(size=(600, 300))
-
-# Add axis
-ax_loss = Axis(
-    fig[1, 1],
-    xlabel="epoch",
-    ylabel="loss",
-)
-# Add axis
-ax_mse = Axis(
-    fig[1, 2],
-    xlabel="epoch",
-    ylabel="MSE",
-)
-
 # Group by model type
-df_group = DF.groupby(df_meta, :model_type)
+df_group = DF.groupby(df_meta, [:model_type, :split])
 
-# Initialize counter
-counter = 1
+# Initialize figure
+fig = Figure(size=(900, 600))
+
+# Define number of rows and columns
+n_row = 2
+n_col = 3
+
 # Loop over groups
-for df in df_group
+for (i, df) in enumerate(df_group)
+    # Obtain row and column indices
+    row = (i - 1) ÷ n_col + 1
+    col = (i - 1) % n_col + 1
+    # Initialize axis
+    ax = Axis(
+        fig[row, col],
+        xlabel="epoch",
+        ylabel="mean squared error",
+        title="$(first(df.model_type)) $(replace(first(df.split), "_" => ":"))",
+    )
+    # Define colors
+    if first(df.model_type) == "original"
+        colors = ColorSchemes.Paired_12[1:2]
+    else
+        colors = ColorSchemes.Paired_12[3:4]
+    end
     # Plot training loss
     lines!(
-        ax_loss,
-        df.epoch,
-        df.loss_train,
-        label="$(first(df.model_type)) train",
-        color=ColorSchemes.Paired_12[counter],
-    )
-    # Plot validation loss
-    lines!(
-        ax_loss,
-        df.epoch,
-        df.loss_val,
-        label="$(first(df.model_type)) val",
-        color=ColorSchemes.Paired_12[counter+1],
-    )
-
-    # Plot training loss
-    lines!(
-        ax_mse,
+        ax,
         df.epoch,
         df.mse_train,
-        label="$(first(df.model_type)) train",
-        color=ColorSchemes.Paired_12[counter],
+        color=colors[1],
+        label="training",
     )
     # Plot validation loss
     lines!(
-        ax_mse,
+        ax,
         df.epoch,
         df.mse_val,
-        label="$(first(df.model_type)) val",
-        color=ColorSchemes.Paired_12[counter+1],
+        color=colors[2],
+        label="validation",
     )
-    # Increment counter
-    counter += 2
-end # for df in df_group
-
-# Add legend
-axislegend(ax_loss, position=:rt)
-axislegend(ax_mse, position=:rt)
-
+    # Add legend
+    axislegend(ax, position=:rt)
+end # for (i, df) in enumerate(df_group)
 
 save("$(fig_dir)/rhvae_loss_cross.pdf", fig)
 save("$(fig_dir)/rhvae_loss_cross.png", fig)
+
+fig
+
+## =============================================================================
+
+# Group by split
+df_group = DF.groupby(df_meta[df_meta.model_type.=="cross", :], :split)
+
+# Initialize figure
+fig = Figure(size=(500, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="fraction of data used for training",
+    ylabel="mean squared error",
+)
+
+# Loop over groups
+for (i, df) in enumerate(df_group)
+    # Plot training loss for last epoch
+    scatter!(
+        ax,
+        first(df.train_frac),
+        last(DF.sort(df, :epoch).mse_train),
+        color=ColorSchemes.Paired_12[3],
+        label="cross training",
+        markersize=12,
+    )
+    # Plot validation loss for last epoch
+    scatter!(
+        ax,
+        first(df.train_frac),
+        last(DF.sort(df, :epoch).mse_val),
+        color=ColorSchemes.Paired_12[4],
+        label="cross validation",
+        markersize=12,
+    )
+end # for (i, df) in enumerate(df_group)
+
+# Extract original mse
+df_original = df_meta[df_meta.model_type.=="original", :]
+
+# Add original mse as horizontal line
+hlines!(
+    ax,
+    last(DF.sort(df_original, :epoch).mse_train),
+    color=ColorSchemes.Paired_12[1],
+    linestyle=:dash,
+    label="original training (0.85)",
+    linewidth=2,
+)
+hlines!(
+    ax,
+    last(DF.sort(df_original, :epoch).mse_val),
+    color=ColorSchemes.Paired_12[2],
+    linestyle=:dash,
+    label="original validation (0.15)",
+    linewidth=2,
+)
+# Add legend
+axislegend(ax, position=:rt, unique=true, merge=true)
+
+# Save figure
+save("$(fig_dir)/rhvae_loss_cross_trainfrac.pdf", fig)
+save("$(fig_dir)/rhvae_loss_cross_trainfrac.png", fig)
 
 fig
 
