@@ -53,9 +53,9 @@ sim_dir = "$(git_root())/output$(out_prefix)/sim_evo"
 # Define model directory
 vae_dir = "$(git_root())/output$(out_prefix)/vae"
 # Define output directory
-original_state_dir = "$(vae_dir)/model_state"
+original_state_dir = "$(vae_dir)/vae_model_state"
 # Define cross-validation directory
-cross_state_dir = "$(vae_dir)/model_crossvalidation_state"
+cross_state_dir = "$(vae_dir)/vae_model_crossvalidation_state"
 # Define figure directory
 fig_dir = "$(git_root())/fig$(out_prefix)/vae"
 
@@ -70,17 +70,12 @@ end
 println("Loading model...")
 
 # Define loss function hyper-parameters
-ϵ = Float32(1E-3) # Leapfrog step size
-K = 10 # Number of leapfrog steps
-βₒ = 0.3f0 # Initial temperature for tempering
-
-# Define RHVAE hyper-parameters in a dictionary
-rhvae_kwargs = (K=K, ϵ=ϵ, βₒ=βₒ,)
+β = 0.1f0 # 
 
 ## =============================================================================
 
 # Find model file
-model_file = first(Glob.glob("$(vae_dir)/model*.jld2"[2:end], "/"))
+model_file = first(Glob.glob("$(vae_dir)/vae_model.jld2"[2:end], "/"))
 # List epoch parameters
 original_model_states = Glob.glob("$(original_state_dir)/*.jld2"[2:end], "/")
 
@@ -175,6 +170,8 @@ n_col = 3
 
 # Loop over groups
 for (i, df) in enumerate(df_group)
+    # Sort df by epoch
+    DF.sort!(df, :epoch)
     # Obtain row and column indices
     row = (i - 1) ÷ n_col + 1
     col = (i - 1) % n_col + 1
@@ -211,8 +208,8 @@ for (i, df) in enumerate(df_group)
     axislegend(ax, position=:rt)
 end # for (i, df) in enumerate(df_group)
 
-save("$(fig_dir)/rhvae_loss_cross.pdf", fig)
-save("$(fig_dir)/rhvae_loss_cross.png", fig)
+save("$(fig_dir)/vae_loss_cross.pdf", fig)
+save("$(fig_dir)/vae_loss_cross.png", fig)
 
 fig
 
@@ -277,8 +274,8 @@ hlines!(
 axislegend(ax, position=:rt, unique=true, merge=true)
 
 # Save figure
-save("$(fig_dir)/rhvae_loss_cross_trainfrac.pdf", fig)
-save("$(fig_dir)/rhvae_loss_cross_trainfrac.png", fig)
+save("$(fig_dir)/vae_loss_cross_trainfrac.pdf", fig)
+save("$(fig_dir)/vae_loss_cross_trainfrac.png", fig)
 
 fig
 
@@ -330,28 +327,24 @@ log_fitnotype_std = DD.DimArray(
 println("Loading models...")
 
 # Load model
-rhvae_original = JLD2.load(model_file)["model"]
+vae_original = JLD2.load(model_file)["model"]
 # Load latest model state
 Flux.loadmodel!(
-    rhvae_original,
+    vae_original,
     JLD2.load(
         df_meta[df_meta.model_type.=="original", :model_state][end]
     )["model_state"]
 )
-# Update metric parameters
-AET.RHVAEs.update_metric!(rhvae_original)
 
 # Load model
-rhvae_cross = JLD2.load(model_file)["model"]
+vae_cross = JLD2.load(model_file)["model"]
 # Load latest model state
 Flux.loadmodel!(
-    rhvae_cross,
+    vae_cross,
     JLD2.load(
         df_meta[df_meta.model_type.=="cross", :model_state][end]
     )["model_state"]
 )
-# Update metric parameters
-AET.RHVAEs.update_metric!(rhvae_cross)
 
 ## =============================================================================
 
@@ -369,7 +362,7 @@ log_fitnotype_std_train = log_fitnotype_std[
 # Map data to latent space
 dd_latent_original = DD.DimArray(
     dropdims(
-        mapslices(slice -> rhvae_original.vae.encoder(slice).μ,
+        mapslices(slice -> vae_original.encoder(slice).μ,
             log_fitnotype_std_train.data,
             dims=[5]);
         dims=1
@@ -384,7 +377,7 @@ dd_latent_original = DD.DimArray(
 # Map data to latent space
 dd_latent_cross = DD.DimArray(
     dropdims(
-        mapslices(slice -> rhvae_cross.vae.encoder(slice).μ,
+        mapslices(slice -> vae_cross.encoder(slice).μ,
             log_fitnotype_std_train.data,
             dims=[5]);
         dims=1
@@ -413,7 +406,7 @@ ax_original = Axis(
     fig[1, 1],
     xlabel="latent dimension 1",
     ylabel="latent dimension 2",
-    title="Original RHVAE\n (envs 1-$(n_env_train))",
+    title="Original VAE\n (envs 1-$(n_env_train))",
     aspect=AxisAspect(1)
 )
 # Add axis
@@ -421,7 +414,7 @@ ax_cross = Axis(
     fig[1, 2],
     xlabel="latent dimension 1",
     ylabel="latent dimension 2",
-    title="Cross-validated RHVAE\n (envs $(n_env_train+1)-$(n_env))",
+    title="Cross-validated VAE\n (envs $(n_env_train+1)-$(n_env))",
     aspect=AxisAspect(1)
 )
 
@@ -442,7 +435,7 @@ scatter!(
     color=ColorSchemes.seaborn_colorblind[2],
 )
 
-save("$(fig_dir)/rhvae_latent_space_cross.pdf", fig)
-save("$(fig_dir)/rhvae_latent_space_cross.png", fig)
+save("$(fig_dir)/vae_latent_space_cross.pdf", fig)
+save("$(fig_dir)/vae_latent_space_cross.png", fig)
 
 fig

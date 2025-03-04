@@ -47,29 +47,7 @@ n_batch_loss = 512
 split_fracs = [0.85, 0.75, 0.50, 0.25]
 
 # Define loss function hyper-parameters
-ϵ = Float32(1E-3) # Leapfrog step size
-K = 10 # Number of leapfrog steps
-βₒ = 0.3f0 # Initial temperature for tempering
-
-# Define ELBO prefactors
-logp_prefactor = [10.0f0, 0.1f0, 0.1f0]
-logq_prefactor = [0.1f0, 0.1f0, 0.1f0]
-
-# Define RHVAE hyper-parameters in a NamedTuple
-rhvae_kwargs = (
-    K=K,
-    ϵ=ϵ,
-    βₒ=βₒ,
-)
-
-# Define loss function kwargs in a NamedTuple
-loss_kwargs = (
-    K=K,
-    ϵ=ϵ,
-    βₒ=βₒ,
-    logp_prefactor=logp_prefactor,
-    logq_prefactor=logq_prefactor,
-)
+β = 0.1f0 # Initial temperature for tempering
 
 # Define by how much to subsample the time series
 n_sub = 10
@@ -103,7 +81,7 @@ sim_dir = "$(out_dir)/sim_evo"
 vae_dir = "$(out_dir)/vae"
 
 # Define model state directory
-state_dir = "$(vae_dir)/model_crossvalidation_state"
+state_dir = "$(vae_dir)/vae_model_crossvalidation_state"
 
 # Generate model state directory if it doesn't exist
 if !isdir(state_dir)
@@ -149,7 +127,7 @@ fit_std_output = StatsBase.transform(dt, fit_mat)[n_env_train+1:end, :]
 # Loop over fractions of data to be used for training
 for (i, split_frac) in enumerate(split_fracs)
 
-    println("Training RHVAE with $(split_frac) of data for training...")
+    println("Training VAE with $(split_frac) of data for training...")
 
     ## =========================================================================
 
@@ -168,16 +146,14 @@ for (i, split_frac) in enumerate(split_fracs)
     println("Checking previous model states...")
 
     # List previous model parameters
-    model_states = sort(Glob.glob("$(split_dir)/beta-rhvae_epoch*.jld2"[2:end], "/"))
+    model_states = sort(Glob.glob("$(split_dir)/vae_epoch*.jld2"[2:end], "/"))
 
     # Check if model states exist
     if 0 < length(model_states) < n_epoch
         # Load model state
         model_state = JLD2.load(model_states[end])["model_state"]
         # Input parameters to model
-        Flux.loadmodel!(rhvae, model_state)
-        # Update metric parameters
-        AET.RHVAEs.update_metric!(rhvae)
+        Flux.loadmodel!(vae, model_state)
         # Extract epoch number
         epoch_init = parse(
             Int, match(r"epoch(\d+)", model_states[end]).captures[1]
@@ -212,43 +188,38 @@ for (i, split_frac) in enumerate(split_fracs)
     println("Load model...\n")
 
     # Load model
-    rhvae = JLD2.load("$(vae_dir)/model.jld2")["model"]
+    vae = JLD2.load("$(vae_dir)/vae_model.jld2")["model"]
 
     # List previous model parameters
     model_state_file = sort(
-        Glob.glob("$(vae_dir)/model_state/beta-rhvae_epoch*.jld2"[2:end], "/")
+        Glob.glob("$(vae_dir)/vae_model_state/vae_epoch*.jld2"[2:end], "/")
     )[end]
 
     # Load model state
     model_state = JLD2.load(model_state_file)["model_state"]
 
     # Input parameters to cross-validation model except for the decoder
-    Flux.loadmodel!(rhvae.metric_chain, model_state.metric_chain)
-    Flux.loadmodel!(rhvae.vae.encoder, model_state.vae.encoder)
-
-    # Update metric parameters
-    AET.RHVAEs.update_metric!(rhvae)
+    Flux.loadmodel!(vae.encoder, model_state.encoder)
 
     ## =========================================================================
 
     println("Uploading model to GPU...")
 
     # Upload model to GPU
-    rhvae = Flux.gpu(rhvae)
+    vae = Flux.gpu(vae)
 
     # Explicit setup of optimizer
-    opt_rhvae = Flux.Train.setup(
+    opt_vae = Flux.Train.setup(
         Flux.Optimisers.Adam(η),
-        rhvae
+        vae
     )
 
     # Freeze enconder and metric chain
-    Flux.freeze!(opt_rhvae.vae.encoder)
-    Flux.freeze!(opt_rhvae.metric_chain)
+    Flux.freeze!(opt_vae.encoder)
 
     ## =============================================================================
 
-    println("\nTraining RHVAE...\n")
+    println("\nTraining VAE...\n")
 
     # Loop through number of epochs
     for epoch in epoch_init:n_epoch
@@ -264,13 +235,13 @@ for (i, split_frac) in enumerate(split_fracs)
                     "Batch: $(i) / $(length(idx_batches))")
             # Extract indexes
             idx_batch = collect(idx_tuple)
-            # Train RHVAE
-            loss_epoch = AET.RHVAEs.train!(
-                rhvae,
-                train_data_input[:, idx_batch, 1],
-                train_data_output[:, idx_batch, 1],
-                opt_rhvae;
-                loss_kwargs=loss_kwargs, verbose=false, loss_return=true
+            # Train VAE
+            loss_epoch = AET.VAEs.train!(
+                vae,
+                train_data_input[:, idx_batch],
+                train_data_output[:, idx_batch],
+                opt_vae;
+                loss_kwargs=(β=β,), verbose=false, loss_return=true
             )
             println("Loss: $(loss_epoch)")
         end # for train_loader
@@ -292,24 +263,24 @@ for (i, split_frac) in enumerate(split_fracs)
         val_sample_output = val_data_output[:, val_sample_idx]
 
         println("Computing loss in training and validation data...")
-        loss_train = AET.RHVAEs.loss(
-            rhvae,
+        loss_train = AET.VAEs.loss(
+            vae,
             train_sample_input,
             train_sample_output;
-            loss_kwargs...
+            β=β,
         )
-        loss_val = AET.RHVAEs.loss(
-            rhvae,
+        loss_val = AET.VAEs.loss(
+            vae,
             val_sample_input,
             val_sample_output;
-            loss_kwargs...
+            β=β,
         )
 
         # Forward pass sample through model
         println("Computing MSE in training and validation data...")
-        out_train = rhvae(train_sample_input; rhvae_kwargs...).μ
+        out_train = vae(train_sample_input).μ
         mse_train = Flux.mse(train_sample_output, out_train)
-        out_val = rhvae(val_sample_input; rhvae_kwargs...).μ
+        out_val = vae(val_sample_input).μ
         mse_val = Flux.mse(val_sample_output, out_val)
 
         println(
@@ -322,8 +293,8 @@ for (i, split_frac) in enumerate(split_fracs)
 
         # Save checkpoint
         JLD2.jldsave(
-            "$(split_dir)/beta-rhvae_epoch$(lpad(epoch, 5, "0")).jld2",
-            model_state=Flux.state(rhvae) |> Flux.cpu,
+            "$(split_dir)/vae_epoch$(lpad(epoch, 5, "0")).jld2",
+            model_state=Flux.state(vae) |> Flux.cpu,
             loss_train=loss_train,
             loss_val=loss_val,
             mse_train=mse_train,
