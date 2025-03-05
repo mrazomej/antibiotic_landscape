@@ -552,6 +552,7 @@ for (i, lin) in enumerate(DD.dims(dd_rhvae_latent, :lineage))
         eachrow(data_pca_rot)...,
         markersize=5,
         color=(ColorSchemes.seaborn_colorblind[i], 0.5),
+        rasterize=true,
     )
     # Extract VAE data
     data_vae = StatsBase.transform(
@@ -565,6 +566,7 @@ for (i, lin) in enumerate(DD.dims(dd_rhvae_latent, :lineage))
         eachrow(data_vae_rot)...,
         markersize=5,
         color=(ColorSchemes.seaborn_colorblind[i], 0.5),
+        rasterize=true,
     )
     # Extract RHVAE data
     data_rhvae = StatsBase.transform(
@@ -578,6 +580,7 @@ for (i, lin) in enumerate(DD.dims(dd_rhvae_latent, :lineage))
         eachrow(data_rhvae_rot)...,
         markersize=5,
         color=(ColorSchemes.seaborn_colorblind[i], 0.5),
+        rasterize=true,
     )
     # Extract phenotype data
     data_phenotype = StatsBase.transform(
@@ -590,6 +593,7 @@ for (i, lin) in enumerate(DD.dims(dd_rhvae_latent, :lineage))
         eachrow(data_phenotype)...,
         markersize=5,
         color=(ColorSchemes.seaborn_colorblind[i], 0.5),
+        rasterize=true,
     )
 end # for 
 
@@ -646,11 +650,6 @@ Legend(
     labelsize=11,
 )
 
-# Adjust column sizes
-# rowsize!(gl04B, 1, Auto(1 / 4))
-# rowsize!(gl04B, 2, Auto(3 / 4))
-
-
 # ------------------------------------------------------------------------------
 # Plot Fig04C
 # ------------------------------------------------------------------------------
@@ -691,7 +690,8 @@ hm = surface!(
     y_grid_rot,
     logdetG,
     colormap=Reverse(to_colormap(ColorSchemes.PuBu)),
-    shading=false,
+    shading=NoShading,
+    rasterize=true,
 )
 
 surface!(
@@ -700,7 +700,8 @@ surface!(
     y_grid_rot,
     logdetG,
     colormap=Reverse(to_colormap(ColorSchemes.PuBu)),
-    shading=false,
+    shading=NoShading,
+    rasterize=true,
 )
 
 # Convert to Point2f
@@ -726,6 +727,7 @@ scatter!(
     latent_points_rotated,
     markersize=4,
     color=(:white, 0.3),
+    rasterize=true,
 )
 
 # Find axis limits from minimum and maximum of latent points
@@ -806,6 +808,9 @@ Label(
     tellheight=false
 )
 
+# ------------------------------------------------------------------------------
+
+println("Saving figure...")
 # Save figure
 save("$(fig_dir)/fig04_v02.pdf", fig)
 save("$(fig_dir)/fig04_v02.png", fig)
