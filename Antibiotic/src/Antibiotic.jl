@@ -8,4 +8,8 @@ module mh
 include("metropolis.jl")
 end # submodule
 
+module stats
+include("stats.jl")
+end # submodule
+
 end # module Antibiotic
