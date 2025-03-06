@@ -618,27 +618,27 @@ scatterlines!(
     n_pcs,
     mse_pca,
     label="PCA",
-    color=Antibiotic.viz.colors()[:dark_gold],
+    color=Antibiotic.viz.colors()[:gold],
 )
 
 # Plot VAE MSE
 hlines!(
     ax_mse,
     mse_vae,
-    color=Antibiotic.viz.colors()[:dark_red],
+    color=Antibiotic.viz.colors()[:green],
     label="2D VAE",
     linestyle=:dash,
-    linewidth=1.5,
+    linewidth=2,
 )
 
 # Plot RHVAE MSE
 hlines!(
     ax_mse,
     mse_rhvae,
-    color=Antibiotic.viz.colors()[:dark_blue],
+    color=Antibiotic.viz.colors()[:red],
     label="2D RHVAE",
     linestyle=:dash,
-    linewidth=1.5,
+    linewidth=2,
 )
 
 # Add legend
@@ -648,7 +648,12 @@ Legend(
     orientation=:horizontal,
     framevisible=false,
     labelsize=11,
+    patchsize=(15, 0),
+    colgap=5,
+    tellheight=true,
+    tellwidth=true,
 )
+
 
 # ------------------------------------------------------------------------------
 # Plot Fig04C
@@ -662,7 +667,7 @@ ax1 = Axis(
     xlabel="latent dimension 1",
     ylabel="latent dimension 2",
     title="RHVAE latent\nmetric volume",
-    titlesize=14,
+    titlesize=12,
     xlabelsize=14,
     ylabelsize=14,
     aspect=AxisAspect(1),
@@ -674,7 +679,7 @@ ax2 = Axis(
     xlabel="latent dimension 1",
     ylabel="latent dimension 2",
     title="fitness profiles \nlatent coordinates",
-    titlesize=14,
+    titlesize=12,
     xlabelsize=14,
     ylabelsize=14,
     aspect=AxisAspect(1),
@@ -747,12 +752,13 @@ Colorbar(
     gl04C[1, 3],
     hm,
     label="√log[det(G)]",
-    tellwidth=false,
+    tellwidth=true,
+    tellheight=true,
     halign=:left,
 )
 
 # Adjust column gaps
-colgap!(gl04C, 0)
+colgap!(gl04C, 5)
 
 # Adjust column sizes
 colsize!(gl04C, 1, Auto(1))
@@ -771,6 +777,8 @@ colsize!(gl, 2, Auto(3 / 5))
 rowsize!(gl, 2, Auto(1))
 rowsize!(gl, 4, Auto(1))
 
+# Adjust row gap
+rowgap!(gl, 0)
 
 # ------------------------------------------------------------------------------
 # Add subplot labels
