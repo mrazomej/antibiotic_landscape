@@ -1,6 +1,7 @@
 import StatsBase
 import LinearAlgebra
-
+import AutoEncoderToolkit as AET
+import Flux
 
 @doc raw"""
     procrustes(X, Y; dims=2, center=true)
@@ -174,4 +175,147 @@ function discrete_frechet_distance(P, Q; dims=2)
 
     # Return the Fréchet distance
     return cm[n, m]
+end
+
+# ------------------------------------------------------------------------------
+# Riemannian geometry
+# ------------------------------------------------------------------------------
+
+"""
+    vec_mat_vec_batched(v1::AbstractMatrix, M::AbstractArray, v2::AbstractMatrix)
+
+Compute the batched vector-matrix-vector product v1ᵀ M v2.
+
+This is a utility function for computing v1ᵀ M v2 for batches of vectors and
+matrices. Similar to the one in your existing code.
+
+# Arguments
+- `v1::AbstractMatrix`: First batch of vectors. Shape (dim, batch_size)
+- `M::AbstractArray`: Batch of matrices. Shape (dim, dim, batch_size)
+- `v2::AbstractMatrix`: Second batch of vectors. Shape (dim, batch_size)
+
+# Returns
+- `result::Vector`: The result of v1ᵀ M v2 for each element in the batch. Shape
+  (batch_size,)
+"""
+function vec_mat_vec_batched(
+    v::AbstractMatrix,
+    M::AbstractArray,
+    w::AbstractMatrix
+)
+    # Compute v̲ M̲̲ w̲ in a broadcasted manner
+    return vec(sum(v .* Flux.batched_vec(M, w), dims=1))
+end # function
+
+# ------------------------------------------------------------------------------
+
+"""
+    trajectory_velocity_finitediff(trajectory::AbstractMatrix)
+
+Compute the velocity of a trajectory using finite differences.
+
+This function calculates the velocity between consecutive points in a trajectory
+using a forward finite difference approximation.
+
+# Arguments
+- `trajectory::AbstractMatrix`: Matrix representing the trajectory points. Each
+  column represents a point along the trajectory and each row represents a
+  dimension.
+
+# Returns
+- `velocity::Matrix`: Matrix of velocity vectors. The shape is the same as the
+  input trajectory except there is one fewer point.
+
+# Details
+The velocity is computed as the difference between consecutive points in the
+    trajectory: v_i = (x_{i+1} - x_i)
+"""
+function trajectory_velocity_finitediff(trajectory::AbstractMatrix)
+    # Calculate velocities using forward differences
+    velocity = trajectory[:, 2:end] - trajectory[:, 1:end-1]
+
+    return velocity
+end
+
+# ------------------------------------------------------------------------------
+
+"""
+    trajectory_midpoints(trajectory::AbstractMatrix)
+
+Compute the midpoints between consecutive points along a trajectory.
+
+# Arguments
+- `trajectory::AbstractMatrix`: Matrix representing the trajectory points. Each
+  column represents a point along the trajectory and each row represents a
+  dimension.
+
+# Returns
+- `midpoints::Matrix`: Matrix of midpoints. Each column represents a midpoint
+  between consecutive points in the original trajectory. The resulting matrix
+  has the same number of rows as the input, but one fewer column.
+"""
+function trajectory_midpoints(trajectory::AbstractMatrix)
+    # Check if trajectory has enough points
+    n_points = size(trajectory, 2)
+    if n_points < 2
+        throw(ArgumentError("Trajectory must have at least 2 points to compute midpoints"))
+    end
+
+    # Number of dimensions
+    n_dims = size(trajectory, 1)
+
+    # Initialize midpoints matrix
+    midpoints = Matrix{eltype(trajectory)}(undef, n_dims, n_points - 1)
+
+    # Compute midpoints between consecutive points
+    for i in 1:(n_points-1)
+        point_i = trajectory[:, i]
+        point_i_plus_1 = trajectory[:, i+1]
+        midpoints[:, i] = (point_i + point_i_plus_1) / 2
+    end
+
+    return midpoints
+end
+
+# ------------------------------------------------------------------------------
+
+"""
+    trajectory_length_riemannian(trajectory::AbstractMatrix, rhvae)
+
+Calculate the length of a trajectory on a Riemannian manifold using the RHVAE
+metric.
+
+This function efficiently computes the length of a curve on a Riemannian
+manifold using batched operations and the RHVAE metric tensor.
+
+# Arguments
+- `trajectory::AbstractMatrix`: Matrix representing the trajectory points. Each
+  column represents a point along the trajectory and each row represents a
+  dimension.
+- `rhvae`: The RHVAE model containing the Riemannian metric.
+
+# Returns
+- `length::Float64`: The approximate length of the trajectory on the Riemannian
+  manifold.
+
+# Notes
+This implementation uses batched operations for efficiency and avoids repeated
+computation of midpoints and velocities.
+"""
+function trajectory_length_riemannian(trajectory::AbstractMatrix, rhvae)
+    # Compute velocity using finite differences
+    velocity = trajectory_velocity_finitediff(trajectory)
+
+    # Compute all midpoints at once
+    midpoints = trajectory_midpoints(trajectory)
+
+    # Get metric tensors for all midpoints in a batch
+    G_tensors = AET.RHVAEs.metric_tensor(midpoints, rhvae)
+
+    # Compute segment lengths using batched vector-matrix-vector multiplication
+    # We need to ensure velocity has the right shape for batched operations
+    segment_lengths = sqrt.(vec_mat_vec_batched(velocity, G_tensors, velocity))
+
+    # Sum all segment lengths to get total length
+    return sum(segment_lengths)
 end
