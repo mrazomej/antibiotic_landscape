@@ -272,17 +272,17 @@ dt_dict = Dict(
 
 # Compute rotation matrix with respect to phenotype space
 R_dict = Dict(
-    :rhvae => Antibiotic.stats.procrustes(
+    :rhvae => Antibiotic.geometry.procrustes(
         StatsBase.transform(dt_dict[:rhvae], reshape(dd_join.rhvae.data, 2, :)),
         StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
         center=false
     )[2],
-    :vae => Antibiotic.stats.procrustes(
+    :vae => Antibiotic.geometry.procrustes(
         StatsBase.transform(dt_dict[:vae], reshape(dd_join.vae.data, 2, :)),
         StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
         center=false
     )[2],
-    :pca => Antibiotic.stats.procrustes(
+    :pca => Antibiotic.geometry.procrustes(
         StatsBase.transform(dt_dict[:pca], reshape(dd_join.pca.data, 2, :)),
         StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
         center=false

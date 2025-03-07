@@ -218,7 +218,7 @@ println("Performing PCA on the data...")
 fit_pca = MStats.fit(MStats.PCA, fit_mat_std, maxoutdim=2)
 
 # Define latent space dimensions
-pca_dims = DD.Dim{:pca}([:pc1, :pc2])
+pca_dims = DD.Dim{:latent}([:latent1, :latent2])
 
 # Map data to latent space
 dd_pca = DD.DimArray(
@@ -284,7 +284,7 @@ scale_dict = Dict()
 
 for method in [:rhvae, :vae, :pca]
     # Run procrustes analysis
-    proc_result = Antibiotic.stats.procrustes(
+    proc_result = Antibiotic.geometry.procrustes(
         StatsBase.transform(dt_dict[method], reshape(dd_join[method].data, 2, :)),
         StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
         center=true
@@ -444,13 +444,13 @@ for (i, group) in enumerate(dd_group)
                  )
 
     # Compute Frechet distance
-    frechet_pca = Antibiotic.stats.discrete_frechet_distance(
+    frechet_pca = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_pca
     )
-    frechet_vae = Antibiotic.stats.discrete_frechet_distance(
+    frechet_vae = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_vae
     )
-    frechet_rhvae = Antibiotic.stats.discrete_frechet_distance(
+    frechet_rhvae = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_rhvae
     )
 
@@ -865,7 +865,7 @@ for col in 1:n_cols
         # Extract latent data
         data_latent = dropdims(group[methods[row]].data, dims=(3, 4, 5))
         # Align latent data via procrustes
-        data_latent = Antibiotic.stats.procrustes(
+        data_latent = Antibiotic.geometry.procrustes(
             data_latent,
             data_phenotype,
             center=true
