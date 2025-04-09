@@ -18,6 +18,9 @@ import Flux
 # Import library to save models
 import JLD2
 
+# Import library for dynamic time warping
+import DynamicAxisWarping as DAW
+
 # Import basic math
 import LinearAlgebra
 import MultivariateStats as MStats
@@ -644,24 +647,21 @@ dt_dict = Dict(
 
 ## =============================================================================
 
-# Compute rotation matrix with respect to phenotype space
-R_dict = Dict(
-    :rhvae => Antibiotic.stats.procrustes(
-        StatsBase.transform(dt_dict[:rhvae], reshape(dd_join.rhvae.data, 2, :)),
+# Compute rotation matrix and scale factor with respect to phenotype space
+R_dict = Dict()
+scale_dict = Dict()
+
+for method in [:rhvae, :vae, :pca]
+    # Run procrustes analysis
+    proc_result = Antibiotic.geometry.procrustes(
+        StatsBase.transform(dt_dict[method], reshape(dd_join[method].data, 2, :)),
         StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
-        center=false
-    )[2],
-    :vae => Antibiotic.stats.procrustes(
-        StatsBase.transform(dt_dict[:vae], reshape(dd_join.vae.data, 2, :)),
-        StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
-        center=false
-    )[2],
-    :pca => Antibiotic.stats.procrustes(
-        StatsBase.transform(dt_dict[:pca], reshape(dd_join.pca.data, 2, :)),
-        StatsBase.transform(dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)),
-        center=false
-    )[2],
-)
+        center=true
+    )
+    # Store rotation matrix and scale factor
+    R_dict[method] = proc_result[2]
+    scale_dict[method] = proc_result[3]
+end
 
 ## =============================================================================
 
@@ -785,29 +785,29 @@ for (i, group) in enumerate(dd_group)
         dropdims(group.phenotype.data, dims=(3, 4, 5))
     )
     # Extract rotated PCA data
-    data_pca = R_dict[:pca] * StatsBase.transform(
-        dt_dict[:pca],
-        dropdims(group.pca.data, dims=(3, 4, 5))
-    )
+    data_pca = scale_dict[:pca] * R_dict[:pca] * StatsBase.transform(
+                   dt_dict[:pca],
+                   dropdims(group.pca.data, dims=(3, 4, 5))
+               )
     # Extract rotated VAE data
-    data_vae = R_dict[:vae] * StatsBase.transform(
-        dt_dict[:vae],
-        dropdims(group.vae.data, dims=(3, 4, 5))
-    )
+    data_vae = scale_dict[:vae] * R_dict[:vae] * StatsBase.transform(
+                   dt_dict[:vae],
+                   dropdims(group.vae.data, dims=(3, 4, 5))
+               )
     # Extract rotated RHVAE data
-    data_rhvae = R_dict[:rhvae] * StatsBase.transform(
-        dt_dict[:rhvae],
-        dropdims(group.rhvae.data, dims=(3, 4, 5))
-    )
+    data_rhvae = scale_dict[:rhvae] * R_dict[:rhvae] * StatsBase.transform(
+                     dt_dict[:rhvae],
+                     dropdims(group.rhvae.data, dims=(3, 4, 5))
+                 )
 
     # Compute Frechet distance
-    frechet_pca = Antibiotic.stats.discrete_frechet_distance(
+    frechet_pca = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_pca
     )
-    frechet_vae = Antibiotic.stats.discrete_frechet_distance(
+    frechet_vae = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_vae
     )
-    frechet_rhvae = Antibiotic.stats.discrete_frechet_distance(
+    frechet_rhvae = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_rhvae
     )
 
@@ -878,34 +878,46 @@ df_frechet_individual = DF.DataFrame()
 # Loop over groups
 for (i, group) in enumerate(dd_group)
     # Extract phenotypic data
-    data_phenotype = dropdims(group.phenotype.data, dims=(3, 4, 5))
+    data_phenotype = StatsBase.transform(
+        dt_dict[:phenotype],
+        dropdims(group.phenotype.data, dims=(3, 4, 5))
+    )
     # Extract PCA data
-    data_pca = dropdims(group.pca.data, dims=(3, 4, 5))
+    data_pca = StatsBase.transform(
+        dt_dict[:pca],
+        dropdims(group.pca.data, dims=(3, 4, 5))
+    )
     # Apply procrustes rotation to PCA data
-    data_pca_rot, _, _ = Antibiotic.stats.procrustes(
+    data_pca_rot, _, _ = Antibiotic.geometry.procrustes(
         data_pca, data_phenotype, center=true
     )
     # Extract VAE data
-    data_vae = dropdims(group.vae.data, dims=(3, 4, 5))
+    data_vae = StatsBase.transform(
+        dt_dict[:vae],
+        dropdims(group.vae.data, dims=(3, 4, 5))
+    )
     # Apply procrustes rotation to VAE data
-    data_vae_rot, _, _ = Antibiotic.stats.procrustes(
+    data_vae_rot, _, _ = Antibiotic.geometry.procrustes(
         data_vae, data_phenotype, center=true
     )
     # Extract RHVAE data
-    data_rhvae = dropdims(group.rhvae.data, dims=(3, 4, 5))
+    data_rhvae = StatsBase.transform(
+        dt_dict[:rhvae],
+        dropdims(group.rhvae.data, dims=(3, 4, 5))
+    )
     # Apply procrustes rotation to RHVAE data
-    data_rhvae_rot, _, _ = Antibiotic.stats.procrustes(
+    data_rhvae_rot, _, _ = Antibiotic.geometry.procrustes(
         data_rhvae, data_phenotype, center=true
     )
 
     # Compute Frechet distance
-    frechet_pca = Antibiotic.stats.discrete_frechet_distance(
+    frechet_pca = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_pca_rot
     )
-    frechet_vae = Antibiotic.stats.discrete_frechet_distance(
+    frechet_vae = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_vae_rot
     )
-    frechet_rhvae = Antibiotic.stats.discrete_frechet_distance(
+    frechet_rhvae = Antibiotic.geometry.discrete_frechet_distance(
         data_phenotype, data_rhvae_rot
     )
 
@@ -962,5 +974,205 @@ axislegend(ax, position=:rb)
 # Save figure
 save("$(fig_dir)/pca_vs_vae_vs_rhvae_frechet_distance_individual.pdf", fig)
 save("$(fig_dir)/pca_vs_vae_vs_rhvae_frechet_distance_individual.png", fig)
+
+fig
+
+## =============================================================================
+
+println("Computing Dynamic Time Warping distance with global alignment...")
+
+# Group data by lineage, replicate, and evo
+dd_group = DD.groupby(dd_join, DD.dims(dd_join)[3:5])
+
+# Initialize empty dataframe to store Frechet distance
+df_dtw = DF.DataFrame()
+
+# Loop over groups
+for (i, group) in enumerate(dd_group)
+    # Extract phenotypic data
+    data_phenotype = StatsBase.transform(
+        dt_dict[:phenotype],
+        dropdims(group.phenotype.data, dims=(3, 4, 5))
+    )
+    # Extract rotated PCA data
+    data_pca = scale_dict[:pca] * R_dict[:pca] * StatsBase.transform(
+                   dt_dict[:pca],
+                   dropdims(group.pca.data, dims=(3, 4, 5))
+               )
+    # Extract rotated VAE data
+    data_vae = scale_dict[:vae] * R_dict[:vae] * StatsBase.transform(
+                   dt_dict[:vae],
+                   dropdims(group.vae.data, dims=(3, 4, 5))
+               )
+    # Extract rotated RHVAE data
+    data_rhvae = scale_dict[:rhvae] * R_dict[:rhvae] * StatsBase.transform(
+                     dt_dict[:rhvae],
+                     dropdims(group.rhvae.data, dims=(3, 4, 5))
+                 )
+
+    # Compute Dynamic Time Warping distance
+    dtw_pca, _, _ = DAW.dtw(data_phenotype, data_pca)
+    dtw_vae, _, _ = DAW.dtw(data_phenotype, data_vae)
+    dtw_rhvae, _, _ = DAW.dtw(data_phenotype, data_rhvae)
+
+    # Append to dataframe
+    DF.append!(df_dtw, DF.DataFrame(
+        lineage=first(values(DD.dims(group)[3])),
+        replicate=first(values(DD.dims(group)[4])),
+        evo=first(values(DD.dims(group)[5])),
+        dtw_pca=dtw_pca,
+        dtw_vae=dtw_vae,
+        dtw_rhvae=dtw_rhvae
+    ))
+end # for
+
+## =============================================================================
+
+# Initialize figure
+fig = Figure(size=(350, 350))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="Dynamic Time Warping distance",
+    ylabel="ECDF",
+    title="Dynamic Time Warping distance",
+    aspect=AxisAspect(1)
+)
+
+# Plot ECDF
+ecdfplot!(
+    ax,
+    df_dtw.dtw_pca,
+    color=ColorSchemes.seaborn_colorblind[1],
+    label="PCA",
+    linewidth=2,
+)
+ecdfplot!(
+    ax,
+    df_dtw.dtw_vae,
+    color=ColorSchemes.seaborn_colorblind[2],
+    label="VAE",
+    linewidth=2,
+)
+ecdfplot!(
+    ax,
+    df_dtw.dtw_rhvae,
+    color=ColorSchemes.seaborn_colorblind[3],
+    label="RHVAE",
+    linewidth=2,
+)
+
+axislegend(ax, position=:rb)
+
+# Save figure
+save("$(fig_dir)/pca_vs_vae_vs_rhvae_dtw_distance_global.pdf", fig)
+save("$(fig_dir)/pca_vs_vae_vs_rhvae_dtw_distance_global.png", fig)
+
+fig
+
+## =============================================================================
+
+println("Computing Dynamic Time Warping distance with local alignment...")
+
+# Group data by lineage, replicate, and evo
+dd_group = DD.groupby(dd_join, DD.dims(dd_join)[3:5])
+
+# Initialize empty dataframe to store Frechet distance
+df_dtw_local = DF.DataFrame()
+
+# Loop over groups
+for (i, group) in enumerate(dd_group)
+    # Extract phenotypic data
+    data_phenotype = StatsBase.transform(
+        dt_dict[:phenotype],
+        dropdims(group.phenotype.data, dims=(3, 4, 5))
+    )
+    # Extract rotated PCA data
+    data_pca = StatsBase.transform(
+        dt_dict[:pca],
+        dropdims(group.pca.data, dims=(3, 4, 5))
+    )
+    # Apply procrustes rotation to PCA data
+    data_pca_rot, _, _ = Antibiotic.geometry.procrustes(
+        data_pca, data_phenotype, center=true
+    )
+    # Extract rotated VAE data
+    data_vae = StatsBase.transform(
+        dt_dict[:vae],
+        dropdims(group.vae.data, dims=(3, 4, 5))
+    )
+    # Apply procrustes rotation to VAE data
+    data_vae_rot, _, _ = Antibiotic.geometry.procrustes(
+        data_vae, data_phenotype, center=true
+    )
+    # Extract rotated RHVAE data
+    data_rhvae = StatsBase.transform(
+        dt_dict[:rhvae],
+        dropdims(group.rhvae.data, dims=(3, 4, 5))
+    )
+    # Apply procrustes rotation to RHVAE data
+    data_rhvae_rot, _, _ = Antibiotic.geometry.procrustes(
+        data_rhvae, data_phenotype, center=true
+    )
+
+    # Compute Dynamic Time Warping distance
+    dtw_pca, _, _ = DAW.dtw(data_phenotype, data_pca_rot)
+    dtw_vae, _, _ = DAW.dtw(data_phenotype, data_vae_rot)
+    dtw_rhvae, _, _ = DAW.dtw(data_phenotype, data_rhvae_rot)
+
+    # Append to dataframe
+    DF.append!(df_dtw_local, DF.DataFrame(
+        lineage=first(values(DD.dims(group)[3])),
+        replicate=first(values(DD.dims(group)[4])),
+        evo=first(values(DD.dims(group)[5])),
+        dtw_pca=dtw_pca,
+        dtw_vae=dtw_vae,
+        dtw_rhvae=dtw_rhvae
+    ))
+end # for
+
+## =============================================================================
+
+# Initialize figure
+fig = Figure(size=(350, 350))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="Dynamic Time Warping distance",
+    ylabel="ECDF",
+    title="Dynamic Time Warping distance",
+    aspect=AxisAspect(1)
+)
+
+# Plot ECDF
+ecdfplot!(
+    ax,
+    df_dtw_local.dtw_pca,
+    color=ColorSchemes.seaborn_colorblind[1],
+    label="PCA",
+    linewidth=2,
+)
+ecdfplot!(
+    ax,
+    df_dtw_local.dtw_vae,
+    color=ColorSchemes.seaborn_colorblind[2],
+    label="VAE",
+    linewidth=2,
+)
+ecdfplot!(
+    ax,
+    df_dtw_local.dtw_rhvae,
+    color=ColorSchemes.seaborn_colorblind[3],
+    label="RHVAE",
+    linewidth=2,
+)
+
+axislegend(ax, position=:rb)
+
+# Save figure
+save("$(fig_dir)/pca_vs_vae_vs_rhvae_dtw_distance_local.pdf", fig)
+save("$(fig_dir)/pca_vs_vae_vs_rhvae_dtw_distance_local.png", fig)
 
 fig

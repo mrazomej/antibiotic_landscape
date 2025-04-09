@@ -223,8 +223,8 @@ split_fracs = sort(collect(keys(loss_train_dict)))
 # Add axis
 ax = Axis(
     fig[1, 1],
-    xlabel="split fraction",
-    ylabel="loss",
+    xlabel="train/validation split fraction",
+    ylabel="mean squared error",
     xticks=split_fracs,
 )
 
@@ -239,6 +239,8 @@ scatterlines!(ax, split_fracs, loss_val_last, label="validation")
 
 # Add legend
 axislegend(ax, position=:ct)
+
+ylims!(ax, high=0.01)
 
 # Save figure
 save("$(fig_dir)/loss_vs_split_frac.pdf", fig)

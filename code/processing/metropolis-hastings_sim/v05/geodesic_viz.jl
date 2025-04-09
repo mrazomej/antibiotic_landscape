@@ -21,6 +21,7 @@ import Flux
 import JLD2
 
 # Import basic math
+import LinearAlgebra
 import StatsBase
 import Random
 Random.seed!(42)
@@ -115,7 +116,7 @@ println("Loading NeuralGeodesic template...")
 nng_template = JLD2.load("$(vae_dir)/geodesic.jld2")["model"].mlp
 
 # Define number of points per axis
-n_time = 75
+n_time = 150
 # Define time points along curve
 t_array = Float32.(collect(range(0, 1, length=n_time)))
 
@@ -276,7 +277,7 @@ for page in 1:n_pages
             latent1_range,
             latent2_range,
             logdetG,
-            colormap=ColorSchemes.tokyo,
+            colormap=Reverse(to_colormap(ColorSchemes.PuBu))
         )
 
         # Group dd_evo by lineage
@@ -388,4 +389,79 @@ end
 
 ## =============================================================================
 
-println("Done!")
+# Initialize dataframe to store distance metrics
+df_dist = DF.DataFrame()
+
+# Loop through rows of df_meta
+for row in eachrow(df_meta)
+    # Load geodesic state
+    geo_state = JLD2.load(row.geodesic_state)
+    # Extract initial and final latent points
+    latent_init = geo_state["latent_init"]
+    latent_end = geo_state["latent_end"]
+    # Define NeuralGeodesic model
+    nng = NG.NeuralGeodesic(
+        nng_template,
+        latent_init,
+        latent_end,
+    )
+    # Update model state
+    Flux.loadmodel!(nng, geo_state["model_state"])
+    # Generate curve
+    curve = nng(t_array)
+    # Compute curve velocity with finite differences
+    curve_velocity = NG.curve_velocity_finitediff(nng, t_array)
+    # Compute geodesic length
+    geodesic_length = NG.curve_length(
+        AET.RHVAEs.metric_tensor(curve, rhvae),
+        curve_velocity,
+        t_array,
+    )
+    # Compute Euclidean length
+    euclidean_length = LinearAlgebra.norm(latent_end - latent_init)
+    # Compute decoder length
+    decoder_length = LinearAlgebra.norm(
+        rhvae.vae.decoder(latent_end).μ - rhvae.vae.decoder(latent_init).μ
+    )
+    # Store results
+    DF.append!(
+        df_dist,
+        DF.DataFrame(
+            :lineage => row.lineage,
+            :rep => row.rep,
+            :evo => row.evo,
+            :geodesic_length => geodesic_length,
+            :euclidean_length => euclidean_length,
+            :decoder_length => decoder_length,
+        ),
+    )
+end # for row in eachrow(df_meta)
+
+## =============================================================================
+
+# Initialize figure
+fig = Figure(size=(300, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="decoder distance",
+    ylabel="latent distance",
+)
+# Plot decoder length vs euclidean length
+scatter!(
+    ax,
+    df_dist.decoder_length,
+    df_dist.euclidean_length,
+)
+
+# Plot decoder length vs geodesic length
+scatter!(
+    ax,
+    df_dist.decoder_length,
+    df_dist.geodesic_length,
+)
+
+fig
+
+
