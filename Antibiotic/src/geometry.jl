@@ -178,6 +178,65 @@ function discrete_frechet_distance(P, Q; dims=2)
 end
 
 # ------------------------------------------------------------------------------
+
+"""
+    linear_interpolation(initial::AbstractVector, final::AbstractVector, num_points::Int)
+
+Create a linear interpolation between initial and final points.
+
+# Arguments
+- `initial::AbstractVector`: The starting point vector
+- `final::AbstractVector`: The ending point vector
+- `num_points::Int`: Number of points to include in the interpolation (including
+  start and end)
+
+# Returns
+- `trajectory::Matrix`: Matrix where each column is a point along the linear
+  path from initial to final. The matrix has dimensions (length(initial),
+  num_points).
+
+# Notes
+- If num_points = 2, returns just the start and end points
+- If num_points = 1, returns just the initial point
+- Throws an ArgumentError if num_points < 1 or if initial and final have
+  different dimensions
+"""
+function linear_interpolation(
+    initial::AbstractVector, final::AbstractVector, num_points::Int
+)
+    # Check inputs
+    if length(initial) != length(final)
+        throw(ArgumentError("Initial and final points must have the same dimensions"))
+    end
+
+    if num_points < 1
+        throw(ArgumentError("Number of points must be at least 1"))
+    end
+
+    # Handle special cases
+    if num_points == 1
+        return reshape(initial, :, 1)
+    end
+
+    # Create the output matrix
+    n_dims = length(initial)
+    trajectory = Matrix{promote_type(eltype(initial), eltype(final))}(
+        undef, n_dims, num_points
+    )
+
+    # For each interpolation step
+    for i in 1:num_points
+        # Calculate interpolation parameter t (0 to 1)
+        t = (i - 1) / (num_points - 1)
+
+        # Linear interpolation formula: p = initial + t * (final - initial)
+        trajectory[:, i] = initial + t * (final - initial)
+    end
+
+    return trajectory
+end
+
+# ------------------------------------------------------------------------------
 # Riemannian geometry
 # ------------------------------------------------------------------------------
 
