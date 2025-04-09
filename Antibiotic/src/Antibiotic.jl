@@ -12,4 +12,8 @@ module geometry
 include("geometry.jl")
 end # submodule
 
+module stats
+include("stats.jl")
+end # submodule
+
 end # module Antibiotic
