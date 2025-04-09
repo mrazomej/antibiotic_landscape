@@ -132,7 +132,10 @@ AET.RHVAEs.update_metric!(rhvae)
 
 println("Loading IC50 data...")
 
+# Load logic50 data
 df_logic50 = CSV.read("$(data_dir)/logic50_ci.csv", DF.DataFrame)
+# Load list of drugs
+drug_list = sort(unique(df_logic50.drug))
 
 println("Map data to latent space...")
 
@@ -875,3 +878,305 @@ end # for p in pairs
 save("$(fig_dir)/geodesic_examples_00.pdf", fig)
 
 fig
+
+## =============================================================================
+
+# Define (:env, :strain_num) pairs to plot
+pairs = [
+    ("KM", 16), ("NFLX", 33), ("TET", 8), ("KM", 28), ("NFLX", 35), ("TET", 3)
+]
+
+# Define filename
+fname = "$(fig_dir)/resistance_trajectories_example.pdf"
+
+# If file exists, delete it
+if isfile(fname)
+    rm(fname)
+end
+
+# Loop through pairs
+for p in pairs
+    println("Plotting resistance trajectory: $(p[1]) | strain #$(p[2])")
+    # Initialize figure
+    fig = Figure(size=(900, 500))
+
+    # Add grid layout
+    gl = fig[1, 1] = GridLayout()
+
+    # Add grid layour for subplots
+    gl_plots = gl[1, 1] = GridLayout()
+    # Add grid layout for legend
+    gl_legend = gl[2, 1] = GridLayout()
+
+    # Define number of rows and columns
+    rows = 2
+    cols = 4
+
+
+    # Extract geodesic metadata
+    data_meta = df_meta[
+        (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
+    ]
+    # Load geodesic state
+    geo_state = JLD2.load(first(data_meta.geodesic_state))
+    # Define NeuralGeodesic model
+    nng = NG.NeuralGeodesic(
+        nng_template,
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+    )
+    # Update model state
+    Flux.loadmodel!(nng, geo_state["model_state"])
+    # Generate curve
+    curve = nng(t_array)
+    # Run curve through decoder
+    curve_decoded = rhvae.vae.decoder(curve).μ
+
+    # Define linear interpolation between beginning and end of curve
+    line = Antibiotic.geometry.linear_interpolation(
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+        length(t_array)
+    )
+    # Run line through decoder
+    line_decoded = rhvae.vae.decoder(line).μ
+
+    # Loop through drugs
+    for (i, drug) in enumerate(drug_list)
+        # Define row and column index
+        row = (i - 1) ÷ cols + 1
+        col = (i - 1) % cols + 1
+        # Add axis
+        ax = Axis(
+            gl_plots[row, col],
+            aspect=AxisAspect(1.25),
+            title="$(drug)",
+            xlabel="days",
+            ylabel="logIC₅₀",
+        )
+        # Extract strain information
+        data_strain = df_logic50[
+            (df_logic50.drug.==drug).&(df_logic50.strain_num.==p[2]), :]
+        # Plot strain information
+        scatterlines!(
+            ax,
+            data_strain.day,
+            data_strain.logic50_mean_std,
+        )
+        # Add error bars
+        errorbars!(
+            ax,
+            data_strain.day,
+            data_strain.logic50_mean_std,
+            data_strain.logic50_mean_std .- data_strain.logic50_ci_lower_std,
+            data_strain.logic50_ci_upper_std .- data_strain.logic50_mean_std,
+            label="experimental",
+        )
+
+        # Plot decoded curve
+        # Create scaled x-axis from min to max day values
+        scaled_days = range(
+            minimum(data_strain.day),
+            maximum(data_strain.day),
+            length=length(curve_decoded[i, :])
+        )
+
+        # Plot decoded curve with scaled days
+        lines!(
+            ax,
+            scaled_days,
+            curve_decoded[i, :],
+            color=Antibiotic.viz.colors()[:dark_red],
+            label="RHVAE geodesic",
+            linewidth=2,
+        )
+
+        # Plot linear interpolation
+        lines!(
+            ax,
+            scaled_days,
+            line_decoded[i, :],
+            color=Antibiotic.viz.colors()[:gold],
+            label="linear interpolation",
+            linewidth=2,
+        )
+
+        # Add legend if first plot
+        if i == 1
+            Legend(
+                gl_legend[1, 1],
+                ax,
+                orientation=:horizontal,
+                merge=true,
+                framevisible=false,
+            )
+        end # if i == 1
+    end # for drug in drug_list
+
+    # Add title
+    Label(
+        gl[1, 1, Top()],
+        "$(p[1]) | strain #$(p[2])",
+        fontsize=20,
+        padding=(0, 0, 30, 0),
+    )
+
+    # Change spacing between subplots
+    rowgap!(gl_plots, -20)
+
+    # Change spacing between legend and subplots
+    rowgap!(gl, -10)
+
+    # Save figure
+    save("tmp.pdf", fig)
+    # Append to final figure
+    append_pdf!(fname, "tmp.pdf", cleanup=true)
+end
+
+## =============================================================================
+
+# Define filename
+fname = "$(fig_dir)/resistance_trajectories.pdf"
+
+# If file exists, delete it
+if isfile(fname)
+    rm(fname)
+end
+
+# Group df_meta by env and strain_num
+df_group = DF.groupby(df_meta, [:env, :strain_num])
+
+# Loop through groups
+for data_meta in df_group
+    println("Plotting resistance trajectory: $(data_meta.env[1]) | strain #$(data_meta.strain_num[1])")
+    # Initialize figure
+    fig = Figure(size=(900, 500))
+
+    # Add grid layout
+    gl = fig[1, 1] = GridLayout()
+
+    # Add grid layour for subplots
+    gl_plots = gl[1, 1] = GridLayout()
+    # Add grid layout for legend
+    gl_legend = gl[2, 1] = GridLayout()
+
+    # Define number of rows and columns
+    rows = 2
+    cols = 4
+
+    # Extract geodesic metadata
+    geo_state = JLD2.load(first(data_meta.geodesic_state))
+    # Define NeuralGeodesic model
+    nng = NG.NeuralGeodesic(
+        nng_template,
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+    )
+    # Update model state
+    Flux.loadmodel!(nng, geo_state["model_state"])
+    # Generate curve
+    curve = nng(t_array)
+    # Run curve through decoder
+    curve_decoded = rhvae.vae.decoder(curve).μ
+
+    # Define linear interpolation between beginning and end of curve
+    line = Antibiotic.geometry.linear_interpolation(
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+        length(t_array)
+    )
+    # Run line through decoder
+    line_decoded = rhvae.vae.decoder(line).μ
+
+    # Loop through drugs
+    for (i, drug) in enumerate(drug_list)
+        # Define row and column index
+        row = (i - 1) ÷ cols + 1
+        col = (i - 1) % cols + 1
+        # Add axis
+        ax = Axis(
+            gl_plots[row, col],
+            aspect=AxisAspect(1.25),
+            title="$(drug)",
+            xlabel="days",
+            ylabel="logIC₅₀",
+        )
+        # Extract strain information
+        data_strain = df_logic50[
+            (df_logic50.drug.==drug).&(df_logic50.strain_num.==data_meta.strain_num[1]), :]
+        # Plot strain information
+        scatterlines!(
+            ax,
+            data_strain.day,
+            data_strain.logic50_mean_std,
+            linewidth=2.5,
+        )
+        # Add error bars
+        errorbars!(
+            ax,
+            data_strain.day,
+            data_strain.logic50_mean_std,
+            data_strain.logic50_mean_std .- data_strain.logic50_ci_lower_std,
+            data_strain.logic50_ci_upper_std .- data_strain.logic50_mean_std,
+            label="experimental",
+        )
+
+        # Plot decoded curve
+        # Create scaled x-axis from min to max day values
+        scaled_days = range(
+            minimum(data_strain.day),
+            maximum(data_strain.day),
+            length=length(curve_decoded[i, :])
+        )
+
+        # Plot decoded curve with scaled days
+        lines!(
+            ax,
+            scaled_days,
+            curve_decoded[i, :],
+            color=Antibiotic.viz.colors()[:dark_red],
+            label="RHVAE geodesic",
+            linewidth=2.5,
+        )
+
+        # Plot linear interpolation
+        lines!(
+            ax,
+            scaled_days,
+            line_decoded[i, :],
+            color=Antibiotic.viz.colors()[:gold],
+            label="linear interpolation",
+            linewidth=2.5,
+        )
+
+        # Add legend if first plot
+        if i == 1
+            Legend(
+                gl_legend[1, 1],
+                ax,
+                orientation=:horizontal,
+                merge=true,
+                framevisible=false,
+            )
+        end # if i == 1
+    end # for drug in drug_list
+
+    # Add title
+    Label(
+        gl[1, 1, Top()],
+        "$(data_meta.env[1]) | strain #$(data_meta.strain_num[1])",
+        fontsize=20,
+        padding=(0, 0, 30, 0),
+    )
+
+    # Change spacing between subplots
+    rowgap!(gl_plots, -20)
+
+    # Change spacing between legend and subplots
+    rowgap!(gl, -10)
+
+    # Save figure
+    save("tmp.pdf", fig)
+    # Append to final figure
+    append_pdf!(fname, "tmp.pdf", cleanup=true)
+end
