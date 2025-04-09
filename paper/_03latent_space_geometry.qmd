@@ -16,14 +16,14 @@ structure of the simulated low-dimensional phenotypic space. @fig-03(A) shows a
 schematic depiction of the idea behind dimensionality reduction applied to
 fitness profiles. With fitness profiles as vectors on a high-dimensional data
 space, dimensionality reduction techniques implicitly assume that the positions
-of points in the data space occupy only a subset of the available space. More
+of points in the data space occupy only a subset of the available volume. More
 specifically, it is assumed that the data points lie on a low-dimensional
 manifold embedded in the high-dimensional data space. The goal of dimensionality
 reduction is to find such embedded manifold that captures the underlying
 structure of the data. When possible, plotting this embedded manifold as a flat
 space (either two or three dimensions) allows for the visualization of the
-underlying structure of the data. Given the conceptual picture developed so far,
-the hope is that the low-dimensional latent spaces captures features of the
+underlying structure data structure. Given the conceptual picture developed so
+far, the hope is that the low-dimensional latent spaces captures features of the
 structure of the underlying phenotypic space.
 
 Traditionally, the field has focused on linear dimensionality reduction
@@ -31,13 +31,13 @@ techniques such as singular value decomposition [@kinsler2020] or related
 methods such as sparse structure discovery [@petti2022]. Although
 computationally efficient, these methods are limited by the rigid assumption
 that fitness is a linear function of some latent phenotypes. To step away from
-such strong assumptions, we can take advantage of the advances in deep-learning
-based dimensionality reduction techniques, such as the variational autoencoder
-(VAE) [@kingma2014a]. However, the traditional VAE framework comes with the
-limitation that the learned latent representation---built from non-linear
-transformations of the input data---does not contain any geometric information
-of how such non-linear transformations affect the geometry of the learned space,
-making distances between points in the latent space meaningless
+such strong assumptions, we can take advantage of the advances in
+deep-learning-based dimensionality reduction techniques, such as the variational
+autoencoder (VAE) [@kingma2014a]. However, the traditional VAE framework comes
+with the limitation that the learned latent representation---built from
+non-linear transformations of the input data---does not contain any geometric
+information of how such non-linear transformations affect the geometry of the
+learned space, making distances between points in the latent space meaningless
 [@arvanitidis2021].
 
 To address both limitations on the linear and non-geometric nature of popular
@@ -81,4 +81,4 @@ workflow. The high-dimensional input is map into a low-dimensional latent space
 coordinate. From there, the network learns the metric tensor of the latent space
 via a specialized network. The latent coordinate is then decoded into an
 accurate reconstruction of the original fitness profile
-input.](./fig/main/fig03_v03){#fig-03}
+input.](./fig/main/fig03_v04){#fig-03}
