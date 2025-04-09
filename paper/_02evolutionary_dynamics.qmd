@@ -18,10 +18,11 @@ $F(\underline{p})$ and the genotype-phenotype density $GP(\underline{p})$.
 At each time step, the population can transition from its current phenotype
 $\underline{p}$ to a new phenotype $\underline{p}'$, where the proposed
 phenotype $\underline{p}'$ is drawn from a proposal distribution
-$q(\underline{p}' \mid \underline{p})$. Whether this transition occurs depends
-on both the relative fitness of the new phenotype and how easily it can be
-reached through mutations. Specifically, the probability of accepting a
-transition is given by
+$q(\underline{p}' \mid \underline{p})$. Whether this transition
+occurs---equivalent to the mutation being fixed int the population---depends on
+both the relative fitness of the new phenotype and how easily it can be reached
+through mutations. Specifically, as derived in the Supplementary Materials, the
+probability of accepting a transition is given by
 
 $$
 P_{\text{accept}} = \min\left(
@@ -36,7 +37,7 @@ drift. This parameter can be interpreted as the strength of selection---higher
 values of $\beta$ lead to more deterministic trajectories that closely follow
 fitness gradients, while lower values allow for more stochastic exploration of
 the phenotype space. Detailed mathematical derivations and analysis of this
-algorithm can be found in the Supplementary Materials (see @sec-metropolis).
+algorithm can be found in the Supplementary Materials.
 
 This formulation captures several key aspects of evolution. First, transitions
 to phenotypes with higher fitness are always accepted, reflecting the power of
@@ -45,16 +46,17 @@ occur with some probability, capturing the role of genetic drift. Finally, the
 $GP(\underline{p})$ term ensures that transitions are influenced by the
 accessibility of phenotype---even a high-fitness phenotype is unlikely to be
 reached if it requires extremely rare genetic variants. @fig-02(A, top) shows
-some example trajectories of multiple lineages evolving over time on a simple
-single-peaked fitness landscape. @fig-02(A, bottom) shows the fitness trajectory
-of these evolving lineages over time. When we examine these same evolutionary
-trajectories under different environmental conditions (@fig-02(B)), we observe
-that, as expected, while the path through phenotype space remains fixed---since
-it represents the adaptive walk on the selection environment in @fig-02(A)---the
-fitness values we measure vary because each environment imposes its own unique
-fitness landscape. The fitness values in all environments for a given lineage
-at a given time point define one fitness profile as the ones depicted in
-@fig-01(D).
+some example trajectories in phenotypic space of multiple lineages evolving on a
+simple single-peaked fitness landscape. @fig-02(A, bottom) shows the fitness
+trajectory of these evolving lineages over time, i.e., the equivalent of the
+experimental observable we can access in a laboratory setting. When we examine
+these same phenotypic trajectories under different environmental conditions
+(@fig-02(B)), we observe that, as expected, while the path through phenotype
+space remains fixed---since it represents the adaptive walk on the selection
+environment in @fig-02(A)---the fitness values we measure vary because each
+environment imposes its own unique fitness landscape. The fitness values in all
+environments for a given lineage at a given time point define one fitness
+profile as the ones depicted in @fig-01(D).
 
 In what follows, we use synthetic data generated from this model, where ten
 lineages (initial phenotype coordinates) in two replicates (different
