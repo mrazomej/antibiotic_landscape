@@ -219,6 +219,7 @@ JLD2.save(
         "logic50_mcmc" => logic50_mcmc,
         "logic50_mcmc_std" => logic50_mcmc_std,
         "logic50_meta" => df_filt_meta,
+        "drugs" => sort(unique(df_ic50_thresh.drug))
     )
 )
 
