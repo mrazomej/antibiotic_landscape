@@ -495,3 +495,149 @@ for (i, data) in enumerate(df_group)
     save("$(fig_dir)/geodesic_$(first(data.drug))rm.png", fig)
 
 end # for data
+
+## =============================================================================
+
+# Define filename
+fname = "$(fig_dir)/resistance_trajectories_prediction.pdf"
+
+# If file exists, delete it
+if isfile(fname)
+    rm(fname)
+end
+
+# Group df_meta by drug
+df_group_drug = DF.groupby(df_geodesic, [:drug])
+
+# Define numebr of columns
+n_cols = 4
+
+# Loop over drugs
+for (data_geodesic_drug) in df_group_drug
+    # Extract drug name
+    drug = data_geodesic_drug.drug[1]
+    # Define needed number of rows
+    n_rows = ceil(Int, size(data_geodesic_drug, 1) / n_cols)
+    # Initialize figure
+    fig = Figure(size=(250 * n_cols, 200 * n_rows + 100))
+    # Add grid layout
+    gl = fig[1, 1] = GridLayout()
+    # Add grid layour for subplots
+    gl_plots = gl[1, 1] = GridLayout()
+    # Add grid layout for legend
+    gl_legend = gl[2, 1] = GridLayout()
+    # Group data by strain_num
+    data_group = DF.groupby(data_geodesic_drug, [:strain_num])
+    # Loop over data_group
+    for (j, data_geo_strain) in enumerate(data_group)
+        # Extract strain number
+        strain_num = data_geo_strain.strain_num[1]
+        # Define row and column
+        row = (j - 1) ÷ n_cols + 1
+        col = (j - 1) % n_cols + 1
+        # Define axis
+        ax = Axis(
+            gl_plots[row, col],
+            aspect=AxisAspect(1.25),
+            title="$(drug) | strain #$(strain_num)",
+            xlabel="day",
+            ylabel="log2(IC50) in $(drug)",
+        )
+        # Extract strain information
+        data_strain = df_logic50[
+            (df_logic50.drug.==drug).&(df_logic50.strain_num.==data_geo_strain.strain_num[1]), :]
+        # Plot strain information
+        scatterlines!(
+            ax,
+            data_strain.day,
+            data_strain.logic50_mean_std,
+            linewidth=2.5,
+        )
+        # Add error bars
+        errorbars!(
+            ax,
+            data_strain.day,
+            data_strain.logic50_mean_std,
+            data_strain.logic50_mean_std .- data_strain.logic50_ci_lower_std,
+            data_strain.logic50_ci_upper_std .- data_strain.logic50_mean_std,
+            label="experimental",
+        )
+        # Extract geodesic metadata
+        geo_state = JLD2.load(first(data_geo_strain.geodesic_state))
+        # Define NeuralGeodesic model
+        nng = NG.NeuralGeodesic(
+            nng_template,
+            geo_state["latent_init"],
+            geo_state["latent_end"],
+        )
+        # Generate curve
+        curve = nng(t_array)
+        # Extract decoder
+        decoder = rhvae_dict[drug].crossval.vae.decoder
+        # Run curve through decoder
+        curve_decoded = decoder(curve).μ
+        # Define linear interpolation between beginning and end of curve
+        line = Antibiotic.geometry.linear_interpolation(
+            geo_state["latent_init"],
+            geo_state["latent_end"],
+            length(t_array)
+        )
+        # Run line through decoder
+        line_decoded = decoder(line).μ
+
+        # Create scaled x-axis from min to max day values
+        scaled_days = range(
+            minimum(data_strain.day),
+            maximum(data_strain.day),
+            length=length(vec(curve_decoded)),
+        )
+
+        # Plot decoded curve
+        lines!(
+            ax,
+            scaled_days,
+            vec(curve_decoded),
+            color=Antibiotic.viz.colors()[:dark_red],
+            label="RHVAE geodesic",
+            linewidth=2.5,
+        )
+        # Plot decoded line
+        lines!(
+            ax,
+            scaled_days,
+            vec(line_decoded),
+            color=Antibiotic.viz.colors()[:gold],
+            label="linear interpolation",
+            linewidth=2.5,
+        )
+        # Add legend if first plot
+        if j == 1
+            Legend(
+                gl_legend[1, 1],
+                ax,
+                orientation=:horizontal,
+                merge=true,
+                framevisible=false,
+            )
+        end # if j == 1
+
+    end # for data_group_strain
+
+    # Add title
+    Label(
+        gl[1, 1, Top()],
+        "RHVAE train without $(drug)",
+        fontsize=20,
+        padding=(0, 0, 30, 0),
+    )
+
+    # Change spacing between subplots
+    rowgap!(gl_plots, -10)
+    # Change spacing between legend and subplots
+    rowgap!(gl, 0)
+
+    # Save figure
+    save("tmp.pdf", fig)
+    # Append to final figure
+    append_pdf!(fname, "tmp.pdf", cleanup=true)
+end # for data_geodesic_drug
