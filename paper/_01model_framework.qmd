@@ -39,9 +39,9 @@ be sampled (see Supplementary Material for a more detailed discussion). The
 location and size of these peaks are assumed to be fixed by the
 genotype-to-phenotype map, irrespective of the environment. We also introduce a
 fitness function $F: \mathbb{R}^P \to \mathbb{R}$ that maps phenotypes to
-fitness values. However, the topology of the fitness landscape is determined by
-the environment $E$. @fig-01(B, right) shows a schematic of the simplest fitness
-landscape with a single symmetric Gaussian peak.
+fitness values. However, the topography of the fitness landscape is determined
+by the environment $E$. @fig-01(B, right) shows a schematic of the simplest
+fitness landscape with a single symmetric Gaussian peak.
 
 In recent experimental evolution studies, genotypes are evolved under a fixed
 environment, but the fitness is measured on multiple environments
@@ -50,8 +50,8 @@ changing the environment on the phenotype-fitness map. Even though the mapping
 from genotype to phenotype (coordinates of the example points) and the
 genotype-to-phenotype density map (white contours) are invariant to the
 environment, the fitness landscape (black dashed contours) changes as the
-environment varies. We model this by changing the topology of the fitness map in
-terms of the number, position, height, and width of the Gaussian peaks.
+environment varies. We model this by changing the topography of the fitness map
+in terms of the number, position, height, and width of the Gaussian peaks.
 Therefore, we conceptualize the measured fitness profiles on multiple
 environments as measuring the heights of a fixed phenotypic coordinate on
 multiple fitness landscapes. @fig-01(D) shows the equivalent experimental
