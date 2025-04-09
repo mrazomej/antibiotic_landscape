@@ -75,4 +75,4 @@ same trajectories shown in (A) overlaid on different fitness maps determined by
 different environments. Although the phenotypic coordinates of the genotypes
 remain the same (top panels) the resulting fitness readouts change as the
 topology of the environments changes (bottom
-panels).](./fig/main/fig02_v04){#fig-02}
+panels).](./fig/main/fig02_v05){#fig-02}
