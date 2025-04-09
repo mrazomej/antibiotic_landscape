@@ -93,9 +93,11 @@ known as variational inference. The objective then becomes to find the
 parameters $\phi$ that, when used to approximate the posterior distribution
 $π_\theta(\underline{z}|\underline{x})$, it is as close as possible to this
 posterior distribution. To matematize this objective, we establish that we want
-to minimize the Kullback-Leibler divergence between the variational distribution
+to minimize the Kullback-Leibler divergence (also known as the relative entropy)
+between the variational distribution
 $q_\phi(\underline{z} \mid \underline{x})$ and the posterior distribution
-$π_\theta(\underline{z} \mid \underline{x})$, i.e.,
+$π_\theta(\underline{z} \mid \underline{x})$, i.e., we aim to find $q_\phi^*$
+such that
 
 $$
 q_\phi^*(\underline{z} \mid \underline{x}) = 
@@ -105,9 +107,9 @@ q_\phi^*(\underline{z} \mid \underline{x}) =
 \right).
 $${#eq-variational-approx}
 
-After some algebraic manipulation, we can show that this objective is equivalent
-to maximizing the so-called evidence lower bound (ELBO), $\mathcal{L}$, of the
-marginal likelihood, i.e.,
+After some algebraic manipulation involving the well-known Gibbs inequality, we
+can show that this objective is equivalent to maximizing the so-called evidence
+lower bound (ELBO), $\mathcal{L}$, of the marginal likelihood, i.e.,
 
 $$
 \mathcal{L} = \left\langle 
@@ -141,25 +143,26 @@ steps to the variational posterior approximation, targeting the true posterior
 [@salimans2015]. In MCMC, rather than optimizing the parameters of a parametric
 distribution, we sample an initial position $\underline{z}_0$ from a simple
 distribution $q(\underline{z}_0)$ or $q(\underline{z}_0 \mid \underline{x})$ and
-subsequently, apply a stochastic transition operator $r(\underline{z}_{t+1} \mid
-\underline{z}_t)$ to draw a new value $\underline{z}_{t+1}$ from the distribution
+subsequently, apply a stochastic transition operator $T(\underline{z}_{t+1} \mid
+\underline{z}_t)$ to draw a new value $\underline{z}_{t+1}$ from the
+distribution
 
 $$
-\underline{z}_{t + 1} \sim r(\underline{z}_{t+1} \mid \underline{z}_t).
+\underline{z}_{t + 1} \sim T(\underline{z}_{t+1} \mid \underline{z}_t).
 $${#eq-mcmc-transition}
 
 Applying this operator over and over again, we build a Markov chain
 
 $$
 \underline{z}_0 \to \underline{z}_1 \to \underline{z}_2 \to \cdots 
-\to \underline{z}_T,
+\to \underline{z}_\tau,
 $${#eq-mcmc-chain}
 
 whose long-term behavior---the so-called stationary distribution---is a very
 good approximation of the true posterior distribution $π_\theta(\underline{z}
 \mid \underline{x})$. In other words, by carefully engineering the transition
-operator $r(\underline{z}_{t+1} \mid \underline{z}_t)$, and applying it over and
-over again, the "histogram" of the samples $\{\underline{z}_t\}_{t=0}^T$ will
+operator $T(\underline{z}_{t+1} \mid \underline{z}_t)$, and applying it over and
+over again, the "histogram" of the samples $\{\underline{z}_t\}_{t=0}^\tau$ will
 converge to the true posterior distribution $π_\theta(\underline{z} \mid
 \underline{x})$.
 
@@ -167,60 +170,196 @@ The central idea to combine MCMC with variational inference is to interpret the
 Markov chain
 
 $$
-q(\underline{Z} | \underline{x}) = 
-q(\underline{z}_0 \mid \underline{x}) \prod_{t=1}^T r(\underline{z}_t \mid
-\underline{z}_{t-1}, \underline{x})
+q_\phi(\underline{z} | \underline{x}) = 
+q_\phi(\underline{z}_0 \mid \underline{x}) 
+\prod_{t=1}^\tau T(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x})
 $${#eq-mcmc-chain-def}
 
-as a variational approximation with an auxiliary variable $\underline{Z} =
-\{\underline{z}_0, \underline{z}_1, \ldots, \underline{z}_T\}$ that we can use
-to approximate the true posterior distribution $π_\theta(\underline{z} \mid
-\underline{x})$. Integrating this expression into the ELBO, we get
-
+as a variational approximation in an expanded space of variables that includes
+the original latent variables $\underline{z}$ and the auxiliary variables
+$\underline{Z} = \{\underline{z}_0, \underline{z}_1, \ldots,
+\underline{z}_{\tau-1}\}$. Note that $\underline{Z}$ reaches up to $\tau-1$
+steps, since we consider the final step $\underline{z}_\tau$ to be the original
+latent variable $\underline{z}$. In other words, our variational distribution
+now writes
 $$
-\begin{aligned}
-\mathcal{L}_{\text {aux }} & =
+q_\phi(\underline{z}_\tau, \underline{Z} \mid \underline{x}) = 
+q_\phi(\underline{z}_0 \mid \underline{x}) 
+\prod_{t=1}^\tau T(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x}).
+$${#eq-mcmc-chain-def-expanded}
+
+Integrating this expression into the ELBO ([@eq-elbo]) consists of substituting
+the of substituting the variational distribution $q_\phi(\underline{z} \mid
+\underline{x})$ with the expression in [@eq-mcmc-chain-def-expanded], i.e.,
+$$
+\mathcal{L}_{\text {aux }} =
 \left\langle\log 
     \left[
-        p\left(\underline{x}, \underline{z}_T\right) 
-        r\left(\underline{Z} \mid \underline{x}, \underline{z}_T\right)
+        \pi_\theta\left(\underline{x}, \underline{z}_T\right) 
+        r\left(\underline{Z} \mid \underline{z}_T, \underline{x}\right)
     \right] - 
     \log q\left(\underline{Z}, \underline{z}_T \mid \underline{x}\right)
-\right\rangle_{q\left(\underline{Z}, \underline{z}_T \mid \underline{x}\right)} \\
-& =\mathcal{L} - 
+\right\rangle_{q\left(\underline{Z}, \underline{z}_T \mid \underline{x}\right)}
+$${#eq-elbo-aux}
+
+where $r(\underline{Z} \mid \underline{z}_T, \underline{x})$ is an auxiliary
+inference distribution that we can choose freely. This auxiliary distribution is
+necessary to ensure we account for the auxiliary variables $\underline{Z}$ that
+are now part of our variational distribution. By splitting the joint
+distribution in [@eq-mcmc-chain-def-expanded] as
+
+$$
+q_\phi(\underline{z}_\tau, \underline{Z} \mid \underline{x}) =
+q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x}) q_\phi(\underline{z}_\tau \mid \underline{x}),
+$${#eq-mcmc-chain-def-expanded-2}
+
+and substituting this expression into [@eq-elbo-aux], we get
+
+$$
+\mathcal{L}_{\text {aux }} =
+\left\langle\log 
+    \left[
+        \pi_\theta\left(\underline{x}, \underline{z}_T\right) 
+        r\left(\underline{Z} \mid \underline{z}_T, \underline{x}\right)
+    \right] - 
+    \log \left[q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x}) q_\phi(\underline{z}_\tau \mid \underline{x})\right]
+\right\rangle_{q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x}) q_\phi(\underline{z}_\tau \mid \underline{x})}.
+$${#eq-elbo-aux-2}
+
+Rearranging the terms, we get
+$$
+\begin{aligned}
+\mathcal{L}_{\text {aux }} 
+& = \left\langle 
+    \log \frac{\pi_\theta\left(\underline{x}, \underline{z}_\tau\right)}{q_\phi(\underline{z}_\tau \mid \underline{x})} - 
+    \log \frac{q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})}{r(\underline{Z} \mid \underline{z}_\tau, \underline{x})}
+\right\rangle_{
+    q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})
+    q_\phi(\underline{z}_\tau \mid \underline{x})
+}, \\
+& = \left\langle 
+    \log \frac{\pi_\theta\left(\underline{x}, \underline{z}_\tau\right)}{q_\phi(\underline{z}_\tau \mid \underline{x})}
+\right\rangle_{
+    q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})
+    q_\phi(\underline{z}_\tau \mid \underline{x})
+} - 
+\left\langle
+    \log \frac{q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})}{r(\underline{Z} \mid \underline{z}_\tau, \underline{x})}
+\right\rangle_{
+    q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})
+    q_\phi(\underline{z}_\tau \mid \underline{x})
+}.
+\end{aligned}
+$${#eq-elbo-aux-3}
+
+From here, we note that the first term in [@eq-elbo-aux-3] is the original ELBO
+with the extra expectation taken over the auxiliary variables $\underline{Z}$.
+However, this term does not depend on the auxiliary variables $\underline{Z}$,
+thus, we can take it out of the expectation, i.e.,
+
+$$
+\mathcal{L}_{\text {aux }} = \mathcal{L} - 
+\left\langle 
+    \log \frac{q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})}{r(\underline{Z} \mid \underline{z}_\tau, \underline{x})}
+\right\rangle_{
+    q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})
+    q_\phi(\underline{z}_\tau \mid \underline{x})
+}.
+$${#eq-elbo-aux-4}
+
+For the second term, taking the expectation over the auxiliary variables
+makes it equivalent to the KL divergence between the variational distribution
+$q_\phi(\underline{Z} \mid \underline{z}_\tau, \underline{x})$ and the auxiliary
+distribution $r(\underline{Z} \mid \underline{z}_\tau, \underline{x})$, i.e.,
+
+$$
+\mathcal{L}_{\text {aux }} = \mathcal{L} - 
 \left\langle 
     D_{K L}\left[
         q\left(\underline{Z} \mid \underline{z}_T, \underline{x}\right) \| 
         r\left(\underline{Z} \mid \underline{z}_T, \underline{x}\right)
     \right]
-\right\rangle_{q\left(\underline{z}_T \mid \underline{x}\right)} \\
-& \leq \mathcal{L} \leq \log [p(\underline{x})].
+\right\rangle_{q\left(\underline{z}_T \mid \underline{x}\right)}
+\leq \mathcal{L} \leq \log [\pi_\theta(\underline{x})].
+$${#eq-elbo-aux-5}
+
+where the inequality follows from the non-negativity of the KL divergence and
+the fact that the ELBO is a lower bound to the marginal likelihood. Since the
+variational distribution $q_\phi(\underline{z}_\tau,\mid \underline{x})$ we
+care about comes from the marginalization of the variational distribution over
+the auxiliary variables $\underline{Z}$, 
+
+$$
+q_\phi(\underline{z}_\tau \mid \underline{x}) = 
+\int d\underline{Z} \, 
+q_\phi(\underline{Z}, \underline{z}_\tau \mid \underline{x}),
+$${#eq-mcmc-marginalization}
+
+it is now a very rich family of distributions that can be used to better
+approximate the true posterior distribution $π_\theta(\underline{z} \mid
+\underline{x})$. However, we are still left with the task of choosing the
+auxiliary distribution $r(\underline{Z} \mid \underline{z}_\tau,
+\underline{x})$. What Salimans & Kingma [@salimans2015] propose is to define 
+this distribution also as a Markov chain, but in reverse order, i.e.,
+
+$$
+r(\underline{Z} \mid \underline{z}_\tau, \underline{x}) = 
+\prod_{t=1}^\tau 
+T^\dagger(\underline{z}_{t-1} \mid \underline{z}_t, \underline{x}),
+$${#eq-mcmc-chain-def-aux}
+
+where $T^\dagger(\underline{z}_{t-1} \mid \underline{z}_t, \underline{x})$ is
+the reverse of the transition operator $T(\underline{z}_{t+1} \mid
+\underline{z}_t, \underline{x})$.  Notice that the dependence on
+$\underline{z}_\tau$ is dropped. 
+
+This choice of the auxiliary distribution leads to an upper bound on the
+marginal log likelihood, of the form
+
+$$
+\begin{aligned}
+\log \pi_\theta(\underline{x}) & \geq 
+\left\langle
+    \log \pi_\theta\left(\underline{x}, \underline{z}_\tau\right) -
+    \log q_\phi\left(
+        \underline{z}_0, \ldots, \underline{z}_\tau \mid \underline{x}
+    \right) +
+    \log r\left(
+        \underline{z}_0, \ldots, \underline{z}_{\tau-1} \mid \underline{x}, \underline{z}_\tau
+    \right)
+\right\rangle_{q_\phi} \\
+& = \left\langle
+    \log \left[\frac{
+        \pi_\theta\left(\underline{x}, \underline{z}_\tau\right)
+        }{
+            q_\phi\left(\underline{z}_0 \mid \underline{x}\right)
+        }
+    \right] +
+    \sum_{t=1}^\tau \log \left[
+        \frac{
+            T^\dagger\left(\underline{z}_{t-1} \mid \underline{z}_t, \underline{x}\right)
+        }{
+            T\left(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x}\right)
+        }
+    \right]
+\right\rangle_{q_\phi}.
 \end{aligned}
-$${#eq-elbo-aux}
+$${#eq-elbo-aux-6}
 
-We are free to choose the transition operator $r(\underline{Z} \mid
-\underline{x}, \underline{z}_T)$. 
-
-
-$q_\phi(\underline{z} \mid \underline{x})$. In
-other words, we can interpret the Markov chain as a parametric distribution over
-the latent variables $\underline{z}$ that we can use to approximate the true
-posterior distribution $π_\theta(\underline{z} \mid \underline{x})$.
-
-
-
-
-
+In other words, we can interpret the Markov chain as a parametric distribution
+over the latent variables $\underline{z}$ that we can use to approximate the
+true posterior distribution $π_\theta(\underline{z} \mid \underline{x})$.
+The unbiased estimator of the marginal likelihood is then given by
 
 $$
 \hat{π}_\theta(\underline{x}) = 
 \frac{
     π_\theta(\underline{x}, \underline{z}_T) 
-    \prod_{t=1}^T r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})
+    \prod_{t=1}^T T^\dagger(\underline{z}_{t-1} \mid \underline{z}_t, \underline{x})
 }{
     q_\phi(\underline{z}_0 \mid \underline{x}) 
-    \prod_{t=1}^T r(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x})
-},
+    \prod_{t=1}^T T(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x})
+}.
 $${#eq-mcmc-approx}
 
 Let's unpack this expression. When performing MCMC, we build a Markov chain
@@ -232,50 +371,48 @@ $${#eq-mcmc-chain}
 
 where $\underline{z}_0 \sim q_\phi(\underline{z} \mid \underline{x})$ is the
 initial position in the chain. At each step, we sample a new position from the
-transition kernel $r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})$,
-which is a function of the current position and the observed data. This way, we
-build a Markov chain that converges to the true posterior distribution.
-Therefore, the denominator of [@eq-mcmc-approx] computes the probability of the
-initial position of the chain $q_\phi(\underline{z}_0 \mid \underline{x})$ times
-the product of the transition probabilities for each of the $T$ steps,
-$\prod_{t=1}^T r(\underline{z}_t \mid \underline{z}_{t-1}, \underline{x})$.
+transition kernel $T(\underline{z}_{t} \mid \underline{z}_{t-1},
+\underline{x})$, which is a function of the current position and the observed
+data. This way, we build a Markov chain that converges to the true posterior
+distribution. Therefore, the denominator of [@eq-mcmc-approx] computes the
+probability of the initial position of the chain $q_\phi(\underline{z}_0 \mid
+\underline{x})$ times the product of the transition probabilities for each of
+the $\tau$ steps, $\prod_{t=1}^\tau T(\underline{z}_{t} \mid
+\underline{z}_{t-1}, \underline{x})$.
 
 The numerator of [@eq-mcmc-approx] computes the equivalent probability, but in
 reverse order, i.e., starts by sampling the final position of the chain
 $\underline{z}_T$ from the joint distribution $π_\theta(\underline{x},
 \underline{z}_T)$ and then samples the previous positions of the chain
 $\underline{z}_{T-1}, \underline{z}_{T-2}, \ldots, \underline{z}_0$ from the
-transition kernel run backwards, $r(\underline{z}_t \mid \underline{z}_{t+1},
-\underline{x})$.
-
-
- and $r(\underline{z}_t \mid \underline{z}_{t-1},
-\underline{x})$ is the transition kernel from which $\underline{z}_t$ is sampled
-and $r(\underline{z}_{t+1} \mid \underline{z}_t, \underline{x})$ is the reverse
-kernel. Including a Markov chain into the variational posterior approximation
-has the effect of trading off computational efficiency for better posterior
-approximation. In other words, to improve the quality of the posterior
-approximation we make use of arguably the most accurate family of inference
-methods known to date---Markov Chain Monte Carlo (MCMC)---at the cost of
-increased computational cost. Intuitively, our estimate of the unbiased gradient
-of the ELBO becomes more and more accurate the more steps we include in the
-Markov chain, but at the same time, the cost of computing this gradient becomes
-higher and higher.
+transition kernel run backwards, $T^\dagger(\underline{z}_{t-1} \mid
+\underline{z}_{t}, \underline{x})$. Including a Markov chain into the
+variational posterior approximation has the effect of trading off computational
+efficiency for better posterior approximation. In other words, to improve the
+quality of the posterior approximation we make use of arguably the most accurate
+family of inference methods known to date---Markov Chain Monte Carlo (MCMC)---at
+the cost of increased computational cost. Intuitively, our estimate of the
+unbiased gradient of the ELBO becomes more and more accurate the more steps we
+include in the Markov chain, but at the same time, the cost of computing this
+gradient becomes higher and higher.
 
 ### Normalizing Flows (Rezende & Mohamed 2015) {#sec-normalizing-flows}
 
-Another approach, known as normalizing flows, considers the composition of
-simple smooth invertible transformations [@rezende2016], such that a variable
-$\underline{z}_K$ consists of $K$ of such transformations of a random variable
-$\underline{z}_0$, sampled from a simple distribution, i.e., 
+Another approach to imrpove the posterior approximation is to consider the
+composition of simple smooth invertible transformations [@rezende2016], such
+that a variable $\underline{z}_K$ consists of $K$ of such transformations of a
+random variable $\underline{z}_0$, sampled from a simple distribution, i.e.,
+$\underline{z}_K$ is built from chaining $K$ simple transformations, $f_x^k$, of
+$\underline{z}_0$,
 
 $$
 \underline{z}_K = 
-f_x^K \circ f_x^{K-1} \circ \cdots \circ f_x^1(\underline{z}_0).
+f_x^K \circ f_x^{K-1} \circ \cdots \circ f_x^1(\underline{z}_0),
 $${#eq-normalizing-flow}
 
-Because the transformation is smooth and invertible, the change of variables
-formula tells us that the density of $\underline{z}_K$ writes
+where $f_i \circ f_j(x) = f_i(f_j(x))$. Because we define the transformations to
+be smooth and invertible, the change of variables formula tells us that the
+density of $\underline{z}_K$ writes
 
 $$
 q_\phi(\underline{z}_K \mid \underline{x}) = 
@@ -383,8 +520,8 @@ $$
 }.
 $${#eq-extended-density}
 
-where $H_{\underline{x}}(\underline{z}, \underline{\rho})$ is the Hamiltonian,
-defined as
+where $H_{\underline{x}}(\underline{z}, \underline{\rho})$ is the so-called
+Hamiltonian, defined as
 
 $$
 H_{\underline{x}}(\underline{z}, \underline{\rho}) = 
