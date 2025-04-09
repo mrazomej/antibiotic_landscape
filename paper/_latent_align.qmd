@@ -1,0 +1,159 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Latent Space Alignment via Procrustes Analysis
+
+When working with different dimensionality reduction techniques such as PCA,
+VAE, and RHVAE, the resulting latent spaces often have arbitrary orientations
+that make direct comparisons challenging. To facilitate meaningful comparisons
+between these latent representations and the ground truth phenotype space, we
+employed Procrustes analysis. This section details the mathematical foundations
+and implementation of our alignment procedure.
+
+### Mathematical Formulation
+
+Procrustes analysis finds an optimal rigid transformation (rotation, scaling,
+and potentially translation) that aligns one set of points with another while
+minimizing the sum of squared differences. Given two sets of points
+$\underline{\underline{X}}$ and $\underline{\underline{Y}}$, where each column
+represents a point in $\mathbb{R}^d$, the objective is to find a transformation
+of $\underline{\underline{X}}$ that best aligns with $\underline{\underline{Y}}$.
+
+The Procrustes problem can be formulated as:
+
+$$
+\min_{R, s} \|
+    \underline{\underline{Y}} - 
+    s\underline{\underline{X}}\,\underline{\underline{R}}
+\|_F^2
+$${#eq-procrustes}
+
+where:
+
+- $\underline{\underline{R}}$ is a $d \times d$ orthogonal rotation matrix
+  ($\underline{\underline{R}}^T\underline{\underline{R}} =
+  \underline{\underline{I}}$)
+- $s$ is a scalar scaling factor
+- $\|\cdot\|_F$ denotes the Frobenius norm
+
+If the data is centered (mean-subtracted), the transformation involves only
+rotation and scaling. The solution to this optimization problem is obtained
+through Singular Value Decomposition (SVD).
+
+### Algorithmic Procedure
+
+Our implementation of Procrustes analysis follows these steps:
+
+1. **Data Standardization**: Each latent representation (PCA, VAE, RHVAE) and
+the ground truth phenotype data are standardized to have zero mean and unit
+standard deviation along each dimension:
+
+$$
+\hat{\underline{\underline{X}}} = 
+\frac{
+    \underline{\underline{X}} -
+    \underline{\mu}_X
+}{
+    \underline{\sigma}_X
+}
+$${#eq-standardization}
+
+where $\underline{\mu}_X$ and $\underline{\sigma}_X$ are the mean and standard
+deviation vectors computed across all points in the respective space.
+
+2. **Inner Product Computation**: We compute the inner product matrix between
+the standardized ground truth phenotype data $\hat{\underline{\underline{Y}}}$
+and each standardized latent representation $\hat{\underline{\underline{X}}}$:
+
+$$
+\underline{\underline{A}} = 
+\hat{\underline{\underline{Y}}}\,
+\hat{\underline{\underline{X}}}^T
+$${#eq-inner-product}
+
+3. **Singular Value Decomposition**: We perform SVD on the inner product matrix:
+
+$$
+\underline{\underline{A}} = 
+\underline{\underline{U}}\,
+\underline{\underline{\Sigma}}\,
+\underline{\underline{V}}^T
+$${#eq-svd}
+
+where $\underline{\underline{U}}$ and $\underline{\underline{V}}$ are orthogonal
+matrices, and $\underline{\underline{\Sigma}}$ is a diagonal matrix of singular
+values.
+
+4. **Rotation Matrix Computation**: The optimal rotation matrix is given by:
+
+$$
+\underline{\underline{R}} = 
+\underline{\underline{U}}\,
+\underline{\underline{V}}^T
+$${#eq-rotation}
+
+5. **Scaling Factor Computation**: The optimal scaling factor is calculated as:
+
+$$
+s = \frac{
+        \text{tr}(\underline{\underline{\Sigma}})
+    }{
+        \|\hat{\underline{\underline{X}}}\|_F^2
+    }
+$${#eq-scaling}
+
+where $\text{tr}(\underline{\underline{\Sigma}})$ is the trace of
+$\underline{\underline{\Sigma}}$ (sum of singular values) and
+$\|\hat{\underline{\underline{X}}}\|_F^2$ is the squared Frobenius norm of
+$\hat{\underline{\underline{X}}}$.
+
+6. **Transformation Application**: Each latent representation is transformed
+using the corresponding rotation matrix:
+
+$$
+\underline{\underline{X}}_{\text{aligned}} = 
+\underline{\underline{R}}\,\hat{\underline{\underline{X}}}
+$${#eq-alignment}
+
+7. **Similarity Metric Calculation**: We compute a correlation-like measure to
+quantify the goodness-of-fit between the aligned spaces:
+
+$$
+\rho = \frac{
+    \text{tr}(\underline{\underline{\Sigma}})
+}{
+    \|\hat{\underline{\underline{X}}}\|_F\|\hat{\underline{\underline{Y}}}\|_F
+}
+$${#eq-correlation}
+
+   This metric ranges from 0 (no similarity) to 1 (perfect alignment).
+
+### Significance for Comparative Analysis
+
+The Procrustes alignment enables several critical aspects of our analysis:
+
+1. **Direct Visual Comparison**: By aligning all latent spaces to the same
+orientation as the ground truth phenotype space, we can directly visualize and
+compare the structural preservation properties of each dimensionality reduction
+technique.
+
+2. **Quantitative Assessment**: The correlation metric $\rho$ provides a
+quantitative measure of how well each latent representation preserves the
+geometric structure of the ground truth phenotype space.
+
+3. **Geometric Structure Preservation**: The alignment allows us to assess how
+features such as local neighborhoods, relative distances, and global structure
+are preserved in each latent representation.
+
+4. **Trajectory Analysis**: For evolutionary trajectories, the alignment enables
+comparison of path lengths, directional changes, and convergence patterns across
+different representations.
+
+This alignment procedure forms the foundation for the comparative analysis
+presented in the main text, where we evaluate the effectiveness of different
+dimensionality reduction techniques in capturing the underlying structure of the
+phenotype space.
