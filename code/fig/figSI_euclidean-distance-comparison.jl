@@ -61,7 +61,7 @@ vae_dir = "$(version_dir)/vae"
 rhvae_state_dir = "$(vae_dir)/model_state"
 vae_state_dir = "$(vae_dir)/vae_model_state"
 # Define output directory
-fig_dir = "$(git_root())/fig/main"
+fig_dir = "$(git_root())/fig/supplementary"
 
 # Generate output directory if it doesn't exist
 if !isdir(fig_dir)
