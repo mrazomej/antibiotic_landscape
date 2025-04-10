@@ -1,0 +1,232 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Advantages of Non-linear Manifold Learning for Fitness Landscapes {#sec-nonlinear}
+
+In this section, we provide a theoretical justification for why non-linear
+dimensionality reduction methods may offer advantages over linear methods when
+modeling fitness landscapes. We build upon the concept of a causal manifold that
+captures the relationship between genotypes and their fitness across multiple
+environments.
+
+### Theoretical Framework: The Causal Manifold
+
+The central concept in our analysis is what we call the causal manifold
+$\mathcal{M}_c$---a low-dimensional space that encodes the information necessary
+to predict fitness across multiple environments. Another way to think about this
+manifold is in a data-generating process perspective: the causal manifold is the
+underlying space from which the fitness data is sampled. We define two key
+functions:
+
+1. The mapping from genotype to manifold coordinates:
+$$
+\phi: g \in G \to \underline{z} \in \mathcal{M}_{c}.
+$${#eq-geno-to-manifold}
+
+2. The mapping from manifold coordinates to fitness in environment $E$:
+$$
+F_{E}: \underline{z} \in \mathcal{M}_c \to f_{E} \in \mathbb{R}.
+$${#eq-manifold-to-fitness}
+
+A critical assumption in linear approaches is that $F_E$ takes the form
+$$
+F_E(\underline{z}) = \underline{\beta} \cdot \underline{z} + b,
+$${#eq-linear-fitness}
+
+where $\underline{\beta}$ is a vector of coefficients and $b$ is a scalar
+offset. However, this assumption may not hold in general. While local linearity
+is guaranteed by Taylor's theorem for small changes in $\underline{z}$
+
+$$
+F_E(\underline{z} + \Delta\underline{z}) \approx 
+F_E({\underline{z}}) + 
+\nabla F_E(\underline{z}) \cdot \Delta \underline{z} + 
+\mathcal{O}(\Delta\underline{z}^2),
+$${#eq-taylor}
+
+global linearity across the entire manifold is a much stronger constraint that
+may not reflect the true complexity of biological systems.
+
+### Limitations of Linear Methods
+
+Applying linear dimensionality reduction techniques such as PCA/SVD constructs a
+flat manifold of dimension $d$ to approximate our fitness data. Through SVD, our
+$N \times M$ data matrix $\underline{\underline{D}}$ ($N$ being the number of
+environments and $M$ being the number of genotypes) containing fitness profiles
+is factorized as
+
+$$
+\underline{\underline{D}} = 
+\underline{\underline{U}}\, 
+\underline{\underline{\Sigma}}\, 
+\underline{\underline{V}}^T.
+$${#eq-svd}
+
+The coordinates of genotype $i$ in this linear manifold are given by
+
+$$
+\underline{z}_i = \left[\begin{matrix}
+\sigma_1 v_{i1} \\
+\sigma_2 v_{i2} \\
+\vdots \\
+\sigma_d v_{id}
+\end{matrix}\right].
+$${#eq-linear-coords}
+
+The key property of this linear approach is that Euclidean distances in the
+manifold directly correspond to differences in fitness profiles in the truncated
+space
+
+$$
+\|\underline{z}_1 - \underline{z}_2\| = 
+\|\underline{\hat{f}}_1 - \underline{\hat{f}}_2\|.
+$${#eq-linear-distance}
+
+While mathematically elegant and computationally tractable, this linear
+constraint may limit our ability to capture the true structure of the underlying
+phenotypic space efficiently.
+
+### Mathematical Advantages of Non-linear Manifolds
+
+A critical insight comes from the Whitney Embedding Theorem, which states that
+any smooth $d'$-dimensional manifold can be embedded in a Euclidean space of
+dimension $2d' + 1$. This theorem explains the "unreasonable effectiveness of
+linear maps" while simultaneously highlighting their limitations. If the true
+causal manifold has intrinsic dimension $d'$ but is non-linear, capturing its
+structure with a linear approximation generally requires $d > d'$ dimensions.
+
+To formalize this intuition, we consider the causal manifold as a Riemannian
+manifold with a position-dependent metric tensor
+$\underline{\underline{G}}(\underline{z})$. On a non-linear manifold, this
+tensor is not the identity matrix, meaning
+
+$$
+\|\underline{z}_1 - \underline{z}_2\| \neq 
+\|\underline{\hat{f}}_1 - \underline{\hat{f}}_2\|.
+$${#eq-nonlinear-distance}
+
+Instead, the distance between points on a Riemannian manifold is given by
+$$
+d_{\mathcal{M}_c}(\underline{z}_1, \underline{z}_2) = 
+\min_{\underline{\gamma}} \int_0^1 dt
+\sqrt{
+    \underline{\dot{\gamma}}(t)^T \, 
+    \underline{\underline{G}}(\underline{\gamma}(t)) \, 
+    \underline{\dot{\gamma}}(t)
+},
+$${#eq-riemannian-distance}
+
+where $\underline{\gamma}$ is a parametric curve with $\underline{\gamma}(0) =
+\underline{z}_1$ and $\underline{\gamma}(1) = \underline{z}_2$. The curve that
+minimizes this distance is called a **geodesic**.
+
+The key insight is that when the true causal manifold is non-linear,
+approximating it with a linear method requires additional dimensions to
+compensate for the curvature. This is reflected in the singular value spectrum,
+where
+
+$$
+\|\underline{\hat{f}}_1 - \underline{\hat{f}}_2\|^2 = 
+\sum_{j=1}^d \sigma_j^2(v_{1j} - v_{2j})^2.
+$${#eq-svd-distance}
+
+In this case, dimensions beyond the intrinsic dimensionality $d'$ (with smaller
+singular values) are effectively "compensating" for the curvature of the true
+manifold.
+
+### Non-linear Methods for Manifold Learning
+
+To learn non-linear manifolds directly, we employ variational autoencoders
+(VAEs) that can approximate the joint distribution between fitness profiles
+$\underline{f}$ and latent variables $\underline{z}$ representing coordinates on
+the causal manifold
+
+$$
+\pi(\underline{f}, \underline{z}) \approx 
+\pi(\underline{f} | \underline{z})\pi(\underline{z}).
+$${#eq-joint-prob}
+
+VAEs employ two key neural networks
+
+1. An encoder function that approximates the posterior distribution:
+$$
+\Phi^{(E)}: \underline{f} \in \mathbb{R}^N \rightarrow
+\left[\begin{matrix}
+\underline{\mu}^{(E)} \\ \\
+\underline{\log \underline{\sigma}^{(E)}}
+\end{matrix}\right] \in \mathbb{R}^{2d}.
+$${#eq-encoder}
+
+2. A decoder function that maps latent points to fitness profiles:
+$$
+\Psi^{(D)}: 
+\underline{z} \in \mathcal{M}_c \rightarrow 
+\underline{\mu}^{(D)} \in \mathbb{R}^N.
+$${#eq-decoder}
+
+For Riemannian Hamiltonian Variational Autoencoders (RHVAEs), used throughout
+this work,we add a third network that explicitly learns the metric tensor
+$\underline{\underline{G}}(\underline{z})$, allowing the model to capture the
+geometric structure of the manifold directly.
+
+### Comparative Advantages of Non-linear Methods
+
+Non-linear methods offer several theoretical advantages over linear approaches:
+
+1. **Dimensionality Efficiency**: Non-linear methods can potentially represent
+the same information with fewer dimensions. If the true causal manifold has
+intrinsic dimension $d'$ but is non-linear, linear methods may require $d > d'$
+dimensions to achieve comparable accuracy.
+
+2. **Geometric Fidelity**: By learning the metric tensor directly, non-linear
+methods can capture the true geometric structure of the fitness landscape,
+including features like multiple peaks, valleys, and saddle points that may be
+difficult to represent in a linear space.
+
+3. **Predictive Power**: If the true relationship between genotype and fitness
+is non-linear, non-linear methods should provide better predictive accuracy,
+especially for genotypes distant from those in the training set.
+
+4. **Information Compression**: By capturing the curvature of the manifold
+explicitly rather than through additional dimensions, non-linear methods can
+provide a more compact and interpretable representation of the fitness
+landscape.
+
+### Empirical Evidence and Caveats
+
+While the theoretical advantages of non-linear methods are clear, empirical
+validation is essential. We observe this advantage in practice through several
+metrics:
+
+1. **Reconstruction Error**: Non-linear methods achieve lower reconstruction
+error for the same latent dimension compared to linear methods.
+
+2. **Singular Value Spectrum**: The slow decay of singular values in the data
+matrix suggests inherent non-linearity in the fitness landscape.
+
+3. **Generalization Performance**: Non-linear methods show better performance
+when predicting fitness for held-out genotypes.
+
+However, it's important to note that non-linear methods come with their own
+challenges:
+
+1. **Overfitting Risk**: Non-linear methods may introduce spurious complexity
+when the true structure is simple.
+
+2. **Interpretation Challenges**: The biological meaning of non-linear latent
+dimensions can be less straightforward than those from linear methods.
+
+3. **Training Complexity**: Non-linear methods typically require more data and
+computational resources for effective training.
+
+4. **Validation Requirements**: Demonstrating that a learned non-linear
+structure reflects true biological relationships rather than mathematical
+artifacts requires careful validation.
+
+In this work, we address these challenges through rigorous cross-validation,
+comparison with linear baselines, and direct analysis of the learned metric
+structure to ensure biological relevance of our non-linear representations.
