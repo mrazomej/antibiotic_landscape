@@ -624,15 +624,15 @@ for lineage in DD.dims(pca_data, :lineage)
                 # Check if the x-coordinate is less than zero and update
                 # max_left_point
                 if (pca_coords[1] < 0) && (pca_coords[2] > max_left_value)
-                    max_left_value = pca_coords[2]
-                    max_left_point = (lineage, time, replicate, evo)
+                    global max_left_value = pca_coords[2]
+                    global max_left_point = (lineage, time, replicate, evo)
                 end
 
                 # Check if the x-coordinate is greater than zero and update
                 # max_right_point
                 if (pca_coords[1] > 0) && (pca_coords[2] > max_right_value)
-                    max_right_value = pca_coords[2]
-                    max_right_point = (lineage, time, replicate, evo)
+                    global max_right_value = pca_coords[2]
+                    global max_right_point = (lineage, time, replicate, evo)
                 end
             end
         end
@@ -668,7 +668,7 @@ function plot_point!(ax, space, metadata, color)
         marker=:diamond,
         strokecolor=color,
         strokewidth=2,
-        rasterize=true,
+        rasterize=false,
     )
 end
 
