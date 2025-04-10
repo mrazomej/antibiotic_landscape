@@ -39,6 +39,9 @@ structure of the phenotypic space in which adaptation unfolds.
 <!-- Latent space geometry -->
 {{< include _03latent_space_geometry.qmd >}}
 
+<!-- Latent space simulation -->
+{{< include _04latent_space_simulation.qmd >}}
+
 <!-- Experimental results -->
 <!-- {{< include _experiment.qmd >}} -->
 
@@ -64,6 +67,9 @@ structure of the phenotypic space in which adaptation unfolds.
 
 <!-- notes on RHVAE -->
 {{< include _rhvae.qmd >}}
+
+<!-- notes on nonlinear manifolds -->
+{{< include _nonlinear_manifolds.qmd >}}
 
 <!-- notes on Neural Geodesic -->
 {{< include _architecture.qmd >}}
