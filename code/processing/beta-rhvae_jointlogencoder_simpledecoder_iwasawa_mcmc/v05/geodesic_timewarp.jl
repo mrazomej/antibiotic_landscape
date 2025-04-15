@@ -590,6 +590,259 @@ end
 
 ## =============================================================================
 
+println("Computing timewarp reconstruction error results...")
+
+# Group df_meta by env and strain_num
+df_group = DF.groupby(df_meta, [:env, :strain_num])
+
+# Initialize empty list to store results
+df_timewarp = []
+
+# Loop through groups
+for data_meta in df_group
+    # Extract environment and strain number
+    env = data_meta.env[1]
+    strain_num = data_meta.strain_num[1]
+
+    # Extract strain latent space information
+    data_strain_rhvae = DF.sort(
+        df_latent[
+            (df_latent.strain_num.==strain_num).&(df_latent.model.=="rhvae"), :],
+        [:day]
+    )
+    data_strain_vae = DF.sort(
+        df_latent[
+            (df_latent.strain_num.==strain_num).&(df_latent.model.=="vae"), :],
+        [:day]
+    )
+    data_strain_pca = DF.sort(
+        df_latent[
+            (df_latent.strain_num.==strain_num).&(df_latent.model.=="pca"), :],
+        [:day]
+    )
+
+    # Extract geodesic metadata
+    geo_state = JLD2.load(first(data_meta.geodesic_state))
+    # Define NeuralGeodesic model
+    nng = NG.NeuralGeodesic(
+        nng_template,
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+    )
+    # Update model state
+    Flux.loadmodel!(nng, geo_state["model_state"])
+    # Generate curve
+    curve = nng(t_array)
+    # Run curve through decoder
+    curve_decoded = rhvae.vae.decoder(curve).μ
+
+    # Define linear interpolation between beginning and end for RHVAE
+    line_rhvae = Float32.(Antibiotic.geometry.linear_interpolation(
+        geo_state["latent_init"],
+        geo_state["latent_end"],
+        length(t_array)
+    ))
+    # Run line through decoder
+    line_decoded_rhvae = rhvae.vae.decoder(line_rhvae).μ
+
+    # Define linear interpolation between beginning and end for VAE
+    line_vae = Float32.(Antibiotic.geometry.linear_interpolation(
+        [data_strain_vae[1, :latent1], data_strain_vae[1, :latent2]],
+        [data_strain_vae[end, :latent1], data_strain_vae[end, :latent2]],
+        length(t_array)
+    ))
+    # Run line through decoder
+    line_decoded_vae = vae.decoder(line_vae).μ
+
+    # Define linear interpolation between beginning and end for PCA
+    line_pca = Float32.(Antibiotic.geometry.linear_interpolation(
+        [data_strain_pca[1, :latent1], data_strain_pca[1, :latent2]],
+        [data_strain_pca[end, :latent1], data_strain_pca[end, :latent2]],
+        length(t_array)
+    ))
+    # Run line through decoder
+    line_decoded_pca = MStats.reconstruct(fit_pca, line_pca)
+
+    # Compute time warp
+    cost_geo_rhvae, idx1_geo_rhvae, idx2_geo_rhvae = DAW.dtw(
+        Float32.(Matrix(permutedims(data_strain_rhvae[:, [:latent1, :latent2]]))),
+        curve,
+        transportcost=1
+    )
+    cost_line_rhvae, idx1_line_rhvae, idx2_line_rhvae = DAW.dtw(
+        Float32.(Matrix(permutedims(data_strain_rhvae[:, [:latent1, :latent2]]))),
+        line_rhvae,
+        transportcost=1
+    )
+    cost_line_vae, idx1_line_vae, idx2_line_vae = DAW.dtw(
+        Float32.(Matrix(permutedims(data_strain_vae[:, [:latent1, :latent2]]))),
+        line_vae,
+        transportcost=1
+    )
+    cost_line_pca, idx1_line_pca, idx2_line_pca = DAW.dtw(
+        Float32.(Matrix(permutedims(data_strain_pca[:, [:latent1, :latent2]]))),
+        line_pca,
+        transportcost=1
+    )
+
+    # Loop through drugs
+    for (i, drug) in enumerate(drug_list)
+        # Extract strain information
+        data_strain = df_logic50[
+            (df_logic50.drug.==drug).&(df_logic50.strain_num.==strain_num), :]
+
+        # Append RHVAE results to list
+        push!(df_timewarp, Dict(
+            :env => env,
+            :strain_num => strain_num,
+            :drug => drug,
+            :cost => cost_geo_rhvae,
+            :model => "rhvae",
+            :type => "geodesic",
+            :mse => Flux.mse(
+                curve_decoded[i, idx2_geo_rhvae],
+                data_strain.logic50_mean_std[idx1_geo_rhvae]
+            ),
+        ))
+
+        push!(df_timewarp, Dict(
+            :env => env,
+            :strain_num => strain_num,
+            :drug => drug,
+            :cost => cost_geo_rhvae,
+            :model => "rhvae",
+            :type => "linear",
+            :mse => Flux.mse(
+                line_decoded_rhvae[i, idx2_line_rhvae],
+                data_strain.logic50_mean_std[idx1_line_rhvae]
+            ),
+        ))
+
+        # Append VAE results to list
+        push!(df_timewarp, Dict(
+            :env => env,
+            :strain_num => strain_num,
+            :drug => drug,
+            :cost => cost_line_vae,
+            :model => "vae",
+            :type => "linear",
+            :mse => Flux.mse(
+                line_decoded_vae[i, idx2_line_vae],
+                data_strain.logic50_mean_std[idx1_line_vae]
+            ),
+        ))
+
+        # Append PCA results to list
+        push!(df_timewarp, Dict(
+            :env => env,
+            :strain_num => strain_num,
+            :drug => drug,
+            :cost => cost_line_pca,
+            :model => "pca",
+            :type => "linear",
+            :mse => Flux.mse(
+                line_decoded_pca[i, idx2_line_pca],
+                data_strain.logic50_mean_std[idx1_line_pca]
+            ),
+        ))
+    end # for drug in drug_list
+end
+
+# Convert list to data frame
+df_timewarp = DF.DataFrame(df_timewarp)
+## =============================================================================
+
+println("Plotting timewarp reconstruction error results...")
+
+# Define colors for each model
+colors = Dict(
+    "pca" => Antibiotic.viz.colors()[:gold],
+    "vae" => Antibiotic.viz.colors()[:dark_green],
+    "rhvae" => Antibiotic.viz.colors()[:light_red],
+)
+
+# Initialize figure
+fig = Figure(size=(900, 500))
+
+# Define number of rows and columns
+rows = 2
+cols = 4
+
+# Add grid layout
+gl = fig[1, 1] = GridLayout()
+# Add grid layout for subplots
+gl_plots = gl[1, 1] = GridLayout()
+# Add grid layout for legend
+gl_legend = gl[2, 1] = GridLayout()
+
+# Loop through drugs
+for (i, drug) in enumerate(drug_list)
+    # Define row and column index
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
+    # Add axis
+    ax = Axis(
+        gl_plots[row, col],
+        title="$(drug)",
+        aspect=AxisAspect(1.25),
+        xlabel="mean squared error",
+        ylabel="ECDF",
+        xlabelsize=12,
+        ylabelsize=12,
+    )
+    # Loop through models
+    for model in ["pca", "vae", "rhvae"]
+        # Extract data
+        data = df_timewarp[
+            (df_timewarp.drug.==drug).&(df_timewarp.model.==model).&(df_timewarp.type.=="linear"), :]
+        # Plot ECDF
+        ecdfplot!(
+            ax,
+            data.mse,
+            color=colors[model],
+            label="$(uppercase(model)) linear interpolation",
+            linewidth=2.5,
+        )
+    end
+    # Extract data
+    data = df_timewarp[
+        (df_timewarp.drug.==drug).&(df_timewarp.type.=="geodesic"), :]
+    # Plot ECDF
+    ecdfplot!(
+        ax,
+        data.mse,
+        color=Antibiotic.viz.colors()[:dark_red],
+        label="RHVAE geodesic",
+        linewidth=2.5,
+    )
+    # Add legend
+    if i == 1
+        Legend(
+            gl_legend[1, 1],
+            ax,
+            orientation=:horizontal,
+            merge=true,
+            framevisible=false,
+        )
+    end
+end
+
+# Add title
+Label(
+    gl[1, 1, Top()],
+    "Timewarp reconstruction error",
+    fontsize=16,
+    padding=(0, 0, 30, 0),
+)
+
+# Save figure
+save("$(fig_dir)/timewarp_reconstruction_error.pdf", fig)
+
+fig
+
+
+## =============================================================================
+
 println("Plotting resistance trajectories with latent space timewarp and Brownian bridge...")
 
 # Define filename
