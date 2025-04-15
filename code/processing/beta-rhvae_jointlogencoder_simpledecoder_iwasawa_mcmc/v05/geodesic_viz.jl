@@ -196,11 +196,18 @@ logdetG = reshape(
 
 ## =============================================================================
 
+println("Plotting latent space geodesic trajectories...")
+
 # Group data by :env
 df_group = DF.groupby(df_latent, :env)
 
 # Define figure name
 fname = "$(fig_dir)/geodesic_latent_trajectory"
+
+# If PDF exists, delete it
+if isfile("$(fname).pdf")
+    rm("$(fname).pdf")
+end
 
 # Loop through meta chunks
 for (i, data_group) in enumerate(df_group)
@@ -244,7 +251,8 @@ for (i, data_group) in enumerate(df_group)
             latent1_range,
             latent2_range,
             logdetG,
-            colormap=ColorSchemes.tokyo,
+            colormap=Reverse(to_colormap(ColorSchemes.PuBu)),
+            alpha=0.5,
         )
 
         # Extract lineage information
@@ -255,6 +263,7 @@ for (i, data_group) in enumerate(df_group)
             ax,
             lineage.latent1,
             lineage.latent2,
+            color=Antibiotic.viz.colors()[:gold],
             markersize=6,
             linewidth=2,
         )
@@ -275,9 +284,8 @@ for (i, data_group) in enumerate(df_group)
         lines!(
             ax,
             eachrow(curve)...,
-            linewidth=2,
-            linestyle=(:dot, :dense),
-            color=:white,
+            color=Antibiotic.viz.colors()[:dark_red],
+            linewidth=2.5,
         )
 
         # Add first point 
@@ -285,16 +293,8 @@ for (i, data_group) in enumerate(df_group)
             ax,
             [lineage.latent1[1]],
             [lineage.latent2[1]],
-            color=:white,
-            markersize=11,
-            marker=:xcross
-        )
-        scatter!(
-            ax,
-            [lineage.latent1[1]],
-            [lineage.latent2[1]],
-            color=:black,
-            markersize=7,
+            color=Antibiotic.viz.colors()[:dark_red],
+            markersize=12,
             marker=:xcross
         )
 
@@ -303,21 +303,163 @@ for (i, data_group) in enumerate(df_group)
             ax,
             [lineage.latent1[end]],
             [lineage.latent2[end]],
-            color=:white,
-            markersize=11,
+            color=Antibiotic.viz.colors()[:dark_red],
+            markersize=12,
             marker=:utriangle
         )
+    end # for data_meta in eachrow(chunk)
+    # Save figure as PDF
+    save("tmp.pdf", fig)
+    # Append to final figure
+    append_pdf!("$(fname).pdf", "tmp.pdf", cleanup=true)
+    # Save figure as PNG
+    save("$(fname)_$(first(data_group.env)).png", fig)
+end # for chunk in df_meta_chunks
+
+## =============================================================================
+
+# Group data by :env
+df_group = DF.groupby(df_latent, :env)
+
+# Define figure name
+fname = "$(fig_dir)/geodesic_latent_trajectory_brownian"
+
+# If PDF exists, delete it
+if isfile("$(fname).pdf")
+    rm("$(fname).pdf")
+end
+
+# Define number of Brownian bridges
+n_bridges = 100
+# Define sigma
+sigma = 2.0
+
+# Loop through meta chunks
+for (i, data_group) in enumerate(df_group)
+    # Extract unique strain numbers
+    strain_nums = unique(data_group.strain_num)
+    # Define number of columns
+    cols = 4
+    # Define the number of needed rows
+    rows = ceil(Int, length(strain_nums) / cols)
+
+    # Initialize figure
+    fig = Figure(size=(200 * cols, 200 * rows))
+    # Add grid layout
+    gl = fig[1, 1] = GridLayout()
+    # Loop through metadata
+    for (j, strain_num) in enumerate(strain_nums)
+        # Extract metadata
+        data_meta = df_meta[
+            (df_meta.env.==first(data_group.env)).&(df_meta.strain_num.==strain_num),
+            :]
+
+        println("   - Plotting geodesic: $(strain_num)")
+        # Define row and column index
+        row = (j - 1) ÷ cols + 1
+        col = (j - 1) % cols + 1
+        # Add axis
+        ax = Axis(
+            gl[row, col],
+            aspect=AxisAspect(1),
+            title="env: $(first(data_meta.env)) | " *
+                  "strain: $(first(data_meta.strain_num))",
+            xticksvisible=false,
+            yticksvisible=false,
+        )
+        # Hide axis labels
+        hidedecorations!(ax)
+
+        # Plot heatmap of log determinant of metric tensor
+        heatmap!(
+            ax,
+            latent1_range,
+            latent2_range,
+            logdetG,
+            colormap=Reverse(to_colormap(ColorSchemes.PuBu)),
+            alpha=0.5,
+        )
+
+        # Extract lineage information
+        lineage = df_latent[df_latent.strain_num.==data_meta.strain_num, :]
+
+        # Load geodesic state
+        geo_state = JLD2.load(first(data_meta.geodesic_state))
+
+        # Generate Brownian bridge
+        rnd_bridge = Antibiotic.geometry.brownian_bridge(
+            geo_state["latent_init"],
+            geo_state["latent_end"],
+            length(t_array),
+            sigma=sigma,
+            num_paths=n_bridges,
+            rng=Random.MersenneTwister(42)
+        )
+
+        for j in 1:n_bridges
+            # Plot Brownian bridge
+            lines!(
+                ax,
+                eachrow(rnd_bridge[:, :, j])...,
+                color=(:gray, 0.25),
+                linewidth=1.5,
+            )
+        end # for j in 1:n_bridges
+
+        # Plot lineage
+        scatterlines!(
+            ax,
+            lineage.latent1,
+            lineage.latent2,
+            color=Antibiotic.viz.colors()[:gold],
+            markersize=6,
+            linewidth=2,
+        )
+
+        # Define NeuralGeodesic model
+        nng = NG.NeuralGeodesic(
+            nng_template,
+            geo_state["latent_init"],
+            geo_state["latent_end"],
+        )
+        # Update model state
+        Flux.loadmodel!(nng, geo_state["model_state"])
+        # Generate curve
+        curve = nng(t_array)
+        # Add geodesic line to axis
+        lines!(
+            ax,
+            eachrow(curve)...,
+            color=Antibiotic.viz.colors()[:dark_red],
+            linewidth=2.5,
+        )
+
+        # Add first point 
+        scatter!(
+            ax,
+            [lineage.latent1[1]],
+            [lineage.latent2[1]],
+            color=Antibiotic.viz.colors()[:dark_red],
+            markersize=12,
+            marker=:xcross
+        )
+
+        # Add last point
         scatter!(
             ax,
             [lineage.latent1[end]],
             [lineage.latent2[end]],
-            color=:black,
-            markersize=7,
+            color=Antibiotic.viz.colors()[:dark_red],
+            markersize=12,
             marker=:utriangle
         )
-        # Save figure 
-        save("$(fname)_$(first(data_group.env)).png", fig)
     end # for data_meta in eachrow(chunk)
+    # Save figure as PDF
+    save("tmp.pdf", fig)
+    # Append to final figure
+    append_pdf!("$(fname).pdf", "tmp.pdf", cleanup=true)
+    # Save figure as PNG
+    save("$(fname)_$(first(data_group.env)).png", fig)
 end # for chunk in df_meta_chunks
 
 ## =============================================================================
