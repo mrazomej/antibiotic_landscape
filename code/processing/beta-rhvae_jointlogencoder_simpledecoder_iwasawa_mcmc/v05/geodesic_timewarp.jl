@@ -709,7 +709,7 @@ for data_meta in df_group
             :env => env,
             :strain_num => strain_num,
             :drug => drug,
-            :cost => cost_geo_rhvae,
+            :cost => cost_line_rhvae,
             :model => "rhvae",
             :type => "linear",
             :mse => Flux.mse(
@@ -840,7 +840,52 @@ save("$(fig_dir)/timewarp_reconstruction_error.pdf", fig)
 
 fig
 
+## =============================================================================
 
+# Initialize figure
+fig = Figure(size=(350, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="time warping cost",
+    ylabel="ECDF",
+)
+
+# Loop through models
+for model in ["pca", "vae", "rhvae"]
+    # Extract data
+    data = df_timewarp[
+        (df_timewarp.drug.==drug_list[1]).&(df_timewarp.model.==model).&(df_timewarp.type.=="linear"), :]
+    # Plot ECDF
+    ecdfplot!(
+        ax,
+        data.cost,
+        color=colors[model],
+        label="$(uppercase(model))",
+        linewidth=2.5,
+    )
+end
+
+# Extract data
+data = df_timewarp[
+    (df_timewarp.drug.==drug_list[1]).&(df_timewarp.type.=="geodesic"), :]
+# Plot ECDF
+ecdfplot!(
+    ax,
+    data.cost,
+    color=Antibiotic.viz.colors()[:dark_red],
+    label="RHVAE geodesic",
+    linewidth=2.5,
+)
+
+# Add legend
+axislegend(ax, merge=true, framevisible=false, position=:rb)
+
+# Save figure
+save("$(fig_dir)/timewarp_cost_ecdf.pdf", fig)
+
+fig
 ## =============================================================================
 
 println("Plotting resistance trajectories with latent space timewarp and Brownian bridge...")
