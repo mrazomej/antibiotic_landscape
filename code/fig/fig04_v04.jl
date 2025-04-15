@@ -27,10 +27,12 @@ import LinearAlgebra
 import MultivariateStats as MStats
 import StatsBase
 import Random
+import Distances
 
 # Load Plotting packages
 using CairoMakie
 using Makie
+using Makie.StructArrays
 import ColorSchemes
 import Colors
 # Activate backend
@@ -363,6 +365,32 @@ x_grid_rot = reshape(grid_points_rot[1, :], n_points, n_points)
 y_grid_rot = reshape(grid_points_rot[2, :], n_points, n_points)
 
 ## =============================================================================
+
+println("Computing Euclidean distances with respect to phenotype space...")
+
+# Compute all pairwise distances
+dist_dict = Dict(
+    :phenotype => Distances.pairwise(
+        Distances.Euclidean(),
+        StatsBase.transform(
+            dt_dict[:phenotype], reshape(dd_join.phenotype.data, 2, :)
+        )
+    ),
+    :rhvae => Distances.pairwise(
+        Distances.Euclidean(),
+        StatsBase.transform(dt_dict[:rhvae], reshape(dd_join.rhvae.data, 2, :))
+    ),
+    :vae => Distances.pairwise(
+        Distances.Euclidean(),
+        StatsBase.transform(dt_dict[:vae], reshape(dd_join.vae.data, 2, :))
+    ),
+    :pca => Distances.pairwise(
+        Distances.Euclidean(),
+        StatsBase.transform(dt_dict[:pca], reshape(dd_join.pca.data, 2, :))
+    ),
+)
+
+## =============================================================================
 # Static Fig04
 ## =============================================================================
 
@@ -372,7 +400,7 @@ Random.seed!(42)
 println("Setting global layout...")
 
 # Initialize figure
-fig = Figure(size=(700, 500))
+fig = Figure(size=(700, 700))
 
 # ------------------------------------------------------------------------------
 # Plot layout
@@ -381,20 +409,26 @@ fig = Figure(size=(700, 500))
 # Add global grid layout
 gl = GridLayout(fig[1, 1])
 
+# Add
 # Add grid layout for fig04A section banner
 gl04A_banner = gl[1, 1:2] = GridLayout()
 # Add grid layout for Fig04A
 gl04A = gl[2, 1:2] = GridLayout()
 
+# Add grid layout for fig04B section banner
+gl04B_banner = gl[3, 1:2] = GridLayout()
+# Add grid layout for Fig04B
+gl04B = gl[4, 1:2] = GridLayout()
+
 # Add grid layout for fig04C section banner
-gl04B_banner = gl[3, 1] = GridLayout()
+gl04C_banner = gl[5, 1] = GridLayout()
 # Add grid layout for Fig04C
-gl04B = gl[4, 1] = GridLayout()
+gl04C = gl[6, 1] = GridLayout()
 
 # Add grid layout for fig04B section banner
-gl04C_banner = gl[3, 2] = GridLayout()
+gl04D_banner = gl[5, 2] = GridLayout()
 # Add grid layout for Fig04B
-gl04C = gl[4, 2] = GridLayout()
+gl04D = gl[6, 2] = GridLayout()
 
 # ------------------------------------------------------------------------------
 # Add section banners
@@ -425,13 +459,13 @@ Box(
     gl04B_banner[1, 1],
     color="#E6E6EF",
     strokecolor="#E6E6EF",
-    alignmode=Mixed(; left=-35, right=0) # Moves box to the left and right
+    alignmode=Mixed(; left=-35, right=0), # Moves box to the left and right
 )
 
 # Add section title
 Label(
     gl04B_banner[1, 1],
-    "reconstruction error for different models",
+    "pairwise Euclidean distances comparison",
     fontsize=12,
     padding=(-25, 0, 0, 0),
     halign=:left,
@@ -443,12 +477,30 @@ Box(
     gl04C_banner[1, 1],
     color="#E6E6EF",
     strokecolor="#E6E6EF",
-    alignmode=Mixed(; left=0), # Moves box to the left and right
+    alignmode=Mixed(; left=-35, right=0) # Moves box to the left and right
 )
 
 # Add section title
 Label(
     gl04C_banner[1, 1],
+    "reconstruction error for different models",
+    fontsize=12,
+    padding=(-25, 0, 0, 0),
+    halign=:left,
+    tellwidth=false, # prevent column from contracting because of label size
+)
+
+# Add box for section title
+Box(
+    gl04D_banner[1, 1],
+    color="#E6E6EF",
+    strokecolor="#E6E6EF",
+    alignmode=Mixed(; left=0), # Moves box to the left and right
+)
+
+# Add section title
+Label(
+    gl04D_banner[1, 1],
     "RHVAE latent space with Riemannian metric",
     fontsize=12,
     padding=(0, 0, 0, 0),
@@ -691,9 +743,63 @@ plot_point!(ax_phenotype, :phenotype, max_right_point, Antibiotic.viz.colors()[:
 
 println("Plotting Fig04B...")
 
+# Extract phenotype-space lower triangular matrix
+dist_mat = dist_dict[:phenotype]
+dist_phenotype = dist_mat[LinearAlgebra.tril(trues(size(dist_mat)), -1)]
+
+cmap = to_colormap(:BuPu_9)
+cmap[1] = RGBAf(1, 1, 1, 1) # make sure background is white
+
+# Loop through latent spaces
+for (i, space) in enumerate([:pca, :vae, :rhvae])
+    # Extract lower triangular matrix
+    dist_mat = dist_dict[space]
+    dist_space = dist_mat[LinearAlgebra.tril(trues(size(dist_mat)), -1)]
+    # Compute R-squared
+    r2 = 1 -
+         sum((dist_phenotype .- dist_space) .^ 2) /
+         sum((dist_phenotype .- StatsBase.mean(dist_phenotype)) .^ 2)
+    # Convert points to StructArray
+    points = StructArray{Point2f}((dist_phenotype, dist_space))
+    # Initialize axis
+    ax = Axis(
+        gl04B[1, i],
+        title="$(uppercase(string(space))) | R² = $(round(r2[1], digits=2))",
+        xlabel="phenotype-space distance",
+        ylabel="latent-space distance",
+        aspect=AxisAspect(1),
+        titlesize=14,
+        xlabelsize=14,
+        ylabelsize=14,
+    )
+    # Plot distance scatter plot
+    datashader!(ax, points, colormap=cmap, async=false)
+    # Add diagonal line
+    lines!(
+        ax,
+        [0, maximum(dist_phenotype)],
+        [0, maximum(dist_phenotype)],
+        color=:black,
+        linewidth=2,
+        linestyle=:dash,
+    )
+    # Set limits
+    xlims!(ax, (0, 6))
+    ylims!(ax, (0, 6))
+end
+
+# Set column gap
+colgap!(gl04B, 20)
+
+# ------------------------------------------------------------------------------
+# Plot Fig04C
+# ------------------------------------------------------------------------------
+
+println("Plotting Fig04C...")
+
 # Add axis
 ax_mse = Axis(
-    gl04B[1, 1],
+    gl04C[1, 1],
     xlabel="number of PCs",
     ylabel="mean squared error",
     yscale=log10,
@@ -730,7 +836,7 @@ hlines!(
 
 # Add legend
 Legend(
-    gl04B[1, 1, Top()],
+    gl04C[1, 1, Top()],
     ax_mse,
     orientation=:horizontal,
     framevisible=false,
@@ -741,16 +847,15 @@ Legend(
     tellwidth=true,
 )
 
-
 # ------------------------------------------------------------------------------
-# Plot Fig04C
+# Plot Fig04D
 # ------------------------------------------------------------------------------
 
-println("Plotting Fig04C...")
+println("Plotting Fig04D...")
 
 # Add axis
 ax1 = Axis(
-    gl04C[1, 1],
+    gl04D[1, 1],
     xlabel="latent dimension 1",
     ylabel="latent dimension 2",
     title="RHVAE latent\nmetric volume",
@@ -762,7 +867,7 @@ ax1 = Axis(
     xticklabelsvisible=false,
 )
 ax2 = Axis(
-    gl04C[1, 2],
+    gl04D[1, 2],
     xlabel="latent dimension 1",
     ylabel="latent dimension 2",
     title="fitness profiles \nlatent coordinates",
@@ -836,7 +941,7 @@ ylims!.(
 
 # Add colorbar
 Colorbar(
-    gl04C[1, 3],
+    gl04D[1, 3],
     hm,
     label="√log[det(G)]",
     tellwidth=true,
@@ -845,12 +950,12 @@ Colorbar(
 )
 
 # Adjust column gaps
-colgap!(gl04C, 5)
+colgap!(gl04D, 5)
 
 # Adjust column sizes
-colsize!(gl04C, 1, Auto(1))
-colsize!(gl04C, 2, Auto(1))
-colsize!(gl04C, 3, Auto(1 / 3))
+colsize!(gl04D, 1, Auto(1))
+colsize!(gl04D, 2, Auto(1))
+colsize!(gl04D, 3, Auto(1 / 3))
 
 # ------------------------------------------------------------------------------
 # Adjust subplot proportions
@@ -863,9 +968,12 @@ colsize!(gl, 2, Auto(3 / 5))
 # Adjust row sizes
 rowsize!(gl, 2, Auto(1))
 rowsize!(gl, 4, Auto(1))
+rowsize!(gl, 6, Auto(1))
 
 # Adjust row gap
 rowgap!(gl, 0)
+rowgap!(gl, 3, 10)
+rowgap!(gl, 4, 10)
 
 # ------------------------------------------------------------------------------
 # Add subplot labels
@@ -897,6 +1005,16 @@ Label(
 Label(
     gl04C_banner[1, 1, Left()], "(C)",
     fontsize=20,
+    padding=(0, 40, 0, 0),
+    halign=:right,
+    tellwidth=false,
+    tellheight=false
+)
+
+# Add subplot labels
+Label(
+    gl04D_banner[1, 1, Left()], "(D)",
+    fontsize=20,
     padding=(0, 5, 0, 0),
     halign=:right,
     tellwidth=false,
@@ -907,7 +1025,7 @@ Label(
 
 println("Saving figure...")
 # Save figure
-save("$(fig_dir)/fig04_v03.pdf", fig)
-save("$(fig_dir)/fig04_v03.png", fig)
+save("$(fig_dir)/fig04_v04.pdf", fig)
+save("$(fig_dir)/fig04_v04.png", fig)
 
 fig
