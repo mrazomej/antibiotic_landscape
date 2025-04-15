@@ -2,6 +2,7 @@ import StatsBase
 import LinearAlgebra
 import AutoEncoderToolkit as AET
 import Flux
+import Random
 
 @doc raw"""
     procrustes(X, Y; dims=2, center=true)
@@ -377,4 +378,85 @@ function trajectory_length_riemannian(trajectory::AbstractMatrix, rhvae)
 
     # Sum all segment lengths to get total length
     return sum(segment_lengths)
+end
+
+# ------------------------------------------------------------------------------
+
+"""
+    brownian_bridge(initial::AbstractVector, final::AbstractVector, num_points::Int, 
+                    sigma::Float64=1.0, num_paths::Int=1, rng=Random.GLOBAL_RNG)
+
+Generate random paths between initial and final points using Brownian bridge
+processes.
+
+A Brownian bridge is a continuous-time stochastic process that describes
+Brownian motion conditioned to have specified start and end points. These random
+paths maintain the endpoint constraints while allowing random fluctuations
+between them.
+
+# Arguments
+- `initial::AbstractVector`: The starting point vector
+- `final::AbstractVector`: The ending point vector
+- `num_points::Int`: Number of points in each path (including start and end)
+- `sigma::Float64=1.0`: Diffusion coefficient controlling the amount of
+  randomness
+- `num_paths::Int=1`: Number of random paths to generate
+- `rng=Random.GLOBAL_RNG`: Random number generator for reproducibility
+
+# Returns
+- `paths::Array{Float64,3}`: Array of shape (dimensions, num_points, num_paths)
+  where each [:, :, i] is a path connecting the initial and final points
+"""
+function brownian_bridge(
+    initial::AbstractVector,
+    final::AbstractVector,
+    num_points::Int;
+    sigma::Float64=1.0,
+    num_paths::Int=1,
+    rng=Random.GLOBAL_RNG
+)
+    # Check inputs
+    if length(initial) != length(final)
+        throw(ArgumentError("Initial and final points must have the same dimensions"))
+    end
+    if num_points < 2
+        throw(ArgumentError("Number of points must be at least 2"))
+    end
+    if sigma < 0
+        throw(ArgumentError("Sigma must be non-negative"))
+    end
+
+    # Dimensions and data type
+    n_dims = length(initial)
+    T = promote_type(eltype(initial), eltype(final), Float32)
+
+    # Initialize array to store all paths
+    paths = Array{T}(undef, n_dims, num_points, num_paths)
+
+    # Create time points (normalized from 0 to 1)
+    times = range(0, 1, length=num_points)
+
+    # Generate paths
+    for p in 1:num_paths
+        # First set endpoints for all paths
+        paths[:, 1, p] = initial
+        paths[:, end, p] = final
+
+        # Generate internal points for the path
+        for i in 2:(num_points-1)
+            t = times[i]
+            # Linear interpolation term
+            mean_term = initial * (1 - t) + final * t
+
+            # Standard deviation term for Brownian bridge
+            std_term = sigma * sqrt(t * (1 - t))
+
+            # Add random fluctuation to each dimension
+            for d in 1:n_dims
+                paths[d, i, p] = mean_term[d] + std_term * randn(rng)
+            end
+        end
+    end
+
+    return paths
 end
