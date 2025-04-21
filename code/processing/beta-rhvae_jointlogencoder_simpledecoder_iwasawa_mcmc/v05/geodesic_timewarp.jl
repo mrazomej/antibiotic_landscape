@@ -752,6 +752,95 @@ end
 df_timewarp = DF.DataFrame(df_timewarp)
 ## =============================================================================
 
+# Initialize empty list to store PCA dimensionality results
+df_timewarp_pca = []
+
+# Define PCA dimensions to test
+pca_dimensions = collect(2:8)
+
+# Group df_meta by env and strain_num
+df_group = DF.groupby(df_meta, [:env, :strain_num])
+
+# Loop through groups
+for data_meta in df_group
+    # Extract environment and strain number
+    env = data_meta.env[1]
+    strain_num = data_meta.strain_num[1]
+
+    # Loop through each PCA dimension
+    for dim in pca_dimensions
+        # Fit PCA with current dimension
+        dim_pca = MStats.fit(MStats.PCA, logic50_mat, maxoutdim=dim)
+
+        # Project data to PCA space
+        df_dim_pca = DF.DataFrame()
+        for data in DF.groupby(df_logic50, [:day, :strain_num, :env])
+            DF.sort!(data, :drug)
+            latent_dim_pca = MStats.predict(dim_pca, data.logic50_mean_std)
+
+            DF.append!(
+                df_dim_pca,
+                DF.DataFrame(
+                    :day => first(data.day),
+                    :strain_num => first(data.strain_num),
+                    :meta => first(data.env),
+                    :env => split(first(data.env), "_")[end],
+                    :strain => split(first(data.env), "_")[1],
+                    :latent => [latent_dim_pca],
+                )
+            )
+        end
+
+        # Filter for current strain
+        data_strain_pca = DF.sort(
+            df_dim_pca[(df_dim_pca.strain_num.==strain_num), :],
+            [:day]
+        )
+
+        # Define linear interpolation in PCA space
+        line_pca = Float32.(Antibiotic.geometry.linear_interpolation(
+            first(data_strain_pca.latent),
+            last(data_strain_pca.latent),
+            length(t_array)
+        ))
+
+        # Convert back to original space
+        line_decoded_pca = MStats.reconstruct(dim_pca, line_pca)
+
+        # Compute time warp
+        cost_line_pca, idx1_line_pca, idx2_line_pca = DAW.dtw(
+            Float32.(hcat(data_strain_pca.latent...)),
+            line_pca,
+            transportcost=1
+        )
+
+        # Loop through drugs
+        for (i, drug) in enumerate(drug_list)
+            # Extract strain information
+            data_strain = df_logic50[
+                (df_logic50.drug.==drug).&(df_logic50.strain_num.==strain_num), :]
+
+            # Append PCA results to list
+            push!(df_timewarp_pca, Dict(
+                :env => env,
+                :strain_num => strain_num,
+                :drug => drug,
+                :cost => cost_line_pca,
+                :pca_dim => dim,
+                :mse => Flux.mse(
+                    line_decoded_pca[i, idx2_line_pca],
+                    data_strain.logic50_mean_std[idx1_line_pca]
+                ),
+            ))
+        end
+    end
+end
+
+# Convert list to DataFrame
+df_timewarp_pca = DF.DataFrame(df_timewarp_pca)
+
+## =============================================================================
+
 println("Plotting timewarp reconstruction error results...")
 
 # Define colors for each model
@@ -842,6 +931,247 @@ fig
 
 ## =============================================================================
 
+println("Plotting PCA dimension comparison...")
+
+# Define colors for PCA dimensions using Blues colormap
+pca_dimensions = sort(unique(df_timewarp_pca.pca_dim))
+
+blues = ColorSchemes.Blues_8
+
+pca_colors = Dict(
+    dim => blues[0.3+0.7*(i-1)/(length(pca_dimensions)-1)]
+    for (i, dim) in enumerate(pca_dimensions)
+)
+
+# Initialize figure
+fig = Figure(size=(900, 500))
+
+# Define number of rows and columns
+rows = 2
+cols = 4
+
+# Add grid layout
+gl = fig[1, 1] = GridLayout()
+# Add grid layout for subplots
+gl_plots = gl[1, 1] = GridLayout()
+# Add grid layout for legend
+gl_legend = gl[2, 1] = GridLayout()
+
+# Loop through drugs
+for (i, drug) in enumerate(drug_list)
+    # Define row and column index
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
+    # Add axis
+    ax = Axis(
+        gl_plots[row, col],
+        title="$(drug)",
+        aspect=AxisAspect(1.25),
+        xlabel="mean squared error",
+        ylabel="ECDF",
+        xlabelsize=12,
+        ylabelsize=12,
+    )
+
+    # Plot each PCA dimension
+    for dim in pca_dimensions
+        # Extract data
+        data = df_timewarp_pca[
+            (df_timewarp_pca.drug.==drug).&(df_timewarp_pca.pca_dim.==dim), :]
+        # Plot ECDF
+        ecdfplot!(
+            ax,
+            data.mse,
+            color=pca_colors[dim],
+            label="$(dim)D-PCA",
+            linewidth=2.5,
+        )
+    end
+
+    # Extract VAE linear interpolation data
+    data = df_timewarp[
+        (df_timewarp.drug.==drug).&(df_timewarp.model.=="vae").&(df_timewarp.type.=="linear"), :]
+    # Plot ECDF
+    ecdfplot!(
+        ax,
+        data.mse,
+        color=Antibiotic.viz.colors()[:dark_green],
+        label="VAE linear interpolation",
+        linewidth=2.5,
+    )
+
+    # Extract RHVAE geodesic data
+    data = df_timewarp[
+        (df_timewarp.drug.==drug).&(df_timewarp.type.=="geodesic"), :]
+    # Plot ECDF
+    ecdfplot!(
+        ax,
+        data.mse,
+        color=Antibiotic.viz.colors()[:dark_red],
+        label="RHVAE geodesic",
+        linewidth=2.5,
+    )
+
+    # Add legend only to first plot
+    if i == 1
+        Legend(
+            gl_legend[1, 1],
+            ax,
+            orientation=:horizontal,
+            merge=true,
+            framevisible=false,
+            nbanks=2,
+        )
+    end
+end
+
+# Add title
+Label(
+    gl[1, 1, Top()],
+    "PCA dimension comparison for reconstruction error",
+    fontsize=16,
+    padding=(0, 0, 30, 0),
+)
+
+# Save figure
+save("$(fig_dir)/timewarp_reconstruction_error_pca.pdf", fig)
+
+fig
+
+## =============================================================================
+
+println("Plotting MSE vs PCA dimension...")
+
+# Initialize figure
+fig = Figure(size=(900, 500))
+
+# Define number of rows and columns
+rows = 2
+cols = 4
+
+# Add grid layout
+gl = fig[1, 1] = GridLayout()
+# Add grid layout for subplots
+gl_plots = gl[1, 1] = GridLayout()
+# Add grid layout for legend
+gl_legend = gl[2, 1] = GridLayout()
+
+# Loop through drugs
+for (i, drug) in enumerate(drug_list)
+    # Define row and column index
+    row = (i - 1) ÷ cols + 1
+    col = (i - 1) % cols + 1
+
+    # Add axis
+    ax = Axis(
+        gl_plots[row, col],
+        title="$(drug)",
+        aspect=AxisAspect(1.25),
+        xlabel="PCA dimension",
+        ylabel="mean squared error",
+        xlabelsize=12,
+        ylabelsize=12,
+    )
+
+    # Aggregate PCA data by dimension
+    pca_grouped = DF.combine(
+        DF.groupby(
+            df_timewarp_pca[df_timewarp_pca.drug.==drug, :],
+            :pca_dim
+        ),
+        :mse => mean => :mean_mse,
+        :mse => std => :std_mse
+    )
+
+    # Plot PCA dimension vs MSE
+    scatterlines!(
+        ax,
+        pca_grouped.pca_dim,
+        pca_grouped.mean_mse,
+        color=Antibiotic.viz.colors()[:gold],
+        markersize=8,
+        linewidth=2,
+        label="PCA"
+    )
+
+    # Calculate mean MSE for VAE linear interpolation
+    vae_mean_mse = mean(
+        df_timewarp[
+            (df_timewarp.drug.==drug).&(df_timewarp.model.=="vae").&(df_timewarp.type.=="linear"),
+            :].mse
+    )
+
+    # Calculate mean MSE for RHVAE linear interpolation
+    rhvae_linear_mean_mse = mean(
+        df_timewarp[
+            (df_timewarp.drug.==drug).&(df_timewarp.model.=="rhvae").&(df_timewarp.type.=="linear"),
+            :].mse
+    )
+
+    # Calculate mean MSE for RHVAE geodesic
+    rhvae_mean_mse = mean(
+        df_timewarp[
+            (df_timewarp.drug.==drug).&(df_timewarp.type.=="geodesic"),
+            :].mse
+    )
+
+    # Add horizontal line for VAE
+    hlines!(
+        ax,
+        vae_mean_mse,
+        color=Antibiotic.viz.colors()[:dark_green],
+        linewidth=2,
+        linestyle=:dash,
+        label="VAE linear interpolation"
+    )
+
+    # Add horizontal line for RHVAE linear interpolation
+    hlines!(
+        ax,
+        rhvae_linear_mean_mse,
+        color=Antibiotic.viz.colors()[:light_red],
+        linewidth=2,
+        linestyle=:dash,
+        label="RHVAE linear interpolation"
+    )
+
+    # Add horizontal line for RHVAE
+    hlines!(
+        ax,
+        rhvae_mean_mse,
+        color=Antibiotic.viz.colors()[:dark_red],
+        linewidth=2,
+        linestyle=:dash,
+        label="RHVAE geodesic"
+    )
+
+    # Add legend only to first plot
+    if i == 1
+        Legend(
+            gl_legend[1, 1],
+            ax,
+            orientation=:horizontal,
+            merge=true,
+            framevisible=false,
+        )
+    end
+end
+
+# Add title
+Label(
+    gl[1, 1, Top()],
+    "MSE vs PCA dimensionality",
+    fontsize=16,
+    padding=(0, 0, 30, 0),
+)
+
+# Save figure
+save("$(fig_dir)/mse_vs_pca_dimension.pdf", fig)
+
+fig
+
+## =============================================================================
+
 # Initialize figure
 fig = Figure(size=(350, 300))
 
@@ -886,6 +1216,10 @@ axislegend(ax, merge=true, framevisible=false, position=:rb)
 save("$(fig_dir)/timewarp_cost_ecdf.pdf", fig)
 
 fig
+## =============================================================================
+
+
+
 ## =============================================================================
 
 println("Plotting resistance trajectories with latent space timewarp and Brownian bridge...")
