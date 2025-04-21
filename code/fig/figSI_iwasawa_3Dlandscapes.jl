@@ -161,7 +161,7 @@ logdetG = reshape(
 mask = (maximum(logdetG) * 0.92 .< logdetG .<= maximum(logdetG))
 
 # Initialize plot
-fig = Figure(size=(700, 625))
+fig = Figure(size=(700, 700))
 
 # Add grid layout
 gl = fig[1, 1] = GridLayout()
@@ -233,6 +233,7 @@ for (i, fit_landscape) in enumerate(eachslice(ic50_rhvae, dims=3))
         ylabeloffset=10,
         zlabeloffset=10,
         titlegap=-35,
+        elevation=0.25π,
     )
     # Plot surface
     surface!(
@@ -285,6 +286,7 @@ ax = Axis3(
     ylabeloffset=10,
     zlabeloffset=10,
     titlegap=-35,
+    elevation=0.25π,
 )
 
 # Plot heatmap of log determinant of metric tensor
