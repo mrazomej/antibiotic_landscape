@@ -1,0 +1,41 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Geometry-Informed Latent Space Reconstruction of Fitness Landscapes {#sec-fitness-landscapes}
+
+With the ability to capture the underlying structure of the phenotypic space as
+shown in @fig-04, it is natural to ask whether the RHVAE can be used to
+reconstruct the underlying fitness landscapes. For this, we take advantage of
+the fact that the RHVAE decoder represents a continuous function from latent
+coordinates to fitness values in different environments. By scanning a grid of
+latent coordinates, we can evaluate the fitness landscape at any point in the
+latent space for all three models shown in @fig-04. @fig-05 shows examples of
+ground truth fitness landscapes, used to generate the data (first row), and the
+resulting inferred fitness landscapes for the RHVAE, VAE, and PCA models
+(second, third, and fourth rows, respectively). Qualitatively, we see that the
+RHVAE is able to capture the underlying topography of the fitness landscapes,
+where the number of peaks and their relative positions are similar to the ground
+truth landscapes. Although the VAE model is also able to capture the general
+shape of the fitness landscapes, the lack of a metric in this space limiting the
+predictions only to the local neighborhood of the training data makes it
+difficult to define where to trust the predictions of the model. The PCA model,
+on the other hand, is not able to capture the underlying structure of the
+fitness landscapes as there is a non-linear structure that cannot be captured by
+a linear transformation.
+
+![**Geometry-informed latent space enables accurate reconstruction of complex
+fitness landscapes**. Comparison of ground truth and reconstructed fitness
+landscapes across multiple environments. The first row shows examples of the
+original simulated fitness landscapes used to generate the data. Subsequent rows
+show reconstructions using the RHVAE (second row), VAE (third row), and PCA
+(fourth row) models. The RHVAE accurately captures the underlying topography
+including the number and relative positions of fitness peaks. While the VAE
+captures general landscape shapes, it lacks a geometric metric to define
+prediction reliability regions. PCA fails to represent the non-linear structure
+of the landscapes, demonstrating the limitations of linear dimensionality
+reduction for complex fitness landscape
+reconstruction.](./fig/main/fig05_v03){#fig-05}

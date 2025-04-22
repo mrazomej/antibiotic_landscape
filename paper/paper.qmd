@@ -42,6 +42,9 @@ structure of the phenotypic space in which adaptation unfolds.
 <!-- Latent space simulation -->
 {{< include _04latent_space_simulation.qmd >}}
 
+<!-- Fitness landscapes -->
+{{< include _05fitness_landscapes_sim.qmd >}}
+
 <!-- Antibiotic data -->
 {{< include _06antibiotic_data.qmd >}}
 
