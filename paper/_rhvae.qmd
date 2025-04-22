@@ -721,7 +721,7 @@ $$
 q_\phi(\underline{z}_K \mid \underline{x}) = 
 q_\phi(\underline{z}_0 \mid \underline{x}) 
 |\det J_{\mathcal{H}_{\underline{x}}}|^{-1}.
-$${#eq-flow-density}
+$${#eq-flow-density-hvae}
 
 For our extended posterior distribution, we have that the initial point is 
 sampled as
@@ -747,6 +747,24 @@ $$
 \prod_{k=0}^K |\det J_{g^k}| 
 |\det J_{\phi_{\epsilon,\underline{x}}^{(1)}}|.
 $${#eq-hvae-jacobian}
+
+The resulting variational distribution is then given by
+
+$$
+\begin{aligned}
+q_{\phi}(\underline{z}_K, \underline{\rho}_K \mid \underline{x}) &= 
+    q_{\phi}(\underline{z}_0 \mid \underline{x}) 
+    q_{\phi}(\underline{\rho}_0) 
+    |\det J_{\mathcal{H}_{\underline{x}}}|^{-1} \\
+    &= 
+    q_{\phi}(\underline{z}_0 \mid \underline{x}) 
+    q_{\phi}(\underline{\rho}_0) 
+    \left[
+        \prod_{k=0}^K \left| \det J_{g^k} \right| 
+        \left| \det J_{\phi_{\epsilon,\underline{x}}^{(1)}} \right|
+    \right]^{-1}
+\end{aligned}
+$${#eq-hvae-variational-distribution}
 
 However, recall that Hamiltonian flows are volume preserving. This means that
 the volume of the phase space is invariant under the transformation and thus the
@@ -1048,10 +1066,19 @@ practice, we set the number of iterations to a small number.
 
 ### Riemannian Hamiltonian Variational Autoencoder
 
-The proposed Riemannian Hamiltonian Variational Autoencoder (RHVAE) method
-extends the HVAE idea to account for non-Euclidean geometry of the latent space.
-As with the HAVE, using the generalized leapfrog integrator along with a 
-tempering step creates a smooth mapping
+The Riemannian Hamiltonian Variational Autoencoder (RHVAE) method extends the
+HVAE idea to account for non-Euclidean geometry of the latent space. This means
+that the latent variables $\underline{z}$ live on a Riemannian manifold. This
+manifold is endowed with a Riemannian metric
+$\underline{\underline{G}}(\underline{z})$, that is position-dependent. We 
+navigate through this manifold using the Hamiltonian equations of motion, 
+utilizing the geometric information encoded in the Riemannian metric.
+
+As with the HAVE, using the generalized leapfrog integrator
+(@eq-generalized-leapfrog-momentum-half-step,
+@eq-generalized-leapfrog-position-full-step,
+@eq-generalized-leapfrog-momentum-full-step) along with a tempering step creates
+a smooth mapping
 
 $$
 (\underline{z}_0, \underline{\rho}_0) \rightarrow 
@@ -1059,4 +1086,21 @@ $$
 $${#eq-rhvae-mapping}
 
 that can be thought of as a kind of normalizing flow informed by the target
-distribution and the geometry of the latent space.
+distribution and the geometry of the latent space. Using the same procedure as
+the HVAE, the resulting variational distribution takes the form of
+@eq-hvae-variational-distribution, with the only difference that the momentum
+variable is now position-dependent, i.e.,
+
+$$
+q_{\phi}(\underline{z}_K, \underline{\rho}_K \mid \underline{x}) = 
+q_{\phi}(\underline{z}_0 \mid \underline{x}) 
+q_{\phi}(\underline{\rho}_0 \mid \underline{z}_0) 
+\left[
+    \prod_{k=1}^{K} 
+    \left| \det \underline{\underline{J}}_{gk} \right|
+    \left| \det \underline{\underline{J}}_{\phi_{\epsilon,\underline{x}}^{(1)}} \right|
+\right]^{-1}
+$${#eq-rhvae-variational-distribution}
+
+
+
