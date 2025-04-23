@@ -1087,9 +1087,9 @@ $${#eq-rhvae-mapping}
 
 that can be thought of as a kind of normalizing flow informed by the target
 distribution and the geometry of the latent space. Using the same procedure as
-the HVAE, the resulting variational distribution takes the form of
-@eq-hvae-variational-distribution, with the only difference that the momentum
-variable is now position-dependent, i.e.,
+the HVAE that includes a tempering step, the resulting variational distribution
+takes the form of @eq-hvae-variational-distribution, with the only difference
+that the momentum variable is now position-dependent, i.e.,
 
 $$
 q_{\phi}(\underline{z}_K, \underline{\rho}_K \mid \underline{x}) = 
@@ -1097,10 +1097,93 @@ q_{\phi}(\underline{z}_0 \mid \underline{x})
 q_{\phi}(\underline{\rho}_0 \mid \underline{z}_0) 
 \left[
     \prod_{k=1}^{K} 
-    \left| \det \underline{\underline{J}}_{gk} \right|
+    \left| \det \underline{\underline{J}}_{g^k} \right|
     \left| \det \underline{\underline{J}}_{\phi_{\epsilon,\underline{x}}^{(1)}} \right|
-\right]^{-1}
+\right]^{-1},
 $${#eq-rhvae-variational-distribution}
 
+where, as before,
+$\underline{\underline{J}}_{\phi_{\epsilon,\underline{x}}^{(1)}}$ is the
+Jacobian of the generalized leapfrog integrator with step size $\epsilon$, and
+$\underline{\underline{J}}_{g^k}$ is the Jacobian of the tempering step. Since
+we established that Hamiltonian dynamics are volume preserving, the determinant
+of the Jacobian of the tempering step is one, i.e., $\left| \det
+\underline{\underline{J}}_{\phi_{\epsilon,\underline{x}}^{(1)}} \right| = 1$.
+Moreover, since we are using the same type of tempering step as in the HVAE,
+we have the same result for the determinant of the Jacobian of the tempering
+step as in @eq-hvae-tempering-step-det. After substituting these results into
+[@eq-rhvae-variational-distribution], we obtain
 
+$$
+q_{\phi}(\underline{z}_K, \underline{\rho}_K \mid \underline{x}) = 
+q_{\phi}(\underline{z}_0 \mid \underline{x}) 
+q_{\phi}(\underline{\rho}_0 \mid \underline{z}_0) 
+\beta_0^{d / 2},
+$${#eq-rhvae-variational-distribution-expanded}
 
+where $d$ is the dimension of the latent space. The main difference from the
+HVAE is that the term $q_{\phi}(\underline{\rho}_0 \mid \underline{z}_0)$
+depends on the position $\underline{z}_0$ of the latent variables. To establish
+this dependence, we must define the functional form for the metric tensor
+$\underline{\underline{G}}(\underline{z})$.
+
+In RHVAE, the metric is learned from the data. However, looking at the
+generalized leapfrog integrator, we see that the inverse and the determinant of
+the metric tensor are required. Thus, rather than defining the metric tensor
+directly, we define the inverse of the metric tensor
+$\underline{\underline{G}}(\underline{z})^{-1}$, and use the fact that
+
+$$
+\det \underline{\underline{G}}(\underline{z}) = 
+\det \underline{\underline{G}}(\underline{z})^{-1}.
+$${#eq-metric-determinant-equivalence}
+
+By doing so, we do not have to invert the metric tensor for every leapfrog step.
+@chadebec2020 proposes an inverse metric tensor of the form
+
+$$
+\underline{\underline{G}}(\underline{z}) =
+\sum_{i=1}^N 
+\underline{\underline{L}}_{\Psi_i} 
+\underline{\underline{L}}_{\Psi_i}^{\top} 
+\exp \left(
+    -\frac{
+        \left\| \underline{z} - \underline{\mu}{(\underline{x}_i)} \right\|_2^2
+        }{
+            T^2
+        } 
+    \right) + 
+\lambda \underline{\underline{\mathbb{I}}}_l,
+$${#eq-metric-tensor-rhvae}
+
+where $\underline{\underline{L}}_{\Psi_i}$ is a lower triangular matrix with
+positive diagonal entries, $\underline{\mu}(\underline{x}_i)$ is the mean of the
+$i$-th component of the dataset, $T$ is a temperature parameter to smooth the
+metric tensor, $\lambda$ is a regularization parameter, and
+$\underline{\underline{\mathbb{I}}}_l$ is the $l \times l$ identity matrix. This
+last term with $\lambda$ is set for the metric tensor not to be zero. However,
+usually $\lambda$ is set to a small value, e.g., $10^{-3}$. The terms
+$\underline{\mu}{(\underline{x}_i)}$ are referred to as the "*centroids*" and
+are given by the mean of the variational posterior, such that,
+
+$$
+q_{\phi}(\underline{z}_i \mid \underline{x}_i) =
+\mathcal{N}\left(
+    \underline{\mu}{(\underline{x}_i)}, 
+    \underline{\underline{\Sigma}}(\underline{x}_i)
+\right).
+$${#eq-metric-tensor-rhvae-centroids}
+
+Intuitively, we can think of $\underline{\underline{L}}_{\Psi_i}$ as the
+triangular matrix in the Cholesky decomposition of
+$\underline{\underline{G}}^{-1}(\underline{\mu}{(\underline{x}_i)})$ up to a
+regularization factor. This matrix is learned using a neural network with
+parameters $\Psi_i$, mapping
+
+$$
+\underline{x}_i \rightarrow \underline{\underline{L}}_{\Psi_i}.
+$${#eq-metric-tensor-rhvae-centroids-network}
+
+The hyperparameters $T$ and $\lambda$ could be learned from the data as well,
+but, for simplicity, we set them to constants. We invite the reader to refer to
+[@chadebec2020] for a more detailed discussion on the training procedure.
