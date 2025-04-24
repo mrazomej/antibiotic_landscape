@@ -1,0 +1,73 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+Our ability to experimentally track evolving microbial populations presents an
+unprecedented opportunity to better understand the complexity of the space in
+which evolutionary dynamics take place. The recent wave of work following the
+strategy of determining the fitness of multiple genotypes not in one, but
+multiple environments [@kinsler2020; @iwasawa2022; @ascensao2023; @ghosh2025]
+suggests that this is a powerful approach to try to uncover the underlying
+structure of the genotype-phenotype-fitness map. Combined with the body of
+theoretical work suggesting that the genotype-phenotype map is
+low-dimensional---meaning that a large number of genotypes result in a small
+number of distinct phenotypes [@kaneko2015; @louis2016; @furusawa2018;
+@russo2025b]---there is hope that we can leverage these large-scale datasets to
+uncover features of the phenotypic space underlying adaptation in a data-driven
+way.
+
+The main approach taken so far towards this goal has been to use linear
+decompositions of the fitness data to identify the principal components of
+phenotypic variation [@kinsler2020; @iwasawa2022; @petti2023; @ghosh2025]. The
+simplicity of these linear models comes at the cost of ignoring potentially
+important nonlinearities in the genotype-phenotype-fitness map. Applying these
+linear models to data generated from highly nonlinear processes can lead to
+misleading interpretations of the underlying dimensionality and structure of the
+phenotypic space, as revealed by embedding theorems from differential geometry
+(see Supplementary Material for a detailed discussion). In this work, we take a
+step towards removing this limitation by proposing a nonlinear dimensionality
+reduction method that can capture the underlying nonlinear structure of the
+phenotype-fitness map. We take advantage of recent advances in geometry-informed
+variational autoencoders [@arvanitidis2018; @hauberg2019; @chadebec2020] to
+learn a low-dimensional latent space built from high-dimensional fitness
+measurements. We demonstrate the ability of our method to recover the underlying
+nonlinear structure of the phenotype-fitness map on synthetic data generated
+from evolutionary dynamics on a simple phenotypic space with nonlinear mapping
+to fitness. The geometry-informed latent space not only recovers the relative
+position of genotypes in the phenotypic space, but also, the learned function
+mapping from latent coordinates to fitness is able to reconstruct the topography
+of the underlying fitness landscape.
+
+We then apply our method to a dataset of *E. coli* strains evolving in different
+antibiotics, where a set of cross-resistance values to seven other antibiotics
+was determined for each lineage at each time point of the adaptation process
+[@iwasawa2022]. When comparing our method to a linear model based on principal
+components, we find that the different evolved lineages separate much more
+clearly in the geometry-informed latent space. Furthermore, in terms of
+reconstruction accuracy, our two-dimensional nonlinear latent space is
+equivalent to a five-dimensional linear latent space based on principal
+components. Finally, to show that the information captured by the learned
+nonlinear latent space is more predictive of the cross-resistance values, we
+leave one of the eight antibiotics out during the construction of the latent
+space, and then use this latent coordinates to predict the cross-resistance
+values of the left-out antibiotic. The results show that the geometry-informed
+two-dimensional latent space outperforms the linear model based on principal
+components by a significant margin.
+
+Our work can be viewed as a modern, data-driven implementation of Fisher's
+geometric model of adaptation [@orr2005]. While Fisher conceptualized adaptation
+as movement in a multidimensional phenotypic space, this framework has largely
+remained theoretical due to the challenges of empirically reconstructing such
+spaces. By leveraging geometry-aware variational autoencoders, we demonstrate
+that it is possible to reconstruct the underlying phenotypic manifold directly
+from fitness measurements across multiple environments. This approach suggests
+it is possible to transform Fisher's geometric intuition from a conceptual tool
+into an empirically grounded framework, where the dimensionality, topology, and
+metric properties of the phenotypic space can be inferred from experimental data
+rather than assumed a priori. The geometry-informed latent space we recover
+provides a picture of the adaptive landscape as originally envisioned by Fisher
+but with the mathematical sophistication afforded by modern deep-learning
+methods.
