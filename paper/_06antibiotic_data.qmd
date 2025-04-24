@@ -12,7 +12,7 @@ phenotypic space, we now turn to the application of the model to the analysis of
 antibiotic adaptation dynamics. For this, we use the data from @iwasawa2022
 where the authors evolved different *E. coli* strains on three different
 antibiotics: kanamycin (KM), norfloxacin (NFLX), and tetracycline (TET). For
-this, they used a multi-well plate format the rows contained a gradient of
+this, they used a multi-well plate format where the rows contained a gradient of
 different concentrations of the antibiotic as depicted in @fig-06(A). Every day,
 a fresh plate with the same arrangement of antibiotics was inoculated with cells
 from the well in the evolving condition with the highest concentration of

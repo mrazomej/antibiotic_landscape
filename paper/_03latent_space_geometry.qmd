@@ -9,36 +9,46 @@ csl: ieee.csl
 
 Given the high-dimensional dataset of simulated fitness profiles emulating a
 plausible picture of the underlying data generating process of many modern
-experimental evolution setups
-[@kinsler2020;@maeda2020;@iwasawa2022;@ascensao2023], we next seek to uncover a
-low-dimensional representation of the data that captures the underlying
-structure of the simulated low-dimensional phenotypic space. @fig-03(A) shows a
-schematic depiction of the idea behind dimensionality reduction applied to
-fitness profiles. With fitness profiles as vectors on a high-dimensional data
-space, dimensionality reduction techniques implicitly assume that the positions
-of points in the data space occupy only a subset of the available volume. More
-specifically, it is assumed that the data points lie on a low-dimensional
-manifold embedded in the high-dimensional data space. The goal of dimensionality
-reduction is to find such embedded manifold that captures the underlying
-structure of the data. When possible, plotting this embedded manifold as a flat
-space (either two or three dimensions) allows for the visualization of the
-underlying structure data structure. Given the conceptual picture developed so
-far, the hope is that the low-dimensional latent spaces captures features of the
-structure of the underlying phenotypic space.
+experimental evolution setups [@kinsler2020; @maeda2020; @iwasawa2022;
+@ascensao2023; @ghosh2025], we next seek to develop a data-driven method to
+reverse the mapping from phenotypes to fitness values to reconstruct the
+phenotypic coordinates of a genotype based only on fitness information in
+different environments. @fig-03(A) shows a schematic depiction of the idea
+behind dimensionality reduction applied to fitness profiles. With fitness
+profiles as vectors on a high-dimensional data space, dimensionality reduction
+techniques implicitly assume that the positions of points in the data space is
+highly constrained to occupy only a subset of the available volume. More
+formally, dimensionality reduction techniques assume that the data points lie on
+a low-dimensional manifold embedded in the high-dimensional data space. Here,
+low-dimensionality refers to having the effective number of degrees of freedom
+required to describe the data being lower than the dimension of the data space.
+The goal of dimensionality reduction is to find such embedded manifold that
+captures the underlying structure of the data. When possible, plotting this
+embedded manifold as a flat space (either two or three dimensions) allows for
+the visualization of the underlying structure data structure. Given the
+conceptual picture we have developed so far, the hope is that the
+low-dimensional latent spaces captures features of the structure of the
+underlying phenotypic space.
 
 Traditionally, the field has focused on linear dimensionality reduction
 techniques such as singular value decomposition [@kinsler2020] or related
-methods such as sparse structure discovery [@petti2022]. Although
+methods such as sparse structure discovery [@petti2023]. Although
 computationally efficient, these methods are limited by the rigid assumption
 that fitness is a linear function of some latent phenotypes. To step away from
 such strong assumptions, we can take advantage of the advances in
 deep-learning-based dimensionality reduction techniques, such as the variational
-autoencoder (VAE) [@kingma2014a]. However, the traditional VAE framework comes
-with the limitation that the learned latent representation---built from
-non-linear transformations of the input data---does not contain any geometric
-information of how such non-linear transformations affect the geometry of the
-learned space, making distances between points in the latent space meaningless
-[@arvanitidis2021].
+autoencoder (VAE) [@kingma2014a]. However, the original VAE framework comes with
+the limitation that the learned latent representation---built from non-linear
+transformations of the input data---does not contain any geometric information
+of how such non-linear transformations affect the geometry of the learned space
+[@arvanitidis2018]. This is analogous to having a 2D map of the surface of the
+surface of the earth (the latent space) where, to know how distances between two
+points on the map correspond to distances on the surface of the earth (the data
+space), we need a position-dependent "scale bar"---more formally, a metric
+tensor---that allows us to convert distances between representations. This
+metric tensor is not encoded in the original VAE framework, rendering distances
+between points in the latent space meaningless as they are not directly
+related to the distances in the data space.
 
 To address both limitations on the linear and non-geometric nature of popular
 methods, we propose the use of a recent extension of the VAE framework---the
@@ -58,9 +68,13 @@ decoder network to reconstruct the fitness profile, the RHVAE uses concepts from
 Riemannian geometry and Hamiltonian mechanics to jointly train a separate
 network that learns the metric tensor of the latent space. This metric tensor
 network, thus, contains all the information needed to map distances in the
-low-dimensional map to distances in the original data space. We direct the
-reader to the supplementary material for a mathematically rigorous description
-of the model. 
+low-dimensional map to distances in the original data space. We consider this
+feature of the RHVAE to be of utmost importance if the learned latent space is
+to be taken seriously as a representation of the underlying phenotypic space.
+Just as a map without a scale bar is not a useful guide to navigate the terrain,
+a latent space without a metric tensor is an incomplete representation of the
+underlying phenotypic space. We direct the reader to the supplementary material
+for a mathematically rigorous description of the model. 
 
 We next turn our attention to the application of the RHVAE to the simulated
 fitness profiles. It is important to highlight that at no point the RHVAE
