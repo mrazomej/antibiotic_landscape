@@ -53,7 +53,7 @@ structure of the phenotypic space in which adaptation unfolds.
 
 # Discussion
 
-<!-- {{< include _discussion.qmd >}} -->
+{{< include _discussion.qmd >}}
 
 # Materials and Methods {.unnumbered}
 
