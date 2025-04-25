@@ -10,16 +10,19 @@ difficulty arises from the enormous number of possible genotypes and the lack of
 understanding of the underlying phenotypic differences driving adaptation. Here,
 we present a computational method that takes advantage of modern high-throughput
 fitness measurements to learn a map from high-dimensional fitness profiles to a
-low-dimensional latent space in a geometry-aware manner. When applied to
-simulated adaptive dynamics, we show that the learned latent space retains
-information about the underlying adaptive phenotypic space. Furthermore,
-adaptive trajectories in the learned latent space become highly predictable as
-the shortest path between the pre- and post-evolution points in latent space. We
-then apply this method to a dataset of high-throughput fitness measurements of
-*E. coli* under different antibiotic pressures and show that, again, adaptive
-trajectories in the learned latent space are highly predictable, suggesting that
-the method can serve as a powerful exploratory tool to uncover the underlying
-structure of the phenotypic space in which adaptation unfolds.
+low-dimensional latent space in a geometry-aware manner. We demonstrate that our
+approach using a Riemannian Hamiltonian Variational Autoencoder (RHVAE)
+outperforms traditional linear dimensionality reduction techniques by capturing
+the non-linear structure of the phenotype-fitness map. When applied to simulated
+adaptive dynamics, we show that the learned latent space retains information
+about the underlying adaptive phenotypic space and accurately reconstructs
+complex fitness landscapes. We then apply this method to a dataset of
+high-throughput fitness measurements of *E. coli* under different antibiotic
+pressures and demonstrate superior predictive power for out-of-sample data
+compared to linear approaches. Our work provides a data-driven implementation of
+Fisher's geometric model of adaptation, transforming it from a theoretical
+framework into an empirically grounded approach for understanding evolutionary
+dynamics using modern deep learning methods.
 :::
 
 ::: {.maintext}
