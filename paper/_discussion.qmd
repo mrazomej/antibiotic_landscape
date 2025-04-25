@@ -65,9 +65,40 @@ spaces. By leveraging geometry-aware variational autoencoders, we demonstrate
 that it is possible to reconstruct the underlying phenotypic manifold directly
 from fitness measurements across multiple environments. This approach suggests
 it is possible to transform Fisher's geometric intuition from a conceptual tool
-into an empirically grounded framework, where the dimensionality, topology, and
+into an empirically grounded framework, where the dimensionality, density, and
 metric properties of the phenotypic space can be inferred from experimental data
 rather than assumed a priori. The geometry-informed latent space we recover
 provides a picture of the adaptive landscape as originally envisioned by Fisher
 but with the mathematical sophistication afforded by modern deep-learning
 methods.
+
+One unique affordance of latent spaces endowed with a Riemannian metric is that
+distances in latent space can be related to the resulting distances in fitness
+space. Moreover, the metric tensor allows for the identification of the shortest
+path between two points in latent space. This property begs the question of
+whether evolutionary trajectories in latent space follow the shortest path
+between pre- and post-evolved genotypes. Although not fully conclusive, when
+comparing the shortest path in latent space between the initial and final latent
+coordinates, some *E. coli* lineages seem to follow the predicted shortest path
+(See Supplementary Material for a detailed discussion). It is tempting to
+speculate about the biological significance of this observation, and whether it
+is a more general property of the evolutionary process, as it suggests a
+potential analogous least-action principle of evolution in phenotypic space.
+Nevertheless, more work is needed to further explore this hypothesis with a
+larger number of genotypes and environments. 
+
+Moreover, it remains an open question as to what is the biological meaning of
+the learned latent coordinates. Complementing these high-dimensional fitness
+measurements with high-dimensional phenotypic characterizations---such as
+RNA-sequencing data---could provide additional insights into the biological
+nature of the latent dimensions. For example, following a similar approach to
+the cross-validation analysis presented in the main text, where the latent space
+was learned using only fitness information, one could then fix the
+encoder---effectively fixing the latent coordinates to be determined based only
+on fitness profiles---to then train a decoder that maps the latent coordinates
+to the high-dimensional phenotypic data. This approach could provide information
+to constrain the biological functions enriched on the latent dimensions,
+effectively determining the name of the axes in the latent space. We see this as
+an exciting direction for future work, where the combination of high-dimensional
+fitness and phenotypic data, guided by theoretical understanding of evolutionary
+dynamics, could shed light on the nature of biological adaptation.
