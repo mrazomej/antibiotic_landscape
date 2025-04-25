@@ -44,15 +44,17 @@ reveals complex adaptation patterns**. (A) Experimental setup using multi-well
 plates with antibiotic concentration gradients for evolution experiments. (B)
 Optical density measurements as a function of antibiotic concentration, showing
 rightward shifts of sigmoidal curves as resistance evolves over time. (C) Time
-trajectories of $IC_{50}$ values across all eight antibiotics (tetracycline (TET),
-kanamycin (KM), mitomycin C (MMC), norfloxacin (NFLX), 4-nitroquinoline 1-oxide
-(NQO), phleomycin (PLM), sodium dichromate dihydrate (SDC), and sodium
+trajectories of $IC_{50}$ values across all eight antibiotics (tetracycline
+(TET), kanamycin (KM), mitomycin C (MMC), norfloxacin (NFLX), 4-nitroquinoline
+1-oxide (NQO), phleomycin (PLM), sodium dichromate dihydrate (SDC), and sodium
 salicylate (SS)) for lineages evolved in tetracycline, demonstrating direct
 resistance increase in the selection antibiotic and complex collateral effects
-in other antibiotics. (D) Latent space projections using PCA, VAE, and RHVAE
-(first three panels) trained on $IC_{50}$ values, with colors representing different
-evolution conditions, showing improved disentanglement of lineages in non-linear
-latent spaces and superior reconstruction accuracy of RHVAE compared to other
-dimensionality reduction methods. The rightmost panel shows the reconstruction
-error of the three methods as a function of the number of PCs used for
-dimensionality reduction.](./fig/main/fig06_v02_compiled){#fig-06}
+in other antibiotics. Error bars represent the 95% credible region as obtained
+via Bayesian inference (see Supplementary Material) (D) Latent space projections
+using PCA, VAE, and RHVAE (first three panels) trained on $IC_{50}$ values, with
+colors representing different evolution conditions, showing improved
+disentanglement of lineages in non-linear latent spaces and superior
+reconstruction accuracy of RHVAE compared to other dimensionality reduction
+methods. The rightmost panel shows the reconstruction error of the three methods
+as a function of the number of PCs used for dimensionality
+reduction.](./fig/main/fig06_v02_compiled){#fig-06}
