@@ -48,6 +48,9 @@ structure of the phenotypic space in which adaptation unfolds.
 <!-- Antibiotic data -->
 {{< include _06antibiotic_data.qmd >}}
 
+<!-- Cross-validation -->
+{{< include _07crossvalidation.qmd >}}
+
 # Discussion
 
 <!-- {{< include _discussion.qmd >}} -->
