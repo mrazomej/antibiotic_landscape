@@ -16,7 +16,7 @@ difficult to answer. First, the vast number of genetic changes available to a
 population makes it impossible to exhaustively sample and measure the phenotypic
 consequences of each mutation [@louis2016]. Second, for most but a few simple
 model systems, it is unknown what the phenotypic changes driving adaptation are
-[*cite?*].
+[@shoval2012].
 
 Nevertheless, advances in modern high-throughput technologies have made it
 possible to measure the fitness of multiple genotypes, opening up the
@@ -38,9 +38,8 @@ features from such complex high-dimensional datasets. -->
 Inspired by this body of work and the impressive results that the deep-learning
 revolution has achieved in the life sciences [@martin2024], we set out to
 develop a data-driven framework to uncover the underlying structure of the
-genotype-phenotype-fitness landscape from high-throughput fitness data. We
-consider three main ingredients for a computational method to tackle this
-challenge:
+phenotype-fitness map from high-throughput fitness data. We consider three main
+ingredients for a computational method to tackle this challenge:
 
 1.  The method should be able to take advantage of the data-rich landscape of
 modern biology, where high-throughput fitness measurements are becoming
@@ -75,12 +74,17 @@ Furthermore, we show that adaptive trajectories projected onto the learned
 low-dimensional embedding are highly predictable. 
 
 We then apply this method to a dataset of high-throughput fitness measurements
-of *E. coli* under different antibiotic pressures [@iwasawa2022]. We show that
-the *RHVAE* is also able to learn a low-dimensional embedding that captures the
-main adaptive trajectories in the dataset, suggesting that the method can serve
-as a powerful exploratory tool to uncover the underlying structure of the hidden
-phenotypic space in which adaptive dynamics unfold, given only high-throughput
-fitness data. Taken together, our results suggest that high-dimensional fitness
-data---such as the one studied here in *E. coli*---can reveal hidden simplicity
-in the evolutionary dynamics when analyzed with the right computational
-framework.
+of *E. coli* under different antibiotic pressures [@iwasawa2022]. Using
+$IC_{50}$ values across eight antibiotics for lineages evolved under
+tetracycline, kanamycin, and norfloxacin, we demonstrate that the RHVAE learns a
+low-dimensional embedding that effectively separates different evolutionary
+trajectories. Our analysis reveals that a two-dimensional RHVAE achieves
+reconstruction accuracy comparable to a five-dimensional PCA model, while
+providing superior predictive power for out-of-sample antibiotic responses.
+Through cross-validation, we show that our non-linear latent space coordinates
+more accurately predict resistance profiles than any number of linear
+components. Taken together, our results suggest that high-dimensional fitness
+data—such as the one studied here in *E. coli*—can reveal hidden simplicity in
+evolutionary dynamics when analyzed with the right computational framework,
+offering new insights into the constraints and predictability of antibiotic
+resistance evolution.
