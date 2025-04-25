@@ -25,14 +25,14 @@ expected, the sigmoidal curve shifts to the right as the population evolves
 resistance to the antibiotic. From these titration curves, we can use Bayesian
 inference to extract the value of the antibiotic concentration at which the
 optical density is 50% of the maximum value. This value---known as the
-*antibiotic IC₅₀*---is a measure of the antibiotic resistance of the evolved
+*antibiotic $IC_{50}$*---is a measure of the antibiotic resistance of the evolved
 strains (see Supplementary Material @iwasawa2022 for more details).
 
-@fig-06(C) shows the time trajectories of the IC₅₀ in all eight antibiotics for
-all cultures evolved in TET. Over time, all lineages increase their IC₅₀ in
+@fig-06(C) shows the time trajectories of the $IC_{50}$ in all eight antibiotics for
+all cultures evolved in TET. Over time, all lineages increase their $IC_{50}$ in
 TET, however, the trend for all other antibiotics is more complex. Following the
 same approach as in @fig-04, @fig-06(D) shows the resulting latent spaces for
-PCA, VAE, and RHVAE trained on the IC₅₀ values for all eight antibiotics. Each
+PCA, VAE, and RHVAE trained on the $IC_{50}$ values for all eight antibiotics. Each
 color represents a lineage evolved on a different antibiotic. From these 
 projections, we can see that the latent coordinates for different lineages are
 more disentangled in the non-linear latent spaces compared to that of PCA. 
@@ -44,13 +44,13 @@ reveals complex adaptation patterns**. (A) Experimental setup using multi-well
 plates with antibiotic concentration gradients for evolution experiments. (B)
 Optical density measurements as a function of antibiotic concentration, showing
 rightward shifts of sigmoidal curves as resistance evolves over time. (C) Time
-trajectories of IC₅₀ values across all eight antibiotics (tetracycline (TET),
+trajectories of $IC_{50}$ values across all eight antibiotics (tetracycline (TET),
 kanamycin (KM), mitomycin C (MMC), norfloxacin (NFLX), 4-nitroquinoline 1-oxide
 (NQO), phleomycin (PLM), sodium dichromate dihydrate (SDC), and sodium
 salicylate (SS)) for lineages evolved in tetracycline, demonstrating direct
 resistance increase in the selection antibiotic and complex collateral effects
 in other antibiotics. (D) Latent space projections using PCA, VAE, and RHVAE
-(first three panels) trained on IC₅₀ values, with colors representing different
+(first three panels) trained on $IC_{50}$ values, with colors representing different
 evolution conditions, showing improved disentanglement of lineages in non-linear
 latent spaces and superior reconstruction accuracy of RHVAE compared to other
 dimensionality reduction methods. The rightmost panel shows the reconstruction
