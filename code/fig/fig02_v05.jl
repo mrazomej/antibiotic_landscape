@@ -112,7 +112,7 @@ Box(
 # Add section title
 Label(
     gl02A_banner[1, 1],
-    "simulated adaptive dynamics",
+    "adaptive dynamics in selection\nenvironment",
     fontsize=12,
     padding=(0, 0, 0, 0),
     halign=:left,
@@ -129,7 +129,7 @@ Box(
 
 Label(
     gl02B_banner[1, 1],
-    "trajectories in non-evolution fitness functions",
+    "evaluation of fitness in diverse environments",
     fontsize=12,
     padding=(0, 0, 0, 0),
     halign=:left,
@@ -231,7 +231,7 @@ for lin in DD.dims(phenotype_trajectory, :lineage)
             color = ColorSchemes.seaborn_colorblind[n_transp]
             linewidth = 1.5
             # Increment counter for non-transparent trajectories
-            n_transp += 1
+            global n_transp += 1
         else
             color = (ColorSchemes.glasbey_hv_n256[counter], alpha)
             linewidth = 1
