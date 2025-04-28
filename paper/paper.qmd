@@ -58,7 +58,12 @@ dynamics using modern deep learning methods.
 
 {{< include _discussion.qmd >}}
 
-# Materials and Methods {.unnumbered}
+# Data and code availability {.unnumbered}
+
+All data and custom scripts were collected and stored using Git version control.
+Code for raw data processing, theoretical analysis, and figure generation is
+available on the [GitHub
+repository](https://github.com/mrazomej/antibiotic_landscape)
 
 # Acknowledgements {.unnumbered}
 
