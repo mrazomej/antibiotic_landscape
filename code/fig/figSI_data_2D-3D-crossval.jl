@@ -984,5 +984,6 @@ colgap!(gl_plots, 15)
 
 # Save figure
 save("$(fig_dir)/figSI_data_2D-3D-crossval.pdf", fig)
+save("$(fig_dir)/figSI_data_2D-3D-crossval.png", fig)
 
 fig
