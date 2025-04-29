@@ -295,7 +295,7 @@ for fig_idx in 1:n_figures
         # Add section title
         Label(
             gl_latent_banner[1, 1],
-            "latent space",
+            "latent space geodesic",
             fontsize=12,
             padding=(-5, 0, 0, 0),
             halign=:left,
