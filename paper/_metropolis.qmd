@@ -159,7 +159,7 @@ $$
 P_{\text{accept}} = \min\left(
     1,
     \frac{F_E(\underline{x}{\prime})^β GP(\underline{x}{\prime})^β}
-    {F_E(\underline{x})^β M(\underline{x})^β}
+    {F_E(\underline{x})^β GP(\underline{x})^β}
 \right),
 $${#eq-acceptance}
 
