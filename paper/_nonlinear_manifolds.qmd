@@ -169,7 +169,7 @@ $$
 $${#eq-decoder}
 
 For Riemannian Hamiltonian Variational Autoencoders (RHVAEs), used throughout
-this work,we add a third network that explicitly learns the metric tensor
+this work, we add a third network that explicitly learns the metric tensor
 $\underline{\underline{G}}(\underline{z})$, allowing the model to capture the
 geometric structure of the manifold directly.
 

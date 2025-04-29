@@ -7,9 +7,9 @@ csl: ieee.csl
 
 ## Bayesian inference of $IC_{50}$ resistance values
 
-The experimental data used throughout this work was gently provided by the first
-author of the excellent paper [@iwasawa2022]. In there, the authors evolved
-*E. coli* strains on different antibiotics via an automated liquid handling
+The experimental data used throughout this work was kindly provided by the first
+author of the excellent paper [@iwasawa2022]. In there, the authors evolved *E.
+coli* strains on different antibiotics via an automated liquid handling
 platform. Here, we will detail our analysis of the raw data to infer the
 $IC_{50}$ values of the strains on a panel of antibiotics.
 
@@ -196,7 +196,7 @@ The effectiveness of the residual-based outlier detection method is demonstrated
 in @fig-ic50-ppc, where the posterior predictive checks show significantly
 tighter credible intervals after outlier removal, particularly in regions of
 high antibiotic concentration where experimental noise tends to be more
-pronounced. experimental noise tends to be more pronounced.
+pronounced.
 
 ![**Posterior predictive check.** The posterior predictive check of the
 posterior distribution for the $IC_{50}$ parameter inference. The blue line is

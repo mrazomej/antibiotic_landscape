@@ -30,7 +30,7 @@ $$
     \underline{x}_1, \underline{x}_2, \ldots, \underline{x}_N
 \right\},
 $${#eq-data-set}
-where $\underline{x}_i \in \mathbb{R}^D$ for $i = 1, 2, \ldots, N$, the the
+where $\underline{x}_i \in \mathbb{R}^D$ for $i = 1, 2, \ldots, N$, the
 variational autoencoder aims to fit a joint distribution
 $π_\theta(\underline{x}, \underline{z})$ where the data generative process is
 assumed to involve a set of latent---unobserved---continuous variables
@@ -92,7 +92,7 @@ conceptual change is at the core of approximate methods for Bayesian inference
 known as variational inference. The objective then becomes to find the
 parameters $\phi$ that, when used to approximate the posterior distribution
 $π_\theta(\underline{z}|\underline{x})$, it is as close as possible to this
-posterior distribution. To matematize this objective, we establish that we want
+posterior distribution. To mathematize this objective, we establish that we want
 to minimize the Kullback-Leibler divergence (also known as the relative entropy)
 between the variational distribution
 $q_\phi(\underline{z} \mid \underline{x})$ and the posterior distribution
@@ -189,8 +189,8 @@ q_\phi(\underline{z}_0 \mid \underline{x})
 $${#eq-mcmc-chain-def-expanded}
 
 Integrating this expression into the ELBO ([@eq-elbo]) consists of substituting
-the of substituting the variational distribution $q_\phi(\underline{z} \mid
-\underline{x})$ with the expression in [@eq-mcmc-chain-def-expanded], i.e.,
+the variational distribution $q_\phi(\underline{z} \mid \underline{x})$ with the
+expression in [@eq-mcmc-chain-def-expanded], i.e.,
 $$
 \mathcal{L}_{\text {aux }} =
 \left\langle\log 
@@ -803,7 +803,7 @@ $$
 \mathcal{N}\left(\underline{0}, \underline{\underline{G}}(\underline{z})\right),
 $${#eq-momentum-dist-rhmc}
 
-i.e., the auxuliary momentum variable is no longer independent of the position
+i.e., the auxiliary momentum variable is no longer independent of the position
 variable $\underline{z}$ but rather is distributed according to a normal
 distribution with mean zero and covariance matrix given by the
 position-dependent Riemannian metric $\underline{\underline{G}}(\underline{z})$.
@@ -1059,9 +1059,9 @@ $${#eq-generalized-leapfrog-momentum-full-step}
 
 Since the left hand side terms appear on the right hand side, these equations
 must be solved using fixed point iterations. This means that the numerical
-impolementation of this generalized integrator iterates a step multiple times 
+implementation of this generalized integrator iterates a step multiple times
 until it finds a "fixed point", i.e., a point that, when fed to the right hand
-side of the equation, does not change the value of the left hand side. In 
+side of the equation, does not change the value of the left hand side. In
 practice, we set the number of iterations to a small number.
 
 ### Riemannian Hamiltonian Variational Autoencoder

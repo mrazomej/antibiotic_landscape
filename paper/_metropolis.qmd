@@ -109,7 +109,7 @@ dynamics.
 At each step, we propose a new phenotype $\underline{x}{\prime}$ from a proposal
 distribution $q(\underline{x}{\prime} | \underline{x})$. For simplicity, we can
 use a symmetric proposal distribution, such as a Gaussian centered at the
-current phenotype. Furthere, we constrain the proposal distribution to be
+current phenotype. Further, we constrain the proposal distribution to be
 symmetric, i.e.,
 
 $$
@@ -158,7 +158,7 @@ This can be rewritten as
 $$
 P_{\text{accept}} = \min\left(
     1,
-    \frac{F_E(\underline{x}{\prime})^β M(\underline{x}{\prime})^β}
+    \frac{F_E(\underline{x}{\prime})^β GP(\underline{x}{\prime})^β}
     {F_E(\underline{x})^β M(\underline{x})^β}
 \right),
 $${#eq-acceptance}
