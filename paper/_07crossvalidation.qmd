@@ -46,6 +46,11 @@ antibiotic $IC_{50}$ values than any number of possible linear dimensions. This
 result is consistent with the hypothesis that the non-linear latent space
 coordinates capture more information about the phenotypic state of the system
 under study, allowing for more accurate predictions of out-of-sample data.
+Furthermore, increasing the dimensionality of the non-linear latent space from
+two to three dimensions only marginally improves the predictive power of the
+model, suggesting that the 2D non-linear latent space captures most of the
+information about the phenotypic state of the system (see Supplementary Material
+for a detailed discussion).
 
 ![**Non-linear latent space models demonstrate superior predictive power for
 out-of-sample antibiotic data**. (A) Schematic representation of the
