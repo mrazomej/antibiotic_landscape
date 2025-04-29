@@ -207,7 +207,7 @@ pairs = [
 ]
 
 # Initialize figure
-fig = Figure(size=(900, 900))
+fig = Figure(size=(700, 900))
 
 # Add grid layout
 gl = fig[1, 1] = GridLayout()
@@ -228,17 +228,11 @@ for i in 1:n_strains
     p = pairs[i]
 
     println("env: $(p[1]) | strain: $(p[2])")
-
+    # --------------------------------------------------------------------------
     # Extract metadata
     data_meta = df_meta[
         (df_meta.env.==p[1]).&(df_meta.strain_num.==p[2]), :
     ]
-
-    # Add grid layout as left column for latent space
-    gl_latent = gl_strains[i][1, 1] = GridLayout()
-
-    # Add grid layout as right column for timewarp
-    gl_timewarp = gl_strains[i][1, 2] = GridLayout()
 
     # Extract lineage information
     lineage = df_latent[df_latent.strain_num.==p[2], :]
@@ -264,6 +258,56 @@ for i in 1:n_strains
         transportcost=1
     )
 
+    # --------------------------------------------------------------------------
+
+    # Add grid layout as left column for latent space
+    gl_latent_banner = gl_strains[i][1, 1] = GridLayout()
+    gl_latent = gl_strains[i][2, 1] = GridLayout()
+
+    # Add grid layout as right column for timewarp
+    gl_timewarp_banner = gl_strains[i][1, 2] = GridLayout()
+    gl_timewarp = gl_strains[i][2, 2] = GridLayout()
+
+    # --------------------------------------------------------------------------
+
+    # Add banner for latent space
+    Box(
+        gl_latent_banner[1, 1],
+        color="#E6E6EF",
+        strokecolor="#E6E6EF",
+        alignmode=Mixed(; left=-10, right=-15),
+    )
+
+    # Add section title
+    Label(
+        gl_latent_banner[1, 1],
+        "latent space",
+        fontsize=12,
+        padding=(-5, 0, 0, 0),
+        halign=:left,
+        tellwidth=false,
+    )
+
+    # Add banner for latent space
+    Box(
+        gl_timewarp_banner[1, 1],
+        color="#E6E6EF",
+        strokecolor="#E6E6EF",
+        alignmode=Mixed(; left=-20, right=0),
+    )
+
+    # Add section title
+    Label(
+        gl_timewarp_banner[1, 1],
+        "comparison of time-warped predicted curves with experimental data",
+        fontsize=12,
+        padding=(-5, 0, 0, 0),
+        halign=:left,
+        tellwidth=false,
+    )
+
+    # --------------------------------------------------------------------------
+
     println("   - plotting latent space")
 
     # Add axis for latent space
@@ -273,6 +317,7 @@ for i in 1:n_strains
         xticksvisible=false,
         yticksvisible=false,
         title="$(p[1]) (selection)",
+        titlesize=12,
     )
     # Hide axis labels
     hidedecorations!(ax_latent)
@@ -337,6 +382,8 @@ for i in 1:n_strains
         label="end",
     )
 
+    # --------------------------------------------------------------------------
+
     println("   - plotting timewarp")
 
     # Loop through drugs
@@ -350,6 +397,8 @@ for i in 1:n_strains
             aspect=AxisAspect(1.25),
             title=drug == p[1] ? "$(drug) (selection)" : "$(drug)",
             titlesize=12,
+            xticklabelsize=10,
+            yticklabelsize=10,
         )
         # Extract strain information
         data_strain = df_logic50[
@@ -362,6 +411,7 @@ for i in 1:n_strains
             data_strain.logic50_mean_std,
             color=Antibiotic.viz.colors()[:dark_gold],
             linewidth=2.5,
+            markersize=6,
         )
         # Add error bars
         errorbars!(
@@ -393,6 +443,21 @@ for i in 1:n_strains
         )
     end # for j in 1:length(drug_list)
 
+    # Add axis labels
+    Label(
+        gl_timewarp[end, :, Bottom()],
+        "day",
+        fontsize=12,
+        padding=(0, 0, 0, 15),
+    )
+
+    Label(
+        gl_timewarp[:, 1, Left()],
+        "log(IC₅₀)",
+        fontsize=12,
+        rotation=π / 2,
+        padding=(0, 0, 0, 0),
+    )
     # Adjust layout
     colsize!(gl_strains[i], 1, Auto(1))
     colsize!(gl_strains[i], 2, Auto(5))
