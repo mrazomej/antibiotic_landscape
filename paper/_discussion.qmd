@@ -53,19 +53,21 @@ components. Finally, to show that the information captured by the learned
 nonlinear latent space is more predictive of the cross-resistance values, we
 leave one of the eight antibiotics out during the construction of the latent
 space, and then use these latent coordinates to predict the cross-resistance
-values of the left-out antibiotic. Moreover, increasing the dimensionality of
-the latent space from two to three dimensions only marginally improves the
-predictive power of the model, suggesting that only two degrees of freedom are
-needed to capture the changes in the phenotypic state of the evolving lineages
-(see Supplementary Material for a detailed discussion). The results show that
-the geometry-informed latent space outperforms the linear model based on
-principal components by a significant margin.
+values of the left-out antibiotic. Our analysis demonstrates that these
+nonlinear latent coordinates provide superior predictive power compared to
+linear approaches. Moreover, increasing the dimensionality of the latent space
+from two to three dimensions only marginally improves the predictive power of
+the model, suggesting that only two degrees of freedom are needed to capture the
+changes in the phenotypic state of the evolving lineages (see Supplementary
+Material for a detailed discussion). The results show that the geometry-informed
+latent space outperforms the linear model based on principal components by a
+significant margin.
 
 Our work can be viewed as a modern, data-driven implementation of Fisher's
 geometric model of adaptation [@orr2005]. While Fisher conceptualized adaptation
 as movement in a multidimensional phenotypic space, this framework has largely
 remained theoretical due to the challenges of empirically reconstructing such
-spaces. By leveraging geometry-aware variational autoencoders, we demonstrate
+spaces. By leveraging geometry-informed variational autoencoders, we demonstrate
 that it is possible to reconstruct the underlying phenotypic manifold directly
 from fitness measurements across multiple environments. This approach suggests
 it is possible to transform Fisher's geometric intuition from a conceptual tool
@@ -95,17 +97,17 @@ evolution in phenotypic space. Nevertheless, more work is needed to explore this
 hypothesis further with a larger number of genotypes and environments. 
 
 Moreover, it remains an open question as to what is the biological meaning of
-the learned latent coordinates. Complementing these high-dimensional fitness
-measurements with high-dimensional phenotypic characterizations---such as
-RNA-sequencing data---could provide additional insights into the biological
-nature of the latent dimensions. For example, following a similar approach to
-the cross-validation analysis presented in the main text, where the latent space
-was learned using only fitness information, one could then fix the
-encoder---effectively fixing the latent coordinates to be determined based only
-on fitness profiles---to then train a decoder that maps the latent coordinates
-to the high-dimensional phenotypic data. This approach could provide information
-to constrain the biological functions enriched on the latent dimensions,
-effectively determining the name of the axes in the latent space. We see this as
+the learned latent coordinates. Complementing these fitness measurements with
+high-dimensional phenotypic characterizations---such as RNA-sequencing
+data---could provide additional insights into the biological nature of the
+latent dimensions. For example, following a similar approach to the
+cross-validation analysis presented in the main text, where the latent space was
+learned using only fitness information, one could then fix the encoder
+(effectively fixing the latent coordinates based only on fitness profiles) and
+then train a decoder that maps the latent coordinates to the high-dimensional
+phenotypic data. This approach could provide information to constrain the
+biological functions enriched on the latent dimensions, effectively determining
+the name of the axes in the latent space. We see this as an exciting direction
 an exciting direction for future work, where the combination of high-dimensional
 fitness and phenotypic data, guided by theoretical understanding of evolutionary
 dynamics, could shed light on the nature of biological adaptation.

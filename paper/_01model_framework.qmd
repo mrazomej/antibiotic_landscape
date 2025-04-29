@@ -13,7 +13,7 @@ procedure in evolutionary biology [@kinsler2020; @maeda2020; @iwasawa2022;
 @ascensao2023]. Nevertheless, we argue that we still lack a simple conceptual
 framework to guide our interpretation of the patterns observed in these
 datasets. To that end, we propose a simple model of phenotype-fitness dynamics
-to serve as a light post for our interpretation of the data. 
+to serve as a guidepost for our interpretation of the data. 
 
 @fig-01(A) shows a schematic of the genotype-phenotype-fitness map. A genotype
 $g$ is mapped to a phenotype coordinate $\underline{p}$ via a function
@@ -21,13 +21,13 @@ $\phi$---depicted as two potential molecular phenotypes, such as an efflux pump
 rate and the sensitivity of a membrane receptor. The fitness of each genotype is
 determined by the value of these phenotypes and the environment $E$ via a
 function $F$---depicted as the doubling time of a bacterial population. To
-mathematize this conceptual model, we assume that phenotypes can be described by
-a vector of $P$ real-valued variables, $\underline{p} \in \mathbb{R}^P$. Thus,
-phenotypic space is a $P$-dimensional Euclidean space, and any genotype $g$ has
-a unique mapping to a phenotypic coordinate. However, this mapping is not
-necessarily bijective, i.e., multiple genotypes may map to the same phenotype.
-To represent the likelihood of sampling some genotype $g$ that maps to some
-coordinate $\underline{p}$ in phenotype space, we introduce a
+formalize mathematically this conceptual model, we assume that phenotypes can be
+described by a vector of $P$ real-valued variables, $\underline{p} \in
+\mathbb{R}^P$. Thus, phenotypic space is a $P$-dimensional Euclidean space, and
+any genotype $g$ has a unique mapping to a phenotypic coordinate. However, this
+mapping is not necessarily bijective, i.e., multiple genotypes may map to the
+same phenotype. To represent the likelihood of sampling some genotype $g$ that
+maps to some coordinate $\underline{p}$ in phenotype space, we introduce a
 genotype-to-phenotype density map $GP: \mathbb{R}^P \to \mathbb{R}$. This
 function captures the empirical observation that the genotype-to-phenotype map
 is highly redundant, with many genotypes mapping to equivalent phenotypes and
@@ -83,5 +83,5 @@ Gray landscapes show other environments with different topographies (position,
 number, and height of fitness peaks). Black dashed lines indicate fitness
 landscape contours, while white solid lines show genotype-phenotype density
 contours. (D) Fitness profiles. The fitness values of any genotype measured
-across multiple environments as an experimental
+across multiple environments represent an experimental
 observable.](./fig/main/fig01_v06_compiled){#fig-01}

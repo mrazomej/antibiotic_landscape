@@ -53,12 +53,10 @@ where $f^{(n)}_e$ and $\hat{f}^{(n)}_e$ are the ground truth and reconstructed
 fitness values, respectively, for the $n$-th genotype in the $e$-th environment.
 We observe that the vanilla 2D-VAE model achieves a reconstruction error
 equivalent to that of an eight-dimensional PCA model. In contrast, the 2D-RHVAE
-outperforms the other two models, achieving a reconstruction error on par with
-an eight-dimensional PCA model. In contrast, the 2D-RHVAE consistently
-outperforms the other two models, achieving a reconstruction error on par with a
-ten-dimensional PCA model. This further highlights the ability of the RHVAE to
-capture the underlying nonlinear structure of the phenotype space while
-maintaining high reconstruction accuracy.
+consistently outperforms the other two models, achieving a reconstruction error
+on par with a ten-dimensional PCA model. This further highlights the ability of
+the RHVAE to capture the underlying nonlinear structure of the phenotype space
+while maintaining high reconstruction accuracy.
 
 One of the main advantages of the RHVAE is its ability to learn a metric tensor
 that captures the local geometry of the latent space. A way to visualize this
@@ -67,21 +65,21 @@ determinant of the metric tensor at each point in the latent space. Intuitively,
 the determinant of the metric tensor at a given point can be interpreted as the
 level of deformation of the latent space at that point. Small values of the
 metric volume indicate that the latent space is locally flat, while large values
-indicate that the latent space is locally curved. @fig-04(D, left) shows the
-metric volume of the latent space derived from the RHVAE model. The lighter the
-color, the larger the metric volume, and thus the larger the local deformation.
-When overlaying the points over this metric volume (@fig-04(D, right)), we
-observe that everything outside the data cloud is locally curved. Knowing that
-neural networks are not able to generalize well outside the data cloud, having
-this feature is particularly nice because the curvature in the latent space
-defines the regions where the trained model is able to make accurate
-predictions. Moreover, we note that regions of high curvature within the data
-cloud exactly correspond to the regions of low genotype-phenotype density we
-imposed in the simulation. This suggests that, for a properly sampled phenotypic
-space, the geometric information learned by the RHVAE is able to capture the
-non-uniformity of the phenotypic density as variations in the curvature of the
-latent space, offering a data-driven tool to identify accessible evolutionary
-paths in phenotype space.
+suggest significant local curvature. @fig-04(D, left) shows the metric volume of
+the latent space derived from the RHVAE model. The lighter the color, the larger
+the metric volume, and thus the larger the local deformation. When overlaying
+the points over this metric volume (@fig-04(D, right)), we observe that
+everything outside the data cloud is locally curved. Knowing that neural
+networks are not able to generalize well outside the data cloud, having this
+feature is particularly nice because the curvature in the latent space defines
+the regions where the trained model is able to make accurate predictions.
+Moreover, we note that regions of high curvature within the data cloud exactly
+correspond to the regions of low genotype-phenotype density we imposed in the
+simulation. This suggests that, for a properly sampled phenotypic space, the
+geometric information learned by the RHVAE is able to capture the non-uniformity
+of the phenotypic density as variations in the curvature of the latent space,
+offering a data-driven tool to identify accessible evolutionary paths in
+phenotype space.
 
 ![**Geometry-informed latent space captures phenotypic structure and improves
 reconstruction accuracy**. (A) Latent space coordinates of simulated fitness

@@ -26,8 +26,8 @@ The goal of dimensionality reduction is to find such an embedded manifold that
 captures the underlying structure of the data. When possible, plotting this
 embedded manifold as a flat space (either two or three dimensions) allows for
 the visualization of the underlying data structure. Given the conceptual picture
-we have developed so far, the hope is that the low-dimensional latent spaces
-capture features of the structure of the underlying phenotypic space.
+we have developed so far, the hope is that the low-dimensional latent space
+captures features of the structure of the underlying phenotypic space.
 
 Traditionally, the field has focused on linear dimensionality reduction
 techniques such as singular value decomposition [@kinsler2020] or related
@@ -39,15 +39,15 @@ deep-learning-based dimensionality reduction techniques, such as the variational
 autoencoder (VAE) [@kingma2014a]. However, the original VAE framework comes with
 the limitation that the learned latent representation---built from non-linear
 transformations of the input data---does not contain any geometric information
-of how such non-linear transformations affect the geometry of the learned space
-[@arvanitidis2018]. This is analogous to having a 2D map of the surface of the
-surface of the earth (the latent space), where, to know how distances between
-two points on the map correspond to distances on the surface of the planet (the
-data space), we need a position-dependent "scale bar"---more formally, a metric
-tensor---that allows us to convert distances between representations. This
-metric tensor is not encoded in the original VAE framework, rendering distances
-between points in the latent space meaningless as they are not directly related
-to the distances in the data space.
+about how such non-linear transformations affect the geometry of the learned
+space [@arvanitidis2018]. This is analogous to having a 2D map of the surface of
+the earth (the latent space), where, to know how distances between two points on
+the map correspond to distances on the surface of the planet (the data space),
+we need a position-dependent "scale bar"---more formally, a metric tensor---that
+allows us to convert distances between representations. This metric tensor is
+not encoded in the original VAE framework, rendering distances between points in
+the latent space meaningless as they are not directly related to the distances
+in the data space.
 
 To address both limitations on the linear and non-geometric nature of popular
 methods, we propose the use of a recent extension of the VAE framework---the
@@ -76,11 +76,11 @@ underlying phenotypic space. We direct the reader to the supplementary material
 for a mathematically rigorous description of the model. 
 
 Next, we turn our attention to applying the RHVAE to the simulated fitness
-profiles. It is important to highlight that at no point the RHVAE obtains any
-knowledge about the identity of the input data. In other words, the RHVAE has no
-information about the lineage or time point of the fitness profile that it is
-processing. The network only uses the unidentified fitness profiles to learn the
-geometric structure of the latent space.
+profiles. It is important to highlight that at no point does the RHVAE obtain
+any knowledge about the identity of the input data. In other words, the RHVAE
+has no information about the lineage or time point of the fitness profile that
+it is processing. The network only uses the unidentified fitness profiles to
+learn the geometric structure of the latent space.
 
 ![**Dimensionality reduction via geometric variational autoencoder**. (A)
 Schematic of dimensionality reduction applied to fitness profiles.

@@ -8,7 +8,7 @@ csl: ieee.csl
 ## Geometry-Informed Latent Space Reconstruction of Fitness Landscapes {#sec-fitness-landscapes}
 
 With the ability to capture the underlying structure of the phenotypic space as
-shown in @fig-04, it is natural to ask whether the RHVAE can be used to
+shown in @fig-04, we can investigate whether the RHVAE can be used to
 reconstruct the underlying fitness landscapes. For this, we take advantage of
 the fact that the RHVAE decoder represents a continuous function from latent
 coordinates to fitness values in different environments. Scanning a grid of
@@ -21,11 +21,11 @@ RHVAE is able to capture the underlying topography of the fitness landscapes,
 where the number of peaks and their relative positions are similar to the ground
 truth landscapes. Although the VAE model can also capture the general shape of
 the fitness landscapes, the lack of a metric in this space---limiting the
-predictions only to the local neighborhood of the training data---makes it
-difficult to define where to trust the predictions of the model. The PCA model,
-on the other hand, is not able to capture the underlying structure of the
-fitness landscapes as there is a non-linear structure that cannot be captured by
-a linear transformation.
+predictions to the local neighborhood of the training data---makes it difficult
+to define where to trust the predictions of the model. The PCA model, on the
+other hand, is not able to capture the underlying structure of the fitness
+landscapes as there is a non-linear structure that cannot be captured by a
+linear transformation.
 
 ![**Geometry-informed latent space enables accurate reconstruction of complex
 fitness landscapes**. Comparison of ground truth and reconstructed fitness

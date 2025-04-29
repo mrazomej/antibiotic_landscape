@@ -63,7 +63,7 @@ lineages (initial phenotype coordinates) in two replicates (different
 instantiations of the random dynamics) evolve for 300 time steps on 50 different
 fitness landscapes (different topographies, meaning number, position, and
 relative height of fitness peaks). For each of these conditions, the fitness in
-all other environments are also determined, giving a high-dimensional dataset
+all other environments is also determined, giving a high-dimensional dataset
 analogous to the ones in recent experimental studies [@kinsler2020;
 @iwasawa2022; @ascensao2023; @ghosh2025]. We use this dataset to test whether it
 is possible to reverse the mapping from phenotypes to fitness values and
@@ -72,12 +72,12 @@ profiles.
 
 ![**Evolutionary dynamics on phenotype space**. (A) Top: Metropolis-like
 evolutionary dynamics on phenotype space. Each line represents the trajectory of
-lineage as it evolves over time, with crosses and triangles denoting the initial
-phenotypic coordinate of a few selected lineages. Note that trajectories tend to
-move towards higher fitness values, avoiding low genotype-to-phenotype density
-regions. Bottom: Fitness over time of the same trajectories shown above. (B) The
-same trajectories shown in (A) overlaid on different fitness maps determined by
-different environments. Although the phenotypic coordinates of the genotypes
-remain the same (top panels), the resulting fitness readouts change as the
-topography of the environment-dependent fitness landscape changes (bottom
+a lineage as it evolves over time, with crosses and triangles denoting the
+initial phenotypic coordinate of a few selected lineages. Note that trajectories
+tend to move towards higher fitness values, avoiding low genotype-to-phenotype
+density regions. Bottom: Fitness over time of the same trajectories shown above.
+(B) The same trajectories shown in (A) overlaid on different fitness maps
+determined by different environments. Although the phenotypic coordinates of the
+genotypes remain the same (top panels), the resulting fitness readouts change as
+the topography of the environment-dependent fitness landscape changes (bottom
 panels).](./fig/main/fig02_v05){#fig-02}
