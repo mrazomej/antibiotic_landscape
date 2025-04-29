@@ -9,10 +9,10 @@ csl: ieee.csl
 
 As described in the Supplementary Material, we trained three models on the
 simulated profiles depicted in [@fig-02] for comparison: A linear model (via
-PCA), a vanilla VAE, and an RHVAE. Each of these models allows us to project the
+PCA), a vanilla VAE, and an RHVAE. Each model allows us to project the
 high-dimensional fitness profiles into a low-dimensional latent space.
-Nevertheless, none of the resulting latent spaces need to be aligned to the
-ground truth phenotype as they were constructed with no information about the
+Nevertheless, none of the resulting latent spaces need to be aligned with the
+ground truth phenotype, as they were constructed with no information about the
 relative coordinates in phenotype space. To visually compare whether the
 resulting latent coordinates for the simulated data preserve the general
 structure of the phenotype space, we aligned each latent space to the ground
@@ -24,10 +24,10 @@ others, the RHVAE-derived latent space appears to qualitatively preserve the
 structure of the phenotype space better than the other two models; for example,
 the four regions of low genotype-to-phenotype density are clearly visible in the
 RHVAE-derived latent space, while they are not as pronounced in the other two
-latent spaces. Moreover, when looking at the commonly-used PCA-derived latent
+latent spaces. Moreover, when looking at the commonly used PCA-derived latent
 space, we might be misled into believing that the two highlighted points
-(diamond markers) are genotypes with very similar phenotypic effects, when in
-fact they are extremely different, as captured by the non-linear latent spaces.
+(diamond markers) are genotypes with very similar phenotypic effects, when, in
+fact, they are extremely different, as captured by the non-linear latent spaces.
 This point is further highlighted in @fig-04(B), where we show the comparison of
 all pairwise distances between genotypes in the ground truth phenotypic space
 vs. the different latent spaces. Overall, the RHVAE-derived latent space
@@ -53,12 +53,12 @@ where $f^{(n)}_e$ and $\hat{f}^{(n)}_e$ are the ground truth and reconstructed
 fitness values, respectively, for the $n$-th genotype in the $e$-th environment.
 We observe that the vanilla 2D-VAE model achieves a reconstruction error
 equivalent to that of an eight-dimensional PCA model. In contrast, the 2D-RHVAE
-outperforms the other two models, achieving a reconstruction error that is on of
+outperforms the other two models, achieving a reconstruction error on par with
 an eight-dimensional PCA model. In contrast, the 2D-RHVAE consistently
-outperforms the other two models, achieving a reconstruction error that is on
-par with that of a ten-dimensional PCA model. This further highlights the
-ability of the RHVAE to capture the underlying nonlinear structure of the
-phenotype space while maintaining high reconstruction accuracy.
+outperforms the other two models, achieving a reconstruction error on par with a
+ten-dimensional PCA model. This further highlights the ability of the RHVAE to
+capture the underlying nonlinear structure of the phenotype space while
+maintaining high reconstruction accuracy.
 
 One of the main advantages of the RHVAE is its ability to learn a metric tensor
 that captures the local geometry of the latent space. A way to visualize this
@@ -77,7 +77,7 @@ this feature is particularly nice because the curvature in the latent space
 defines the regions where the trained model is able to make accurate
 predictions. Moreover, we note that regions of high curvature within the data
 cloud exactly correspond to the regions of low genotype-phenotype density we
-imposed in the simulation. This suggests that, for a properly-sampled phenotypic
+imposed in the simulation. This suggests that, for a properly sampled phenotypic
 space, the geometric information learned by the RHVAE is able to capture the
 non-uniformity of the phenotypic density as variations in the curvature of the
 latent space, offering a data-driven tool to identify accessible evolutionary
@@ -85,14 +85,14 @@ paths in phenotype space.
 
 ![**Geometry-informed latent space captures phenotypic structure and improves
 reconstruction accuracy**. (A) Latent space coordinates of simulated fitness
-profiles colored by lineage, after alignment to ground truth phenotype space
-using Procrustes analysis. The RHVAE better preserves phenotypic relationships
-than PCA or vanilla VAE, as evidenced by the highlighted points (diamond
-markers). (B) Comparison of all pairwise Euclidean distances between genotypes
-in the ground truth phenotypic space versus the different latent spaces, showing
-RHVAE better preserves the original distances. (C) Reconstruction error (MSE)
-comparison showing 2D-RHVAE achieves accuracy comparable to a 10-dimensional PCA
-model. (D) Metric volume visualization of the RHVAE latent space (left) and with
-projected data points (right), revealing regions of high curvature that
-correspond to areas of low genotype-phenotype density in the
-simulation.](./fig/main/fig04_v04){#fig-04}
+profiles colored by lineage, after alignment with the ground truth phenotype
+space using Procrustes analysis. The RHVAE better preserves phenotypic
+relationships than PCA or vanilla VAE, as evidenced by the highlighted points
+(diamond markers). (B) Comparison of all pairwise Euclidean distances between
+genotypes in the ground truth phenotypic space versus the different latent
+spaces, showing RHVAE better preserves the original distances. (C)
+Reconstruction error (MSE) comparison showing 2D-RHVAE achieves accuracy
+comparable to a 10-dimensional PCA model. (D) Metric volume visualization of the
+RHVAE latent space (left) and with projected data points (right), revealing
+regions of high curvature that correspond to areas of low genotype-phenotype
+density in the simulation.](./fig/main/fig04_v04){#fig-04}

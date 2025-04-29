@@ -13,8 +13,8 @@ antibiotic adaptation dynamics. For this, we use the data from @iwasawa2022
 where the authors evolved different *E. coli* strains on three different
 antibiotics: kanamycin (KM), norfloxacin (NFLX), and tetracycline (TET). For
 this, they used a multi-well plate format where the rows contained a gradient of
-different concentrations of the antibiotic as depicted in @fig-06(A). Every day,
-a fresh plate with the same arrangement of antibiotics was inoculated with cells
+different antibiotic concentrations, as depicted in @fig-06(A). Every day, a
+fresh plate with the same arrangement of antibiotics was inoculated with cells
 from the well in the evolving condition with the highest concentration of
 antibiotic that still allowed growth. This process was repeated every day for 27
 days. @fig-06(B) shows the raw data output from one of the experiments. The
@@ -25,19 +25,19 @@ expected, the sigmoidal curve shifts to the right as the population evolves
 resistance to the antibiotic. From these titration curves, we can use Bayesian
 inference to extract the value of the antibiotic concentration at which the
 optical density is 50% of the maximum value. This value---known as the
-*antibiotic $IC_{50}$*---is a measure of the antibiotic resistance of the evolved
-strains (see Supplementary Material @iwasawa2022 for more details).
+*antibiotic $IC_{50}$*---is a measure of the antibiotic resistance of the
+evolved strains (see Supplementary Material @iwasawa2022 for more details).
 
-@fig-06(C) shows the time trajectories of the $IC_{50}$ in all eight antibiotics for
-all cultures evolved in TET. Over time, all lineages increase their $IC_{50}$ in
-TET, however, the trend for all other antibiotics is more complex. Following the
-same approach as in @fig-04, @fig-06(D) shows the resulting latent spaces for
-PCA, VAE, and RHVAE trained on the $IC_{50}$ values for all eight antibiotics. Each
-color represents a lineage evolved on a different antibiotic. From these 
-projections, we can see that the latent coordinates for different lineages are
-more disentangled in the non-linear latent spaces compared to that of PCA. 
-Moreover, the rightmost panel shows that in terms of reconstruction error, RHVAE
-shows the lowest error---comparable to that of a 5-dimensional PCA.
+@fig-06(C) shows the time trajectories of the $IC_{50}$ in all eight antibiotics
+for all cultures evolved in TET. Over time, all lineages increase their
+$IC_{50}$ in TET, however, the trend for all other antibiotics is more complex.
+Following the same approach as in @fig-04, @fig-06(D) shows the resulting latent
+spaces for PCA, VAE, and RHVAE trained on the $IC_{50}$ values for all eight
+antibiotics. Each color represents a lineage evolved on a different antibiotic.
+These projections show that the latent coordinates for different lineages are
+more disentangled in the non-linear latent spaces than in PCA. Moreover, the
+rightmost panel shows that in terms of reconstruction error, RHVAE shows the
+lowest error---comparable to that of a 5-dimensional PCA.
 
 ![**Evolutionary dynamics of antibiotic resistance captured in latent space
 reveals complex adaptation patterns**. (A) Experimental setup using multi-well

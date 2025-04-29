@@ -8,7 +8,7 @@ csl: ieee.csl
 ## Simple Phenotype-Fitness Model
 
 With the advent of high-throughput fitness assays, determining the fitness of
-multiple genotypes on a plethora of different environments has become a routine
+multiple genotypes in a plethora of different environments has become a routine
 procedure in evolutionary biology [@kinsler2020; @maeda2020; @iwasawa2022;
 @ascensao2023]. Nevertheless, we argue that we still lack a simple conceptual
 framework to guide our interpretation of the patterns observed in these
@@ -17,7 +17,7 @@ to serve as a light post for our interpretation of the data.
 
 @fig-01(A) shows a schematic of the genotype-phenotype-fitness map. A genotype
 $g$ is mapped to a phenotype coordinate $\underline{p}$ via a function
-$\phi$---depicted as two potential molecular phenotypes such as an eflux pump
+$\phi$---depicted as two potential molecular phenotypes, such as an efflux pump
 rate and the sensitivity of a membrane receptor. The fitness of each genotype is
 determined by the value of these phenotypes and the environment $E$ via a
 function $F$---depicted as the doubling time of a bacterial population. To
@@ -34,8 +34,8 @@ is highly redundant, with many genotypes mapping to equivalent phenotypes and
 some phenotypes being extremely rare [@louis2016]. @fig-01(B, left) shows a
 schematic of one possible $GP$ map overlaid on a 2D phenotype space. For
 illustration purposes, we set the $GP$ map to contain four negative Gaussian
-peaks, which represent four regions of the phenotype space that are unlikely to
-be sampled (see Supplementary Material for a more detailed discussion). The
+peaks, representing four regions of the phenotype space that are unlikely to be
+sampled (see Supplementary Material for a more detailed discussion). The
 location and size of these peaks are assumed to be fixed by the
 genotype-to-phenotype map, irrespective of the environment. We also introduce a
 fitness function $F: \mathbb{R}^P \to \mathbb{R}$ that maps phenotypes to
@@ -44,7 +44,7 @@ by the environment $E$. @fig-01(B, right) shows a schematic of the simplest
 fitness landscape with a single symmetric Gaussian peak.
 
 In recent experimental evolution studies, genotypes are evolved under a fixed
-environment, but the fitness is measured on multiple environments
+environment, but the fitness is measured across multiple environments
 [@kinsler2020;@iwasawa2022]. To reflect this, @fig-01(C) shows the effect of
 changing the environment on the phenotype-fitness map. Even though the mapping
 from genotype to phenotype (coordinates of the example points) and the
@@ -56,12 +56,12 @@ Therefore, we conceptualize the measured fitness profiles on multiple
 environments as measuring the heights of a fixed phenotypic coordinate on
 multiple fitness landscapes. @fig-01(D) shows the equivalent experimental
 observable---the fitness values of any genotype $g$ on multiple environments,
-hereafter referred to as a fitness profile. We ask whether it is possible to
-extract information about the latent phenotypic coordinates based only on such
-high-dimensional fitness profiles. Conceptually, this is equivalent to asking
-whether it is possible to reverse the mapping from phenotypes to fitness values
-and predict the phenotypic coordinates of a genotype based only on its fitness
-values on multiple environments.
+hereafter referred to as a fitness profile. We ask whether extracting
+information about the latent phenotypic coordinates is possible based only on
+such high-dimensional fitness profiles. Conceptually, this is equivalent to
+asking whether it is possible to reverse the mapping from phenotypes to fitness
+values and predict the phenotypic coordinates of a genotype based only on its
+fitness values across multiple environments.
 
 ![**Model of phenotype-fitness dynamics**. (A) Schematic of the
 genotype-phenotype-fitness map. A pair of genotypes $g^{(\text{b})}$ and
@@ -75,8 +75,8 @@ iso-probability contours. Right: The fitness landscape $F$ as a function of the
 phenotype values $p_1$ and $p_2$. White lines show iso-fitness contours. The
 points show the coordinates of the two genotypes in phenotype space. (C)
 Examples of the effect of changing the environment on the phenotype-fitness
-landscape. The phenotypic coordinates of any genotype as well as the
-genotype-to-phenotype density map are not affected by changes of the
+landscape. The phenotypic coordinates of any genotype and the
+genotype-to-phenotype density map are not affected by changes in the
 environment. The fitness landscape, however, does change as the environment
 changes. Green landscape shows the evolution condition where selection happens.
 Gray landscapes show other environments with different topographies (position,
@@ -85,4 +85,3 @@ landscape contours, while white solid lines show genotype-phenotype density
 contours. (D) Fitness profiles. The fitness values of any genotype measured
 across multiple environments as an experimental
 observable.](./fig/main/fig01_v06_compiled){#fig-01}
-

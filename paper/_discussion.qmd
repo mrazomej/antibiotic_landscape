@@ -8,7 +8,7 @@ csl: ieee.csl
 Our ability to experimentally track evolving microbial populations presents an
 unprecedented opportunity to better understand the complexity of the space in
 which evolutionary dynamics take place. The recent wave of work following the
-strategy of determining the fitness of multiple genotypes not in one, but
+strategy of determining the fitness of multiple genotypes, not in one, but
 multiple environments [@kinsler2020; @iwasawa2022; @ascensao2023; @ghosh2025]
 suggests that this is a powerful approach to try to uncover the underlying
 structure of the genotype-phenotype-fitness map. Combined with the body of
@@ -37,7 +37,7 @@ measurements. We demonstrate the ability of our method to recover the underlying
 nonlinear structure of the phenotype-fitness map on synthetic data generated
 from evolutionary dynamics on a simple phenotypic space with nonlinear mapping
 to fitness. The geometry-informed latent space not only recovers the relative
-position of genotypes in the phenotypic space, but also, the learned function
+position of genotypes in the phenotypic space, but also the learned function
 mapping from latent coordinates to fitness is able to reconstruct the topography
 of the underlying fitness landscape.
 
@@ -52,7 +52,7 @@ equivalent to a five-dimensional linear latent space based on principal
 components. Finally, to show that the information captured by the learned
 nonlinear latent space is more predictive of the cross-resistance values, we
 leave one of the eight antibiotics out during the construction of the latent
-space, and then use this latent coordinates to predict the cross-resistance
+space, and then use these latent coordinates to predict the cross-resistance
 values of the left-out antibiotic. The results show that the geometry-informed
 two-dimensional latent space outperforms the linear model based on principal
 components by a significant margin.
@@ -69,7 +69,7 @@ into an empirically grounded framework, where the dimensionality, density, and
 metric properties of the phenotypic space can be inferred from experimental data
 rather than assumed a priori. The geometry-informed latent space we recover
 provides a picture of the adaptive landscape as originally envisioned by Fisher
-but with the mathematical sophistication afforded by modern deep-learning
+but with the mathematical sophistication afforded by modern deep learning
 methods.
 
 One unique affordance of latent spaces endowed with a Riemannian metric is that
@@ -81,10 +81,10 @@ between pre- and post-evolved genotypes. Although not fully conclusive, when
 comparing the shortest path in latent space between the initial and final latent
 coordinates, some *E. coli* lineages seem to follow the predicted shortest path
 (See Supplementary Material for a detailed discussion). It is tempting to
-speculate about the biological significance of this observation, and whether it
+speculate about the biological significance of this observation and whether it
 is a more general property of the evolutionary process, as it suggests a
 potential analogous least-action principle of evolution in phenotypic space.
-Nevertheless, more work is needed to further explore this hypothesis with a
+Nevertheless, more work is needed to explore this hypothesis further with a
 larger number of genotypes and environments. 
 
 Moreover, it remains an open question as to what is the biological meaning of

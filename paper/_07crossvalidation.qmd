@@ -35,18 +35,17 @@ only 50% of the genotypes for training, it tries to predict the $IC_{50}$ of the
 missing antibiotic.
 
 @fig-07(B) compares the predictive power of the three models across different
-numbers of linear latent space dimensions in terms of reconstruction error. For 
-each panel, the accuracy of the predicted $IC_{50}$ value on the missing 
+numbers of linear latent space dimensions in terms of reconstruction error. For
+each panel, the accuracy of the predicted $IC_{50}$ value on the missing
 antibiotic over the validation set is plotted as a function of the number of
-of linear dimensions used in the SVD bi-cross validation approach. The 
-horiziontal dashed lines represent the accuracy of the predicted $IC_{50}$ value
-for the 2D-VAE (dark blue) and 2D-RHVAE (dark red) models. We can see that for
-all antibiotics, the 2D non-linear latent space coordinates are more predictive
-of the missing antibiotic $IC_{50}$ values than any number of possible linear
-dimensions. This result is consistent with the hypothesis that the non-linear
-latent space coordinates capture more information about the phenotypic state of
-the system under study, allowing for more accurate predictions of out-of-sample
-data.
+linear dimensions used in the SVD bi-cross validation approach. The horizontal
+dashed lines represent the accuracy of the predicted $IC_{50}$ value for the
+2D-VAE (dark blue) and 2D-RHVAE (dark red) models. For all antibiotics, the 2D
+non-linear latent space coordinates are more predictive of the missing
+antibiotic $IC_{50}$ values than any number of possible linear dimensions. This
+result is consistent with the hypothesis that the non-linear latent space
+coordinates capture more information about the phenotypic state of the system
+under study, allowing for more accurate predictions of out-of-sample data.
 
 ![**Non-linear latent space models demonstrate superior predictive power for
 out-of-sample antibiotic data**. (A) Schematic representation of the
@@ -62,3 +61,5 @@ predictions than any number of linear dimensions, demonstrating that non-linear
 latent space representations capture more meaningful biological information
 about the underlying phenotypic state.](./fig/main/fig07_v01_compiled){#fig-07}
 
+
+  
