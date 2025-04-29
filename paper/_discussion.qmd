@@ -53,9 +53,13 @@ components. Finally, to show that the information captured by the learned
 nonlinear latent space is more predictive of the cross-resistance values, we
 leave one of the eight antibiotics out during the construction of the latent
 space, and then use these latent coordinates to predict the cross-resistance
-values of the left-out antibiotic. The results show that the geometry-informed
-two-dimensional latent space outperforms the linear model based on principal
-components by a significant margin.
+values of the left-out antibiotic. Moreover, increasing the dimensionality of
+the latent space from two to three dimensions only marginally improves the
+predictive power of the model, suggesting that only two degrees of freedom are
+needed to capture the changes in the phenotypic state of the evolving lineages
+(see Supplementary Material for a detailed discussion). The results show that
+the geometry-informed latent space outperforms the linear model based on
+principal components by a significant margin.
 
 Our work can be viewed as a modern, data-driven implementation of Fisher's
 geometric model of adaptation [@orr2005]. While Fisher conceptualized adaptation
@@ -74,18 +78,21 @@ methods.
 
 One unique affordance of latent spaces endowed with a Riemannian metric is that
 distances in latent space can be related to the resulting distances in fitness
-space. Moreover, the metric tensor allows for the identification of the shortest
-path between two points in latent space. This property begs the question of
-whether evolutionary trajectories in latent space follow the shortest path
-between pre- and post-evolved genotypes. Although not fully conclusive, when
-comparing the shortest path in latent space between the initial and final latent
-coordinates, some *E. coli* lineages seem to follow the predicted shortest path
-(See Supplementary Material for a detailed discussion). It is tempting to
-speculate about the biological significance of this observation and whether it
-is a more general property of the evolutionary process, as it suggests a
-potential analogous least-action principle of evolution in phenotypic space.
-Nevertheless, more work is needed to explore this hypothesis further with a
-larger number of genotypes and environments. 
+space. Furthermore, as suggested by our results on the synthetic data, the
+curvature of the resulting latent space can be related to the underlying density
+of genotypes mapping to regions of phenotype space, revealing the accessibility
+of different regions. Moreover, the metric tensor allows for the identification
+of the shortest path between two points in latent space. This property begs the
+question of whether evolutionary trajectories in latent space follow the
+shortest path between pre- and post-evolved genotypes. Although not fully
+conclusive, when comparing the shortest path in latent space between the initial
+and final latent coordinates, some *E. coli* lineages seem to follow the
+predicted shortest path (See Supplementary Material for a detailed discussion).
+It is tempting to speculate about the biological significance of this
+observation and whether it is a more general property of the evolutionary
+process, as it suggests a potential analogous least-action principle of
+evolution in phenotypic space. Nevertheless, more work is needed to explore this
+hypothesis further with a larger number of genotypes and environments. 
 
 Moreover, it remains an open question as to what is the biological meaning of
 the learned latent coordinates. Complementing these high-dimensional fitness
