@@ -26,7 +26,7 @@ resistance to the antibiotic. From these titration curves, we can use Bayesian
 inference to extract the value of the antibiotic concentration at which the
 optical density is 50% of the maximum value. This value---known as the
 *antibiotic $IC_{50}$*---is a measure of the antibiotic resistance of the
-evolved strains (see Supplementary Material @iwasawa2022 for more details).
+evolved strains (see Supplementary Material for more details).
 
 @fig-06(C) shows the time trajectories of the $IC_{50}$ in all eight antibiotics
 for all cultures evolved in TET. Over time, all lineages increase their
