@@ -271,6 +271,13 @@ $endif$
 $if(pagestyle)$
 \pagestyle{$pagestyle$}
 $endif$
+
+% Lower the position of page numbers
+\usepackage{fancyhdr}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{100pt} % Increase this value to lower the page numbers
+
 $pandoc.tex()$
 $if(lang)$
 \ifLuaTeX
