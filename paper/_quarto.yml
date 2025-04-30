@@ -14,21 +14,23 @@ title: "Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning R
 author:
   - name: Manuel Razo-Mejia
     orcid: 0000-0002-9510-0527
-    email: mrazo@stanford.edu
     affiliations: 
       - ref: stanfordbio
-    corresponding: true
   - name: Madhav Mani
     orcid: 0000-0002-5812-4167
+    email: madhav.mani@gmail.com
     affiliations: 
       - ref: nwqbio
       - ref: nweng
+    corresponding: true
   - name: Dmitri Petrov
     orcid: 0000-0002-3664-9130
+    email: dpetrov@stanford.edu
     affiliations:
       - ref: stanfordbio
       - ref: stanfordcancer
       - ref: czb
+    corresponding: true
 
 # Author affiliations
 affiliations:
