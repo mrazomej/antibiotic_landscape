@@ -22,8 +22,8 @@ pressures and demonstrate superior predictive power for out-of-sample data
 compared to linear approaches. Our work provides a data-driven implementation of
 Fisher's geometric model of adaptation, transforming it from a theoretical
 framework into an empirically grounded approach for understanding evolutionary
-dynamics using modern deep learning methods. :::
-
+dynamics using modern deep learning methods. 
+:::
 ::: {.maintext}
 
 # Introduction
