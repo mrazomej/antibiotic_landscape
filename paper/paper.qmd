@@ -85,8 +85,11 @@ repository](https://github.com/mrazomej/antibiotic_landscape)
 <!-- notes on nonlinear manifolds -->
 {{< include _nonlinear_manifolds.qmd >}}
 
-<!-- notes on Neural Geodesic -->
-{{< include _architecture.qmd >}}
+<!-- notes on geodesics -->
+{{< include _geodesics.qmd >}}
+
+<!-- notes on fitness landscapes -->
+{{< include _fitness_landscapes_data.qmd >}}
 
 <!-- notes on Neural Geodesic -->
 {{< include _architecture.qmd >}}

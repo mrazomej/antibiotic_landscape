@@ -1,0 +1,109 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Geometry-Informed Latent Space Reconstruction of Antibiotic Resistance Landscapes
+
+In the main text, Figure 5 shows the ability of the RHVAE to reconstruct the
+underlying fitness landscapes' topography from simulated data. There, we
+demonstrated that the relative position, number of peaks, and overall shape of
+the fitness landscapes are well-reproduced by the RHVAE latent space. It is
+therefore interesting to show the same reconstructions using the experimental
+data from [@iwasawa2022].
+
+After training an RHVAE model on the $IC_{50}$ data from [@iwasawa2022]---the
+same model used in the main text in Figure 6---we apply the same methodology to
+reconstruct the fitness landscapes for the eight antibiotics used in the
+experiment. @fig-iwasawa-landscapes shows the reconstructed fitness landscapes
+for all eight antibiotics along with the latent space metric volume. One obvious
+difference between the landscapes reconstructed from the simulated and
+experimental data is the lack of clear peaks in the experimental landscapes.
+Although it is possible that such peaks do not exist, it is more likely that the
+lack of peaks is due to the limited resolution of the experimental data, where
+only a few initial genotypes were measured.
+
+![**Reconstructed 2D antibiotic resistance landscapes from experimental data**.
+The first eight panels show the antibiotic resistance landscape reconstructions
+using a 2D RHVAE trained on the $IC_{50}$ data from [@iwasawa2022]. Dotted lines
+show different level curves on the fitness landscape. The last panel shows the
+metric volume (the determinant of the metric tensor) of the latent space. The
+darker the color, the flatter the latent
+space.](./fig/supplementary/figSI_iwasawa_landscapes){#fig-iwasawa-landscapes}
+
+Given the lack of regularity in the resulting landscapes, we also show the
+three-dimensional representations of the resistance landscapes for different
+antibiotics using experimental data from [@iwasawa2022].
+@fig-iwasawa-3D-landscapes shows the same landscapes as in
+@fig-iwasawa-landscapes, but using the z-axis to represent the fitness value.
+From this 3D perspective, the lack of clear peaks is more apparent.
+
+![**3D visualization of reconstructed antibiotic resistance landscapes**.
+Three-dimensional representations of the same resistance landscapes shown in
+@fig-iwasawa-landscapes, using experimental data from [@iwasawa2022]. The z-axis
+represents the fitness value (IC₅₀). This 3D perspective more clearly
+illustrates the lack of distinct peaks in the experimental data, which may be
+due to limited sampling of initial genotypes rather than the absence of such
+features in the actual fitness
+landscapes.](./fig/supplementary/figSI_iwasawa_3Dlandscapes){#fig-iwasawa-3D-landscapes}
+
+### Trajectories in Experimentally-reconstructed Fitness Landscapes
+
+Given these reconstructed fitness landscapes, we can now explore the
+evolutionary trajectories of different lineages in the experimental data. In
+[@iwasawa2022], the authors evolved genotypes in the presence of three different
+antibiotics: *Tetracycline* (TET), *Kanamycin* (KAN), and *Norfloxacin* (NFLX).
+Naively, if these fitness landscapes are representative of the underlying
+landscape available to the genotypes, we would expect the trajectories of these
+lineages to follow a noisy gradient ascent-like path in the latent space,
+following the fitness gradient predicted by the reconstructed landscapes.
+@fig-iwasawa-trajectories-KM, @fig-iwasawa-trajectories-TET, and
+@fig-iwasawa-trajectories-NFLX show the evolutionary trajectories of the
+lineages evolved in the presence of *Kanamycin*, *Tetracycline*, and
+*Norfloxacin*, respectively. The left and right panels show the same
+trajectories in the 2D and 3D projection of the latent space, respectively. One
+of the problematic aspects of these trajectories is that in none of the cases
+do the trajectories follow a path towards the predicted highest fitness peak.
+We strongly suspect this is a problem with the experimental setup, rather than
+the entirety of our approach. Our suspicion is that the selection of initial
+genotypes completely biased the reconstruction of the fitness landscapes. Some
+of the lineages selected by the authors were previously evolved in the presence
+of one of these antibiotics, to then be re-evolved in the presence of the other
+antibiotics. In other words, there were some strains in the initial pool that
+were already highly resistant to, say, *Kanamycin*, and then these strains were
+re-evolved in the presence of *Tetracycline*. The presence of these strains
+explains the existence of those peaks that none of the trajectories reach, since
+these strains evolved for much longer in the corresponding antibiotic compared
+to this experimental setup. However, further investigation is needed to
+determine the cause of this behavior.
+
+![**Evolutionary trajectories of lineages evolved in Kanamycin**. The left panel
+shows the 2D projection of evolutionary trajectories in the latent space
+overlaid on the Kanamycin resistance landscape. The right panel shows the same
+trajectories in a 3D projection. Different colors represent different lineages.
+Cross symbols indicate the initial point of the trajectory, while triangles
+indicate the final point. Note that trajectories do not follow paths toward the
+highest predicted fitness peaks, suggesting potential biases in the experimental
+setup or limitations in landscape
+reconstruction.](./fig/supplementary/figSI_iwasawa_landscapes_trajectories_KM){#fig-iwasawa-trajectories-KM}
+
+![**Evolutionary trajectories of lineages evolved in Tetracycline**. The left
+panel shows the 2D projection of evolutionary trajectories in the latent space
+overlaid on the Tetracycline resistance landscape. The right panel shows the
+same trajectories in a 3D projection. Different colors represent different
+lineages. Cross symbols indicate the initial point of the trajectory, while
+triangles indicate the final point. Similar to the Kanamycin case, trajectories
+do not consistently follow gradient ascent paths toward fitness
+peaks.](./fig/supplementary/figSI_iwasawa_landscapes_trajectories_TET){#fig-iwasawa-trajectories-TET}
+
+![**Evolutionary trajectories of lineages evolved in Norfloxacin**. The left
+panel shows the 2D projection of evolutionary trajectories in the latent space
+overlaid on the Norfloxacin resistance landscape. The right panel shows the same
+trajectories in a 3D projection. Different colors represent different lineages.
+Cross symbols indicate the initial point of the trajectory, while triangles
+indicate the final point. As with other antibiotics, the evolutionary paths do
+not align with the predicted fitness gradients, potentially due to pre-evolved
+strains in the initial pool biasing landscape
+reconstruction.](./fig/supplementary/figSI_iwasawa_landscapes_trajectories_NFLX){#fig-iwasawa-trajectories-NFLX}
