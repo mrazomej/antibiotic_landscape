@@ -1,0 +1,38 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Cross-Validation comparison of 2D and 3D latent spaces
+
+In Figure 7 in the main text, we tested the predictive power of 2D non-linear
+latent space coordinates compared to linear latent space coordinates. There, we
+showed via a custom cross-validation scheme that the 2D latent space
+coordinates were more predictive of out-of-sample data than the linear latent
+space coordinates. Here, we repeat a similar analysis, but using 3D latent space
+coordinates.
+
+Following the same cross-validation scheme as in the main text, we trained a
+full model on all but one antibiotic (85%-15% splits for training and validation
+data). This generates the latent space coordinates without using any information
+from the antibiotic that was left out. Next, we froze the encoder parameters
+---equivalent to fixing the latent space coordinates---and trained a
+decoder-only model on the missing antibiotic data (50%-50% splits for training
+and validation data). @fig-SI-data-2D-3D-crossval shows the results of this
+analysis. We can see that other than a couple of exceptions (KM and NFLX), the
+3D latent space coordinates are marginally more predictive of out-of-sample data
+than the 2D latent space coordinates. This suggests that the phenotypic changes
+associated with the experimental setup can be captured with two effective
+degrees of freedom.
+
+![**Comparison of 2D and 3D non-linear latent space models for predicting
+out-of-sample antibiotic data**. Reconstruction error for each missing
+antibiotic as a function of linear dimensions used in SVD cross-validation.
+Horizontal lines represent the accuracy of non-linear models: 2D-VAE (dark blue,
+dashed), 2D-RHVAE (dark red, solid), 3D-VAE (dark green, dotted), and 3D-RHVAE
+(dark purple, dash-dotted). The 3D models show marginal improvement over their 2D
+counterparts for most antibiotics, suggesting that two effective degrees of
+freedom capture most of the relevant phenotypic
+variation.](./fig/supplementary/figSI_data_2D-3D-crossval){#fig-SI-data-2D-3D-crossval}
