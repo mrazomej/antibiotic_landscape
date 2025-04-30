@@ -408,8 +408,8 @@ $endfor$
 
 % Add corresponding author
 $for(by-author)$
-$if(by-author.corresponding)$
-\affil[*]{$by-author.email$}
+$if(by-author.email)$
+\affil[*]{Corresponding author: $by-author.email$}
 $endif$
 $endfor$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
