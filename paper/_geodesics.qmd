@@ -1,0 +1,156 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Geodesics in Latent Space
+
+In this section, we explore an interesting and surprising property of some of
+the resulting evolutionary trajectories in latent space. As detailed in the main
+text, we trained an RHVAE on the $IC_{50}$ data from [@iwasawa2022]. The data
+used to train the RHVAE consists of a matrix with eight rows---one per each
+antibiotic---and $\approx$ 1300 columns representing one of the lineages at some
+time point in the experiment. However, at no point, the RHVAE has any knowledge
+of what genotype or time point corresponds to any particular column in the data
+matrix. All it sees at every epoch is a random subset of columns of this matrix.
+Nevertheless, it is interesting to ask whether there is some regularity in the
+resulting evolutionary trajectories in the learned latent space. In other words,
+once the RHVAE is trained, we can map the time series corresponding to a
+particular lineage to the corresponding latent space trajectory. A few of these
+trajectories are shown in @fig-data-geodesics as gold connected points.
+
+One of the unique features of the RHVAE model is the co-learning of the metric
+tensor in the latent space. A space endowed with such mathematical structure
+gives us the ability to compute the shortest path between any two points,
+commonly referred to as a geodesic. Geodesics are the generalization of the idea
+of a straight line in Euclidean space to curved spaces, and it is a fundamental
+concept in Riemannian geometry. Let us define this curve as
+$\underline{\gamma}(t)$ where $t \in [0, 1]$. This means that the geodesic is a
+parametric curve $\underline{\gamma}$ for which we only need to define the
+initial and final points of the curve, $\underline{\gamma}(0) = \underline{z}_0$
+and $\underline{\gamma}(1) = \underline{z}_1$. What makes it a geodesic is that
+it minimizes the length of the curve connecting the initial and final points,
+i.e., it minimizes
+
+$$
+L(\underline{\gamma}) = \int_0^1 
+dt \,
+\sqrt{
+    \underline{\dot{\gamma}}(t)^T 
+    \underline{\underline{G}}(\underline{\gamma}(t))
+    \underline{\dot{\gamma}}(t)
+}
+$${#eq-geodesic}
+
+where $\underline{\dot{\gamma}}(t) = \frac{d}{dt} \underline{\gamma}(t)$ is the
+velocity vector of the curve and
+$\underline{\underline{G}}(\underline{\gamma}(t))$ is the metric tensor at the
+point $\underline{\gamma}(t)$. Computing this geodesic is a non-trivial task,
+especially for a data-derived metric tensor with no closed-form expression.
+Fortunately, we can leverage the generality of neural networks to parameterize
+the curve and compute the geodesic numerically [@chen2018a]. Again, all we need
+to do is define the initial and final points of the curve, provide the metric
+tensor learned by the RHVAE, and let the neural network approximate the shortest
+path between the two points. @fig-data-geodesics shows the corresponding curves
+between the initial point (black crosses) and the final point (black triangles)
+as red curves for a few lineages. We highlight the fact that the curves are not
+straight lines in the latent space, but rather curved paths that follow the
+curvature of the latent space. For these few examples, we see that the geodesic
+curves are very similar to the gold curves, which are the actual trajectories
+of the lineages in the latent space. This rather surprising result suggests that
+the best spatial representation for the evolutionary trajectories coincides with
+the shortest path in the latent space.
+
+![**Geodesic paths in latent space follow evolutionary trajectories** The figure
+shows the latent space representation of evolutionary trajectories from the
+Iwasawa et al. dataset [@iwasawa2022]. Background coloring represents the metric
+volume (determinant of the metric tensor), with lighter regions indicating
+higher local curvature. Gold connected points show actual evolutionary
+trajectories of different lineages, while red curves represent the computed
+geodesics (shortest paths) between initial points (black crosses) and final
+points (black triangles). The striking similarity between geodesics and actual
+trajectories suggests that evolution in phenotype space tends to follow paths
+that minimize distance in the geometry-informed latent
+space.](./fig/supplementary/figSI_data_geodesics){#fig-data-geodesics}
+
+So far, these few examples suggest that the shortest path in the latent space
+coincides with the actual evolutionary trajectory. Since the latent space
+coordinates of any data point capture information about the resistance profile
+of the corresponding strain, we expect that the qualitative matching between the
+geodesic and the actual trajectory should mean that the resulting resistance
+profile predicted by the geodesic is very similar to the actual experimental
+resistance profile. To see if this is the case, we must decode the latent space
+trajectory back to the original space. Doing so projects back all of the points
+sampled along the geodesic curve to the original data space with eight
+antibiotic resistance values. However, there is a catch: the geodesic curve is a
+smooth continuous function of time, but the resistance profile of a strain is a
+discrete set of values with different step sizes. In other words, when
+constructing the geodesic curve, we define a continuous function connecting the
+initial and final point with no sudden jumps in the coordinates. But there is no
+*a priori* reason that the resulting experimental curve should be smooth. This
+statement is not necessarily a consequence of the discrete sampling of the data
+with a one-day time step that could be resolved by increasing the sampling
+frequency, but rather a consequence of the genotype-phenotype map. Although in
+the simulations presented in the main text we assume that all evolutionary steps
+follow certain distribution of step sizes as a convenient mathematical
+simplification, the complexity of the genotype-phenotype map might be such that
+this simplification is not valid. To emphasize this point even further, we can
+think of the geodesic curve as a prediction of what the cross-resistance values
+for the different antibiotics ought to be without information about when those
+values must evolve in time.
+
+The consequence of this is that it is not clear how to align the continuous
+geodesic curve with the discrete experimental data. We can, however, make use of
+methodologies developed for similar purposes in the form of time-warping
+algorithms. In this case, we can use dynamic time warping (DTW) to align the
+continuous geodesic curve with the discrete experimental data. DTW is a
+well-known algorithm in the signal processing community for aligning two time
+series with different step sizes. Effectively, DTW finds the optimal pairing of
+points between the two time series, with the constraint that the alignment is
+monotonic, i.e., if point $x_i$ in one time series is aligned to point $y_j$ in
+the other time series, then $x_{i+1}$ is either aligned to $y_{j}$ or $y_{j+1}$,
+never stepping backwards. We use this algorithm to align the points sampled
+along the geodesic curve in latent space with the resulting experimental curve
+also in latent space. This point, although subtle, is important: the alignment
+is done in latent space, not in the original data space. This means that the
+alignment is done based on the metric tensor learned by the RHVAE, and not on
+the original data.
+
+Once we have the aligned latent space trajectory, we can decode it back to the
+original data space and plot the resulting experimental curve.
+@fig-data-geodesics-timewarp-1 and @fig-data-geodesics-timewarp-2 show the
+results of this procedure for the same few lineages shown in
+@fig-data-geodesics. On the left, we show the same latent space trajectory as in
+@fig-data-geodesics, on the right, we show the resulting $IC_{50}$ curves for
+each of the eight antibiotics. The gold curves show the original experimental
+curves, while the red curves show the geodesic-predicted curves after the
+dynamic time warping alignment. Although far from perfect, the alignment is
+remarkably good considering that the predictions were drawn from only knowing
+the initial and final points of the trajectory in latent space and then
+computing the shortest path between them. This surprising result begs for
+further experimental investigation along with extensive theoretical analysis of
+why this phenomenon occurs. One tantalizing, although highly speculative,
+possibility is that evolution proceeds in phenotype space following a least
+action principle, i.e., the path taken by the evolutionary trajectory is the one
+that minimizes the distance traveled in phenotype space subject to the
+constraints of phenotype accessibility, as modeled by our genotype-phenotype
+density function in the main text.
+
+![**Geodesic predictions of evolutionary trajectories match experimental data
+after time alignment.** Left panel shows latent space trajectories (gold:
+experimental path; red: geodesic prediction) for selected lineages. Right panel
+shows the corresponding IC50 values for all eight antibiotics over time,
+comparing experimental measurements (gold) with geodesic predictions after
+dynamic time warping alignment
+(red).](./fig/supplementary/figSI_data_geodesics_timewarp_1){#fig-data-geodesics-timewarp-1}
+
+![**Additional examples of geodesic-based predictions of antibiotic resistance
+evolution.** Each panel pair shows another set of lineages where geodesic paths
+in latent space (left, red curves) were used to predict the temporal evolution
+of resistance profiles (right). Despite only using initial and final points as
+inputs, the geodesic predictions (red) capture many features of the actual
+evolutionary trajectories (gold) after time
+alignment.](./fig/supplementary/figSI_data_geodesics_timewarp_2){#fig-data-geodesics-timewarp-2}
+

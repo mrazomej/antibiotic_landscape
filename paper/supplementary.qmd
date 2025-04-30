@@ -13,6 +13,9 @@
 <!-- notes on nonlinear manifolds -->
 {{< include _nonlinear_manifolds.qmd >}}
 
+<!-- notes on geodesics -->
+{{< include _geodesics.qmd >}}
+
 <!-- notes on Neural Geodesic -->
 {{< include _architecture.qmd >}}
 
