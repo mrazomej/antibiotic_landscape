@@ -13,6 +13,9 @@
 <!-- notes on nonlinear manifolds -->
 {{< include _nonlinear_manifolds.qmd >}}
 
+<!-- notes on cross-validation -->
+{{< include _crossvalidation.qmd >}}
+
 <!-- notes on geodesics -->
 {{< include _geodesics.qmd >}}
 

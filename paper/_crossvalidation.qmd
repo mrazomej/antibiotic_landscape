@@ -1,0 +1,244 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Cross-Validation Methodology for Evaluating Latent Space Predictive Power
+
+To rigorously evaluate whether non-linear latent space coordinates capture more
+information about the underlying phenotypic state than linear projections, we
+implemented a cross-validation framework that tests each model's ability to
+predict responses to unseen antibiotics. This approach extends the bi-cross
+validation methodology described by @kinsler2020, adapting it for both linear
+(PCA/SVD) and non-linear (VAE and RHVAE) dimensionality reduction techniques.
+
+### Theoretical Background
+
+The core insight of our cross-validation approach is that if latent space
+coordinates genuinely capture the underlying phenotypic state of the system,
+they should enable accurate prediction of cellular responses to antibiotics not
+used in training. We test this hypothesis by systematically holding out one
+antibiotic at a time, learning latent space coordinates without information from
+that antibiotic, and then evaluating how well these coordinates predict the
+response to the held-out antibiotic.
+
+### Linear Bi-Cross Validation (SVD)
+
+For linear models, we implement the bi-cross validation method of @kinsler2020.
+Given our $IC_{50}$ data matrix $\underline{\underline{X}} \in \mathbb{R}^{m
+\times n}$ where rows represent antibiotics and columns represent genotypes, we
+partition the matrix into four quadrants
+
+$$
+\underline{\underline{X}} = 
+\begin{bmatrix}
+\underline{\underline{A}} & \underline{\underline{B}} \\
+\underline{\underline{C}} & \underline{\underline{D}}
+\end{bmatrix}
+$${#eq-crossvalidation-svd}
+
+Here, $\underline{\underline{A}}$ represents the target quadrant containing the
+held-out antibiotic-genotype combinations we aim to predict. Specifically, for
+a given held-out antibiotic $i$:
+
+- $\underline{\underline{A}} \in \mathbb{R}^{1 \times k}$ contains $IC_{50}$
+    values for antibiotic $i$ and the validation set genotypes ($k$ genotypes)
+- $\underline{\underline{B}} \in \mathbb{R}^{1 \times (n-k)}$ contains $IC_{50}$
+    values for antibiotic $i$ and the training set genotypes
+- $\underline{\underline{C}} \in \mathbb{R}^{(m-1) \times k}$ contains $IC_{50}$
+    values for all other antibiotics and the validation set genotypes
+- $\underline{\underline{D}} \in \mathbb{R}^{(m-1) \times (n-k)}$ contains $IC_{50}$
+    values for all other antibiotics and the training set genotypes
+
+The theoretical foundation of this approach rests on the observation that for a
+full-rank matrix, we can estimate $\underline{\underline{A}}$ as
+
+$$
+\underline{\underline{A}} = 
+\underline{\underline{B}}\, \underline{\underline{D}}^+ \underline{\underline{C}}
+$${#eq-crossvalidation-svd-estimate}
+
+where $\underline{\underline{D}}^+$ is the Moore-Penrose pseudoinverse of
+$\underline{\underline{D}}$. To evaluate how well a low-rank approximation
+performs, we compute rank-$r$ approximations of $\underline{\underline{D}}$
+using SVD:
+
+1. Perform SVD on $\underline{\underline{D}}$: 
+
+$$
+\underline{\underline{D}} =
+\underline{\underline{U}}\, \underline{\underline{\Sigma}} \,
+\underline{\underline{V}}^T
+$${#eq-crossvalidation-svd-svd}
+
+2. Create rank-$r$ approximation by retaining only the top $r$ singular values:
+
+$$
+\underline{\underline{D}}_r = \underline{\underline{U}}\,
+\underline{\underline{\Sigma}}_r \underline{\underline{V}}^T
+$${#eq-crossvalidation-svd-svd-rank}
+
+3. Compute the predicted matrix:
+
+$$
+\underline{\underline{\hat{A}}}_r =
+\underline{\underline{B}}\, \underline{\underline{D}}_r^+
+\underline{\underline{C}}
+$${#eq-crossvalidation-svd-svd-pred}
+
+4. Calculate the mean squared error (MSE) between $\underline{\underline{A}}$
+and $\underline{\underline{\hat{A}}}_r$:
+
+$$
+\text{MSE}_r =
+\frac{1}{|\underline{\underline{A}}|}\sum_{i,j}(\underline{\underline{A}}_{ij} -
+\underline{\underline{\hat{A}}}_{r,ij})^2
+$${#eq-crossvalidation-svd-svd-mse}
+
+By examining how MSE varies with rank, we can determine the minimum
+dimensionality needed to accurately predict the held-out antibiotic data.
+
+### Non-Linear Cross-Validation (VAE and RHVAE)
+
+For non-linear models (VAE and RHVAE), we adapt the cross-validation approach to
+account for the different model architecture. The procedure for each held-out
+antibiotic $i$ consists of two phases:
+
+#### Phase 1: Training the Encoder
+
+First, we train a complete model (encoder + decoder) on $IC_{50}$ data from all
+antibiotics except the held-out antibiotic $i$. This yields an 85%-15%
+train-validation split of genotypes for robust training. Denoting the set of all
+antibiotics as $\mathcal{A}$ and the held-out antibiotic as $a_i$, we train on
+the data matrix $\underline{\underline{X}}_{\mathcal{A} \setminus \{a_i\}}$.
+
+For the VAE, we maximize the evidence lower bound (ELBO):
+
+$$
+\mathcal{L}(\theta, \phi) = 
+\left\langle 
+    \log p_\theta(\underline{x}|\underline{z}) 
+\right\rangle_{q_\phi(\underline{z}|\underline{x})} -
+D_{KL}(q_\phi(\underline{z}|\underline{x}) || \pi(\underline{z}))
+$${#eq-crossvalidation-vae-elbo}
+
+where $\underline{x}$ represents the $\log IC_{50}$ values for a genotype across
+all antibiotics except $a_i$, $\underline{z}$ is the latent representation,
+$q_\phi(\underline{z}|\underline{x})$ is the encoder, and
+$p_\theta(\underline{x}|\underline{z})$ is the decoder.
+
+For the RHVAE, we similarly maximize the ELBO but with modifications to account
+for the Riemannian geometry of the latent space. The model learns a
+position-dependent metric tensor $\underline{\underline{G}}(\underline{z})$
+along with the encoder and decoder parameters.
+
+After training, the encoder maps inputs $\underline{x}$ to latent coordinates
+$\underline{z}$ that capture the underlying phenotypic state without information
+from antibiotic $a_i$.
+
+#### Phase 2: Training the Missing Antibiotic Decoder
+
+Once the encoder is trained, we freeze its parameters—effectively fixing the
+latent space coordinates for each genotype. We then train a decoder-only model
+to predict the response to the held-out antibiotic $a_i$ using a 50%-50%
+train-validation split of genotypes
+
+$$
+\underline{z} = \text{Encoder}_\phi(\underline{x})
+$${#eq-crossvalidation-vae-encoder}
+
+$$
+\hat{y}_i = \text{Decoder}_\theta(\underline{z})
+$${#eq-crossvalidation-vae-decoder}
+
+where $\hat{y}_i$ is the predicted $IC_{50}$ value for antibiotic $a_i$.
+
+This training maximizes the likelihood of the observed $IC_{50}$ values given the latent coordinates:
+
+$$
+\mathcal{L}_{\text{decoder}} = 
+\left\langle 
+    \log p_\theta(y_i|\underline{z}) 
+\right\rangle_{q_\phi(\underline{z}|\underline{x})}
+$${#eq-crossvalidation-vae-decoder-elbo}
+
+For both VAE and RHVAE, we use a 2-dimensional latent space to ensure fair
+comparison with linear methods. After training, we evaluate the model's
+predictive performance on the validation set by computing the mean squared error
+between predicted and actual $IC_{50}$ values.
+
+### Implementation Details
+
+The specific implementation involved several key components:
+
+1. **Data Organization**: The $IC_{50}$ values were organized in a 3D tensor
+with dimensions [antibiotics × genotypes × MCMC samples], where the MCMC samples
+represent posterior samples from the Bayesian inference procedure used to
+estimate $IC_{50}$ values in @iwasawa2022.
+
+2. **Training Protocol**: For each held-out antibiotic:
+   - The full model (encoder + decoder) was trained for the linear mapping from
+   all antibiotics except the held-out one to the latent space.
+   - The encoder parameters were frozen, and a new decoder was trained to map
+   from the latent space to the held-out antibiotic's $IC_{50}$ values.
+   - A tempering parameter $\beta_0$ was set to 0.3 to improve stability during
+   training.
+   - Training used the Adam optimizer with a learning rate of $10^{-3}$.
+   - Models were trained for 50 epochs with a batch size of 256.
+
+3. **Model Architecture**:
+   - The encoder consisted of a joint logarithmic encoder that maps inputs to latent space.
+   - The decoder was a simple network mapping from latent space to antibiotic responses.
+   - For RHVAE, the model incorporated a metric chain with position-dependent Riemannian metric.
+
+4. **Evaluation Metrics**: We assessed predictive performance using mean squared error (MSE) between actual and predicted $IC_{50}$ values on the validation set.
+
+### Comparative Analysis
+
+To fairly compare the predictive power of linear and non-linear dimensionality
+reduction techniques, we plotted the MSE for SVD at different ranks alongside
+the MSE for 2D VAE and 2D RHVAE models. This visualization, shown in Figure 7 in
+the main text, demonstrates that for all antibiotics, the 2D non-linear latent
+space coordinates provide more accurate predictions than any number of linear
+dimensions.
+
+The key finding is that the non-linear latent spaces capture the underlying
+phenotypic structure of the system more effectively than linear projections,
+thus enabling better predictions of out-of-sample data. This validates our
+hypothesis that the phenotypic space of antibiotic resistance has an inherently
+non-linear structure that is better represented by VAE and especially RHVAE
+models.
+
+### Cross-Validation comparison of 2D and 3D latent spaces
+
+In Figure 7 in the main text, we tested the predictive power of 2D non-linear
+latent space coordinates compared to linear latent space coordinates. There, we
+showed via a custom cross-validation scheme that the 2D latent space
+coordinates were more predictive of out-of-sample data than the linear latent
+space coordinates. Here, we repeat a similar analysis, but using 3D latent space
+coordinates.
+
+Following the same cross-validation scheme as in the main text, we trained a
+full model on all but one antibiotic (85%-15% splits for training and validation
+data). This generates the latent space coordinates without using any information
+from the antibiotic that was left out. Next, we froze the encoder parameters
+---equivalent to fixing the latent space coordinates---and trained a
+decoder-only model on the missing antibiotic data (50%-50% splits for training
+and validation data). @fig-SI-data-2D-3D-crossval shows the results of this
+analysis. We can see that other than a couple of exceptions (KM and NFLX), the
+3D latent space coordinates are marginally more predictive of out-of-sample data
+than the 2D latent space coordinates. This suggests that the phenotypic changes
+associated with the experimental setup can be captured with two effective
+degrees of freedom.
+
+![**Comparison of 2D and 3D non-linear latent space models for predicting
+out-of-sample antibiotic data**. Reconstruction error for each missing
+antibiotic as a function of linear dimensions used in SVD cross-validation.
+Horizontal lines represent the accuracy of non-linear models: 2D-VAE (dark blue,
+dashed), 2D-RHVAE (dark red, solid), 3D-VAE (dark green, dotted), and 3D-RHVAE
+(dark purple, dash-dotted). The 3D models show marginal improvement over their 2D
+counterparts for most antibiotics, suggesting that two effective degrees of
+freedom capture most of the relevant phenotypic
+variation.](./fig/supplementary/figSI_data_2D-3D-crossval){#fig-SI-data-2D-3D-crossval}

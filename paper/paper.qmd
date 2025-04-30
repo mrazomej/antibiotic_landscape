@@ -10,8 +10,8 @@ difficulty arises from the enormous number of possible genotypes and the lack of
 understanding of the underlying phenotypic differences driving adaptation. Here,
 we present a computational method that takes advantage of modern high-throughput
 fitness measurements to learn a map from high-dimensional fitness profiles to a
-low-dimensional latent space in a geometry-aware manner. We demonstrate that our
-approach using a Riemannian Hamiltonian Variational Autoencoder (RHVAE)
+low-dimensional latent space in a geometry-informed manner. We demonstrate that
+our approach using a Riemannian Hamiltonian Variational Autoencoder (RHVAE)
 outperforms traditional linear dimensionality reduction techniques by capturing
 the non-linear structure of the phenotype-fitness map. When applied to simulated
 adaptive dynamics, we show that the learned latent space retains information
@@ -22,8 +22,7 @@ pressures and demonstrate superior predictive power for out-of-sample data
 compared to linear approaches. Our work provides a data-driven implementation of
 Fisher's geometric model of adaptation, transforming it from a theoretical
 framework into an empirically grounded approach for understanding evolutionary
-dynamics using modern deep learning methods.
-:::
+dynamics using modern deep learning methods. :::
 
 ::: {.maintext}
 
@@ -84,6 +83,9 @@ repository](https://github.com/mrazomej/antibiotic_landscape)
 
 <!-- notes on nonlinear manifolds -->
 {{< include _nonlinear_manifolds.qmd >}}
+
+<!-- notes on cross-validation -->
+{{< include _crossvalidation.qmd >}}
 
 <!-- notes on geodesics -->
 {{< include _geodesics.qmd >}}
