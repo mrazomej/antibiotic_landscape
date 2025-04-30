@@ -16,27 +16,27 @@ biological system under study, allowing for more accurate predictions of
 out-of-sample data.
 
 To test this hypothesis, we followed an equivalent approach to that of
-[@kinsler2020]. In their study, they performed a bi-cross validation of the
-predictive power of an increasing number of linear components on out-of-sample
-data. This approach divides the data matrix into four quadrants, $A$, $B$, $C$,
-and $D$, where rows represent genotypes and columns represent antibiotics. The
-objective is to train a linear model on known genotype-antibiotic combinations
-to predict responses in the $A$ quadrant (containing held-out
-genotype-antibiotic combinations) based on the information contained in the
-other three quadrants (see Supplementary Material for a detailed description).
-While this approach works well for linear models, we needed to adapt it for our
-non-linear approaches. The analogous approach for the VAE and RHVAE is
-schematically depicted in @fig-07(A): First, we train a full model on fitness
-profiles from all but one antibiotic (85%-15% splits for training and validation
-data). This generates the latent space coordinates without using any information
-from the antibiotic that was left out. Next, we freeze the encoder
-parameters---equivalent to fixing the latent space coordinates---and train a
-decoder-only model on the missing antibiotic data (50%-50% splits for training
-and validation data). Intuitively, this procedure uses seven out of the eight
-antibiotic $IC_{50}$ values to determine genotype's latent space coordinates
-using the same train-validation split used throughout this work, and then, using
-only 50% of the genotypes for training, it tries to predict the $IC_{50}$ of the
-missing antibiotic.
+[@kinsler2020]. In their study, the authors performed a bi-cross validation of
+the predictive power of an increasing number of linear components on
+out-of-sample data. This approach divides the data matrix into four quadrants,
+$A$, $B$, $C$, and $D$, where rows represent genotypes and columns represent
+antibiotics. The objective is to train a linear model on known
+genotype-antibiotic combinations to predict responses in the $A$ quadrant
+(containing held-out genotype-antibiotic combinations) based on the information
+contained in the other three quadrants (see Supplementary Material for a
+detailed description). While this approach works well for linear models, we
+needed to adapt it for our non-linear approaches. The analogous approach for the
+VAE and RHVAE is schematically depicted in @fig-07(A): First, we train a full
+model on fitness profiles from all but one antibiotic (85%-15% splits for
+training and validation data). This generates the latent space coordinates
+without using any information from the antibiotic that was left out. Next, we
+freeze the encoder parameters---equivalent to fixing the latent space
+coordinates---and train a decoder-only model on the missing antibiotic data
+(50%-50% splits for training and validation data). Intuitively, this procedure
+uses seven out of the eight antibiotic $IC_{50}$ values to determine genotype's
+latent space coordinates using the same train-validation split used throughout
+this work, and then, using only 50% of the genotypes for training, it tries to
+predict the $IC_{50}$ of the missing antibiotic.
 
 @fig-07(B) compares the predictive power of the three models across different
 numbers of linear latent space dimensions in terms of reconstruction error. For

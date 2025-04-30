@@ -72,7 +72,7 @@ feature of the RHVAE to be of utmost importance if the learned latent space is
 to be taken seriously as a representation of the underlying phenotypic space.
 Just as a map without a scale bar is not a useful guide to navigate the terrain,
 a latent space without a metric tensor is an incomplete representation of the
-underlying phenotypic space. We direct the reader to the supplementary material
+underlying phenotypic space. We direct the reader to the Supplementary Material
 for a mathematically rigorous description of the model. 
 
 Next, we turn our attention to applying the RHVAE to the simulated fitness
