@@ -108,6 +108,6 @@ then train a decoder that maps the latent coordinates to the high-dimensional
 phenotypic data. This approach could provide information to constrain the
 biological functions enriched on the latent dimensions, effectively determining
 the name of the axes in the latent space. We see this as an exciting direction
-an exciting direction for future work, where the combination of high-dimensional
-fitness and phenotypic data, guided by theoretical understanding of evolutionary
-dynamics, could shed light on the nature of biological adaptation.
+for future work, where the combination of high-dimensional fitness and
+phenotypic data, guided by theoretical understanding of evolutionary dynamics,
+could shed light on the nature of biological adaptation.
