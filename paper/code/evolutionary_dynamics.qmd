@@ -26,6 +26,10 @@ julia:
   exeflags: ["--project=../../Antibiotic"]
 ---
 
+\(c\) This work is licensed under a [Creative Commons Attribution License CC-BY
+4.0](https://creativecommons.org/licenses/by/4.0/). All code contained herein is
+licensed under an [MIT license](https://opensource.org/licenses/MIT).
+
 # Evolutionary Dynamics Simulation
 
 In this notebook, we simulate the dynamics of populations evolving in a 2-dimensional phenotypic space under various fitness landscapes and a fixed mutational landscape. We'll use the Metropolis-Hastings algorithm to model evolution as a biased random walk influenced by both fitness and mutational constraints.

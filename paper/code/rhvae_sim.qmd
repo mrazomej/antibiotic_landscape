@@ -25,6 +25,10 @@ julia:
   exeflags: ["--project=../../Antibiotic"]
 ---
 
+\(c\) This work is licensed under a [Creative Commons Attribution License CC-BY
+4.0](https://creativecommons.org/licenses/by/4.0/). All code contained herein is
+licensed under an [MIT license](https://opensource.org/licenses/MIT).
+
 # Riemannian Hamiltonian Variational Autoencoder for Phenotypic Space Reconstruction
 
 This notebook implements a Riemannian Hamiltonian Variational Autoencoder
