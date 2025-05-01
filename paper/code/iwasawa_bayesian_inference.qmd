@@ -1,0 +1,1128 @@
+---
+title: "Bayesian Inference of $IC_{50}$ Values"
+author:
+  - name: Manuel Razo-Mejia
+    orcid: 0000-0002-9510-0527
+    affiliations: 
+      - ref: stanfordbio
+affiliations:
+  - id: stanfordbio
+    number: 1
+    name: Department of Biology, Stanford University
+    city: Stanford
+    state: California
+    country: United States of America
+keywords:
+  - Bayesian inference
+  - Antibiotic resistance
+  - $IC_{50}$
+format:
+  html:
+    code-fold: false
+    toc: true
+engine: julia
+julia:
+  exeflags: ["--project=../../Antibiotic"]
+---
+
+\(c\) This work is licensed under a [Creative Commons Attribution License CC-BY
+4.0](https://creativecommons.org/licenses/by/4.0/). All code contained herein is
+licensed under an [MIT license](https://opensource.org/licenses/MIT).
+
+```{julia}
+#| output: false
+# Import project package
+import Antibiotic
+
+# Import package to handle DataFrames
+import DataFrames as DF
+import CSV
+
+# Import library for Bayesian inference
+import Turing
+
+# Import library to list files
+import Glob
+
+# Import packages to work with data
+import DataFrames as DF
+
+# Load CairoMakie for plotting
+using CairoMakie
+import ColorSchemes
+
+# Import packages for posterior sampling
+import PairPlots
+
+# Import basic math libraries
+import LsqFit
+import StatsBase
+import LinearAlgebra
+import Random
+
+# Activate backend
+CairoMakie.activate!()
+
+# Set custom plotting style
+Antibiotic.viz.theme_makie!()
+```
+
+\(c\) This work is licensed under a [Creative Commons Attribution License CC-BY
+4.0](https://creativecommons.org/licenses/by/4.0/). All code contained herein is
+licensed under an [MIT license](https://opensource.org/licenses/MIT).
+
+# Bayesian Inference of $IC_{50}$ values
+
+In this notebook, we will perform Bayesian inference on the $IC_{50}$ values of
+the antibiotic resistance landscape. For this, we will use the raw `OD620`
+measurements provided by @iwasawa2022.
+
+Let's begin by loading the data into a DataFrame.
+
+```{julia}
+# Load data into a DataFrame
+df = CSV.read("./iwasawa_data/iwasawa_tidy.csv", DF.DataFrame)
+
+first(df, 5)
+```
+
+To double-check that the structure of the table makes sense, let's plot the time
+series for one example to see if the sequence agrees with the expectation.
+
+```{julia}
+# Define data to use
+data = df[
+    (df.antibiotic.=="KM").&(df.env.=="Parent_in_KM").&(df.strain_num.==13).&.!(df.blank).&(df.concentration_ugmL.>0),
+    :]
+# Remove blank measurement
+# Group data by day
+df_group = DF.groupby(data, :day)
+
+# Initialize figure
+fig = Figure(size=(500, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="OD₆₂₀",
+    xscale=log2
+)
+
+# Define colors for plot
+colors = get(ColorSchemes.Blues_9, LinRange(0.25, 1, length(df_group)))
+
+# Loop through days
+for (i, d) in enumerate(df_group)
+    # Sort data by concentration
+    DF.sort!(d, :concentration_ugmL)
+    # Plot scatter line
+    scatterlines!(
+        ax, d.concentration_ugmL, d.OD, color=colors[i], label="$(first(d.day))"
+    )
+end # for
+
+# Add legend to plot
+fig[1, 2] = Legend(
+    fig, ax, "day", framevisible=false, nbanks=3, labelsize=10
+)
+
+fig
+```
+
+The functional form used by the authors to fit the data is
+$$
+f(x) = \frac{a}
+{1+\exp \left[b\left(\log _2 x-\log _2 IC_{50}\right)\right]} + c
+$${#eq-iwasawa-model}
+
+where $a$, $b$, and $c$ are nuisance parameters of the model, $IC_{50}$ is the
+parameter of interest, and $x$ is the antibiotic concentration. We can define a
+function to compute this model.
+
+```{julia}
+#| output: false
+@doc raw"""
+    logistic(x, a, b, c, ic50)
+
+Compute the logistic function used to model the relationship between antibiotic
+concentration and bacterial growth.
+
+This function implements the following equation:
+
+f(x) = a / (1 + exp(b * (log₂(x) - log₂(IC₅₀)))) + c
+
+# Arguments
+- `x`: Antibiotic concentration (input variable)
+- `a`: Maximum effect parameter (difference between upper and lower asymptotes)
+- `b`: Slope parameter (steepness of the curve)
+- `c`: Minimum effect parameter (lower asymptote)
+- `ic50`: IC₅₀ parameter (concentration at which the effect is halfway between
+  the minimum and maximum)
+
+# Returns
+The computed effect (e.g., optical density) for the given antibiotic
+concentration and parameters.
+
+Note: This function is vectorized and can handle array inputs for `x`.
+"""
+function logistic(x, a, b, c, ic50)
+    return @. a / (1.0 + exp(b * (log2(x) - log2(ic50)))) + c
+end
+```
+
+To test the function, let's plot the model for a set of parameters.
+```{julia}
+# Define parameters
+a = 1.0
+b = 1.0
+c = 0.0
+ic50 = 1.0
+
+# Define concentration range
+x = 10 .^ LinRange(-2.5, 2.5, 50)
+
+# Compute model
+y = logistic(x, a, b, c, ic50)
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration (a.u.)",
+    ylabel="optical density",
+    xscale=log10
+)
+# Plot model
+lines!(ax, x, y)
+
+fig
+```
+
+The function seems to work as expected. However, notice that in Eq. (1), the
+$\mathrm{IC}_{50}$ goes into the logarithm. This is the parameter we will fit
+for. Thus, let's define a function that takes $\log_2(\mathrm{IC}_{50})$ and
+$\log_2(x)$ as input instead.
+
+```{julia}
+#| output: false
+@doc raw"""
+    logistic_log2(log2x, a, b, c, log2ic50)
+
+Compute the logistic function used to model the relationship between antibiotic
+concentration and bacterial growth, using log2 inputs for concentration and
+IC₅₀.
+
+This function implements the following equation:
+
+f(x) = a / (1 + exp(b * (log₂(x) - log₂(IC₅₀)))) + c
+
+# Arguments
+- `log2x`: log₂ of the antibiotic concentration (input variable)
+- `a`: Maximum effect parameter (difference between upper and lower asymptotes)
+- `b`: Slope parameter (steepness of the curve)
+- `c`: Minimum effect parameter (lower asymptote)
+- `log2ic50`: log₂ of the IC₅₀ parameter
+
+# Returns
+The computed effect (e.g., optical density) for the given log₂ antibiotic
+concentration and parameters.
+
+Note: This function is vectorized and can handle array inputs for `log2x`.
+"""
+function logistic_log2(log2x, a, b, c, log2ic50)
+    return @. a / (1.0 + exp(b * (log2x - log2ic50))) + c
+end
+```
+
+## Bayesian model
+
+Given the model presented in Eq. (1), and the data, our objective is to infer
+the value of all parameters. By Bayes theorem, we write
+
+$$
+\pi(IC_{50}, a, b, c \mid \text{data}) = 
+\frac{\pi(\text{data} \mid IC_{50}, a, b, c) 
+\pi(IC_{50}, a, b, c)}
+{\pi(\text{data})},
+$${#eq-iwasawa-bayesian-model}
+
+where $\text{data}$ consists of the pairs of antibiotic concentration and
+optical density.
+
+
+### Likelihood $\pi(\text{data} \mid IC_{50}, a, b, c)$
+
+Let's begin by defining the likelihood function. For simplicity, we assume each
+datum is independent and identically distributed (i.i.d.) and write
+
+$$
+\pi(\text{data} \mid IC_{50}, a, b, c) = 
+\prod_{i=1}^n \pi(d_i \mid IC_{50}, a, b, c),
+$${#eq-iwasawa-likelihood}
+
+where $d_i = (x_i, y_i)$ is the $i$-th pair of antibiotic concentration and
+optical density, respectively, and $n$ is the total number of data points. As a
+first pass, we assume that our experimental measurements can be expressed as
+
+$$
+y_i = f(x_i, IC_{50}, a, b, c) + \epsilon_i,
+$${#eq-iwasawa-likelihood-model}
+
+where $\epsilon_i$ is the experimental error. Furthermore, we assume that the
+experimental error is normally distributed, i.e.,
+
+$$
+\epsilon_i \sim \mathcal{N}(0, \sigma^2),
+$${#eq-iwasawa-likelihood-error}
+
+where $\sigma^2$ is an unknown variance parameter that must be included in our
+inference. Notice that we assume the same variance parameter for all data points
+since $\sigma^2$ is not indexed by $i$.
+
+Given this likelihood function, we must update our inference on the parameters
+as
+
+$$
+\pi(IC_{50}, a, b, c, \sigma^2 \mid \text{data}) = 
+\frac{\pi(\text{data} \mid IC_{50}, a, b, c, \sigma^2) 
+\pi(IC_{50}, a, b, c, \sigma^2)}
+{\pi(\text{data})},
+$${#eq-iwasawa-likelihood-error-model}
+
+to include the new parameter $\sigma^2$.
+
+Our likelihood function is then of the form
+$$
+y_i \mid IC_{50}, a, b, c, \sigma^2 \sim 
+\mathcal{N}(f(x_i, IC_{50}, a, b, c), \sigma^2).
+$${#eq-iwasawa-likelihood-error-model}
+
+### Prior $\pi(IC_{50}, a, b, c, \sigma^2)$
+
+For the prior, we assume that all parameters are independent and write
+$$
+\pi(IC_{50}, a, b, c, \sigma^2) = 
+\pi(IC_{50}) \pi(a) \pi(b) \pi(c) \pi(\sigma^2).
+$${#eq-iwasawa-prior}
+
+Let's detail each prior.
+
+1. $IC_{50}$: The $IC_{50}$ is a strictly positive parameter. However,
+we will fit for $\log_2(IC_{50})$. Thus, we will use a normal prior
+for $\log_2(IC_{50})$. This means we have
+
+$$
+\log_2(IC_{50}) \sim 
+\mathcal{N}(
+    \mu_{\log_2(IC_{50})}, \sigma_{\log_2(IC_{50})}^2
+).
+$${#eq-iwasawa-prior-ic50}
+
+2. $a$: This nuisance parameter scales the logistic function. Again, the natural
+scale for this parameter is a strictly positive real number. Thus, we will
+use a lognormal prior for $a$. This means we have
+
+$$
+a \sim \text{LogNormal}(\mu_a, \sigma_a^2).
+$${#eq-iwasawa-prior-a}
+
+3. $b$: This parameter controls the steepness of the logistic function. Again,
+the natural scale for this parameter is a strictly positive real number. Thus,
+we will use a lognormal prior for $b$. This means we have
+
+$$
+b \sim \text{LogNormal}(\mu_b, \sigma_b^2).
+$${#eq-iwasawa-prior-b}
+
+4. $c$: This parameter controls the minimum value of the logistic function. 
+Since this is a strictly positive real number that does not necessarily scale
+with the data, we will use a half-normal prior for $c$. This means we have
+
+$$
+c \sim \text{Half-}\mathcal{N}(0, \sigma_c^2).
+$${#eq-iwasawa-prior-c}
+
+5. $\sigma^2$: This parameter controls the variance of the experimental error.
+Since this is a strictly positive real number that does not necessarily scale
+with the data, we will use a half-normal prior for $\sigma^2$. This means we
+have
+
+$$
+\sigma^2 \sim \text{Half-}\mathcal{N}(0, \sigma_{\sigma^2}^2).
+$${#eq-iwasawa-prior-sigma2}
+
+With all of this in place, we are ready to define a `Turing` model to perform
+Bayesian inference on the parameters of the model.
+
+```{julia}
+#| output: false
+Turing.@model function logistic_model(
+    log2x, y, prior_params::NamedTuple=NamedTuple()
+)
+    # Define default prior parameters
+    default_params = (
+        log2ic50=(0, 1),
+        a=(0, 1),
+        b=(0, 1),
+        c=(0, 1),
+        σ²=(0, 1)
+    )
+
+    # Merge default parameters with provided parameters
+    params = merge(default_params, prior_params)
+
+    # Define priors
+    log2ic50 ~ Turing.Normal(params.log2ic50...)
+    a ~ Turing.LogNormal(params.a...)
+    b ~ Turing.LogNormal(params.b...)
+    c ~ Turing.truncated(Turing.Normal(params.c...), 0, Inf)
+    σ² ~ Turing.truncated(Turing.Normal(params.σ²...), 0, Inf)
+
+    # Define likelihood
+    y ~ Turing.MvNormal(
+        logistic_log2(log2x, a, b, c, log2ic50),
+        LinearAlgebra.Diagonal(fill(σ², length(y)))
+    )
+end
+```
+
+Having defined the model, we can now perform inference. First, let's perform
+inference on simulated data. For this, we first simulate a single titration
+curve with known parameters.
+
+```{julia}
+Random.seed!(42)
+# Define ground truth parameters
+log2ic50_true = 0.5
+a_true = 1.0
+b_true = 10.0
+σ²_true = 0.01
+c_true = 0.1
+
+# Simulate data
+log2x = LinRange(-2.5, 2.5, 15)
+# Define mean of data
+ŷ = logistic_log2(log2x, a_true, b_true, c_true, log2ic50_true)
+# Add noise
+y = ŷ .+ randn(length(log2x)) * √(σ²_true)
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    xscale=log2
+)
+# Plot data
+scatterlines!(ax, 2.0 .^ log2x, y)
+
+fig
+```
+
+With the data simulated, let's perform inference on the data. For this, we will
+use the NUTS sampler. To run multiple chains in parallel, we will use the
+`MCMCThreads` option.
+
+```{julia}
+Random.seed!(42)
+# Perform inference
+model = logistic_model(log2x, y)
+
+# Define number of steps
+n_burnin = 10_000
+n_samples = 1_000
+
+# Run sampler using
+chain = Turing.sample(
+    model, Turing.NUTS(), Turing.MCMCThreads(), n_burnin + n_samples, 4
+)
+```
+
+Let's look at the posterior distribution of the parameters. For this, we will 
+use the `PairPlots.jl` package.
+
+```{julia}
+# Plot corner plot for chains
+PairPlots.pairplot(
+    chain[n_burnin+1:end, :, :],
+    PairPlots.Truth(
+        (;
+        log2ic50=log2ic50_true,
+        a=a_true,
+        b=b_true,
+        c=c_true,
+        σ²=σ²_true
+    )
+    )
+)
+```
+
+All parameters are well-constrained by the data, and we are able to recover the
+ground truth values.
+
+Let's plot the posterior predictive checks with the data to see how the model
+performs.
+
+```{julia}
+Random.seed!(42)
+
+# Initialize matrix to store samples
+y_samples = Array{Float64}(undef, length(log2x), n_samples)
+
+# Loop through samples
+for i in 1:n_samples
+    # Generate mean for sample
+    y_samples[:, i] = logistic_log2(
+        log2x,
+        chain[:a][i],
+        chain[:b][i],
+        chain[:c][i],
+        chain[:log2ic50][i]
+    )
+    # Add noise
+    y_samples[:, i] .+= randn(length(log2x)) * sqrt(chain[:σ²][i])
+end # for
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    title="Posterior Predictive Check",
+    xscale=log2
+)
+
+# Plot samples
+for i in 1:n_samples
+    lines!(ax, 2.0 .^ log2x, y_samples[:, i], color=(:gray, 0.05))
+end # for
+
+# Plot data
+scatterlines!(ax, 2.0 .^ log2x, y)
+
+fig
+```
+
+The fit looks excellent. Let's now perform inference on the Iwasawa data. We 
+will use one example dataset. Moreover, we will set informative priors for the
+parameters.
+
+```{julia}
+Random.seed!(42)
+# Group data by antibiotic, environment, and day
+df_group = DF.groupby(
+    df[(.!df.blank).&(df.concentration_ugmL.>0), :],
+    [:antibiotic, :env, :day]
+)
+
+# Extract data
+data = df_group[2]
+
+# Define prior parameters
+prior_params = (
+    a=(log(0.1), 0.1),
+    b=(0, 1),
+    c=(0, 1),
+    σ²=(0, 0.1)
+)
+# Perform inference
+model = logistic_model(
+    log2.(data.concentration_ugmL),
+    data.OD,
+    prior_params
+)
+
+# Define number of steps
+n_burnin = 10_000
+n_samples = 1_000
+
+chain = Turing.sample(
+    model, Turing.NUTS(), Turing.MCMCThreads(), n_burnin + n_samples, 4
+)
+```
+
+Let's look at the corner plot for the chains.
+
+```{julia}
+# Plot corner plot for chains
+PairPlots.pairplot(chain[n_burnin+1:end, :, :])
+```
+
+This looks good. Let's now plot the posterior predictive check.
+
+```{julia}
+Random.seed!(42)
+
+# Define unique concentrations
+unique_concentrations = sort(unique(data.concentration_ugmL))
+
+# Initialize matrix to store samples
+y_samples = Array{Float64}(
+    undef, length(unique_concentrations), n_samples
+)
+
+# Loop through samples
+for i in 1:n_samples
+    # Generate mean for sample
+    y_samples[:, i] = logistic_log2(
+        log2.(unique_concentrations),
+        chain[:a][i],
+        chain[:b][i],
+        chain[:c][i],
+        chain[:log2ic50][i]
+    )
+    # Add noise
+    y_samples[:, i] .+= randn(length(unique_concentrations)) * √(chain[:σ²][i])
+    √(chain[:σ²][i])
+end # for
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    title="Posterior Predictive Check",
+    xscale=log2
+)
+
+# Plot samples
+for i in 1:n_samples
+    lines!(
+        ax,
+        unique_concentrations,
+        y_samples[:, i],
+        color=(ColorSchemes.Paired_12[1], 0.5)
+    )
+end # for
+
+# Plot data
+scatter!(ax, data.concentration_ugmL, data.OD)
+
+fig
+```
+
+The presence of the outlier measurements expands the posterior predictive checks
+uncertainty.
+
+Let's look into how to detect outliers in the data.
+
+## Residual-based outlier detection
+
+Our naive approach to detect outliers is to fit the logistic model
+deterministically and then identify points that are more than 3 standard
+deviations from the mean. This is known as "residual-based outlier detection".
+
+```{julia}
+#| output: false
+function logistic_log2(log2x, params)
+    return logistic_log2(log2x, params...)
+end
+
+"""
+    fit_logistic_and_detect_outliers(log2x, y; threshold=3)
+
+Fit a logistic model to the given data and detect outliers based on residuals.
+
+This function performs the following steps:
+1. Fits a logistic model to the log2-transformed x-values and y-values.
+2. Calculates residuals between the fitted model and actual y-values.
+3. Identifies outliers as points with residuals exceeding a specified threshold.
+
+# Arguments
+- `log2x`: Array of log2-transformed x-values (typically concentrations).
+- `y`: Array of y-values (typically optical density measurements).
+- `threshold`: Number of standard deviations beyond which a point is considered an outlier. Default is 3.
+
+# Returns
+- A boolean array indicating which points are outliers (true for outliers).
+
+# Notes
+- The function uses a logistic model of the form: 
+    y = a / (1 + exp(b * (log2x - log2ic50))) + c
+- Initial parameter guesses are made based on the input data.
+- The LsqFit package is used for curve fitting.
+- Outliers are determined by comparing the absolute residuals to the threshold * standard deviation of residuals.
+"""
+function fit_logistic_and_detect_outliers(log2x, y; threshold=3)
+    # Initial parameter guess
+    p0 = [0.1, 1.0, maximum(y) - minimum(y), StatsBase.median(log2x)]
+
+    # Fit the logistic model
+    fit = LsqFit.curve_fit(logistic_log2, log2x, y, p0)
+
+    # Calculate residuals
+    residuals = y - logistic_log2(log2x, fit.param)
+
+    # Calculate standard deviation of residuals
+    σ = StatsBase.std(residuals)
+
+    # Identify outliers
+    outliers_idx = abs.(residuals) .> threshold * σ
+
+    # Return outlier indices
+    return outliers_idx
+end
+```
+
+Let's test this function by trying to remove the outliers from the data we used
+in the previous section.
+
+```{julia}
+# Locate outliers
+outliers_idx = fit_logistic_and_detect_outliers(
+    log2.(data.concentration_ugmL), data.OD, threshold=2
+)
+
+# Plot the results
+fig = Figure(size=(450, 300))
+
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    # xscale=log2
+)
+
+# Plot the original data
+scatter!(
+    ax,
+    data.concentration_ugmL,
+    data.OD,
+    color=ColorSchemes.Paired_12[1],
+    label="data"
+)
+
+# Plot the cleaned data
+scatter!(
+    ax,
+    data.concentration_ugmL[.!outliers_idx] .+ 0.5,
+    data.OD[.!outliers_idx], color=ColorSchemes.Paired_12[2],
+    label="cleaned data"
+)
+
+# Add legend
+Legend(fig[1, 2], ax)
+
+fig
+```
+
+The detection of outliers worked really well. Let's now perform inference on the
+cleaned data.
+
+```{julia}
+Random.seed!(42)
+# Group data by antibiotic, environment, and day
+df_group = DF.groupby(
+    df[(.!df.blank).&(df.concentration_ugmL.>0), :],
+    [:antibiotic, :env, :day]
+)
+
+# Extract data
+data = df_group[2]
+
+# Find outliers
+outliers_idx = fit_logistic_and_detect_outliers(
+    log2.(data.concentration_ugmL), data.OD, threshold=2
+)
+# Remove outliers
+data_clean = data[.!outliers_idx, :]
+
+# Define prior parameters
+prior_params = (
+    a=(log(0.1), 0.1),
+    b=(0, 1),
+    c=(0, 1),
+    σ²=(0, 0.1)
+)
+
+# Perform inference
+model = logistic_model(
+    log2.(data_clean.concentration_ugmL),
+    data_clean.OD,
+    prior_params
+)
+
+# Define number of steps
+n_burnin = 10_000
+n_samples = 1_000
+
+chain = Turing.sample(
+    model, Turing.NUTS(), Turing.MCMCThreads(), n_burnin + n_samples, 4
+)
+```
+
+Let's look again at the corner plot for the chains.
+
+```{julia}
+# Plot corner plot for chains
+PairPlots.pairplot(chain[n_burnin+1:end, :, :])
+```
+
+Compared to the previous example where we didn't remove the outliers, the
+posterior distributions are more concentrated, especially for the $b$ parameter.
+
+Let's now plot the posterior predictive check.
+
+```{julia}
+Random.seed!(42)
+
+# Define unique concentrations
+unique_concentrations = sort(unique(data_clean.concentration_ugmL))
+
+# Initialize matrix to store samples
+y_samples = Array{Float64}(
+    undef, length(unique_concentrations), n_samples
+)
+
+# Loop through samples
+for i in 1:n_samples
+    # Generate mean for sample
+    y_samples[:, i] = logistic_log2(
+        log2.(unique_concentrations),
+        chain[:a][i],
+        chain[:b][i],
+        chain[:c][i],
+        chain[:log2ic50][i]
+    )
+    # Add noise
+    y_samples[:, i] .+= randn(length(unique_concentrations)) * √(chain[:σ²][i])
+    √(chain[:σ²][i])
+end # for
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    title="Posterior Predictive Check",
+    xscale=log2
+)
+
+# Plot samples
+for i in 1:n_samples
+    lines!(
+        ax,
+        unique_concentrations,
+        y_samples[:, i],
+        color=(ColorSchemes.Paired_12[1], 0.5)
+    )
+end # for
+
+# Plot data
+scatter!(ax, data_clean.concentration_ugmL, data_clean.OD)
+
+fig
+```
+
+This look much better. Removing the outliers improved the fit significantly.
+
+## Alternative parameterization
+
+In the data, there are several concentrations at zero, which is not compatible
+with the log-scale model. However, we can rewrite @eq-iwasawa-model without
+using the exponent as
+
+$$
+f(x) = \frac{a}
+{1+ \left(\frac{x}{\mathrm{IC}_{50}}\right)^b} + c
+$${#eq-iwasawa-model-no-exponent}
+
+Let's define a new model using this parameterization.
+
+```{julia}
+#| output: false
+@doc raw"""
+    logistic_alt(x, a, b, c, ic50)
+
+Compute the logistic function used to model the relationship between antibiotic
+concentration and bacterial growth.
+
+This function implements the following equation:
+
+f(x) = a / (1 + (x / IC₅₀) ^ b) + c
+
+# Arguments
+- `x`: Antibiotic concentration (input variable)
+- `a`: Maximum effect parameter (difference between upper and lower asymptotes)
+- `b`: Slope parameter (steepness of the curve)
+- `c`: Minimum effect parameter (lower asymptote)
+- `ic50`: IC₅₀ parameter (concentration at which the effect is halfway between
+  the minimum and maximum)
+
+# Returns
+The computed effect (e.g., optical density) for the given antibiotic
+concentration and parameters.
+
+Note: This function is vectorized and can handle array inputs for `x`.
+"""
+function logistic_alt(x, a, b, c, ic50)
+    return @. a / (1.0 + (x / ic50)^b) + c
+end
+
+function logistic_alt(x, params)
+    return logistic_alt(x, params...)
+end
+```
+
+We will use the previous function to detect outliers in the data. Now, we
+re-define the Bayesian model using this parameterization.
+
+```{julia}
+#| output: false
+Turing.@model function logistic_alt_model(
+    x, y, prior_params::NamedTuple=NamedTuple()
+)
+    # Define default prior parameters
+    default_params = (
+        ic50=(0, 1),
+        a=(0, 1),
+        b=(0, 1),
+        c=(0, 1),
+        σ²=(0, 1)
+    )
+
+    # Merge default parameters with provided parameters
+    params = merge(default_params, prior_params)
+
+    # Define priors
+    ic50 ~ Turing.LogNormal(params.ic50...)
+    a ~ Turing.LogNormal(params.a...)
+    b ~ Turing.LogNormal(params.b...)
+    c ~ Turing.truncated(Turing.Normal(params.c...), 0, Inf)
+    σ² ~ Turing.truncated(Turing.Normal(params.σ²...), 0, Inf)
+
+    # Define likelihood
+    y ~ Turing.MvNormal(
+        logistic_alt(x, a, b, c, ic50),
+        LinearAlgebra.Diagonal(fill(σ², length(y)))
+    )
+end
+```
+
+Let's now perform inference on synthetic data using this new parameterization.
+
+```{julia}
+Random.seed!(42)
+# Define ground truth parameters
+ic50_true = 2^0.5
+a_true = 1.0
+b_true = 10.0
+σ²_true = 0.01
+c_true = 0.1
+
+# Simulate data
+x = 2 .^ LinRange(-2.5, 2.5, 15)
+# Define mean of data
+ŷ = logistic_alt(x, a_true, b_true, c_true, ic50_true)
+# Add noise
+y = ŷ + randn(length(x)) * sqrt(σ²_true)
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    xscale=log2
+)
+# Plot data
+scatterlines!(ax, x, y)
+
+fig
+```
+
+With the data simulated, let's perform inference on the data.
+
+```{julia}
+Random.seed!(42)
+# Perform inference
+model = logistic_alt_model(x, y)
+
+# Define number of steps
+n_burnin = 10_000
+n_samples = 1_000
+
+chain = Turing.sample(
+    model, Turing.NUTS(), Turing.MCMCThreads(), n_burnin + n_samples, 4
+)
+```
+
+Let's look at the posterior distribution of the parameters.
+
+```{julia}
+# Plot corner plot for chains
+PairPlots.pairplot(
+    chain[n_burnin+1:end, :, :],
+    PairPlots.Truth(
+        (;
+        ic50=ic50_true,
+        a=a_true,
+        b=b_true,
+        c=c_true,
+        σ²=σ²_true
+    )
+    )
+)
+```
+
+The model is still able to recover the ground truth parameters. Let's now plot 
+the posterior predictive check.
+
+```{julia}
+Random.seed!(42)
+
+# Initialize matrix to store samples
+y_samples = Array{Float64}(undef, length(x), n_samples)
+
+# Loop through samples
+for i in 1:n_samples
+    # Generate mean for sample
+    y_samples[:, i] = logistic_alt(
+        x,
+        chain[:a][i],
+        chain[:b][i],
+        chain[:c][i],
+        chain[:ic50][i]
+    )
+    # Add noise
+    y_samples[:, i] .+= randn(length(x)) * √(chain[:σ²][i])
+end # for
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    title="Posterior Predictive Check",
+    xscale=log2
+)
+
+# Plot samples
+for i in 1:n_samples
+    lines!(ax, x, y_samples[:, i], color=(:gray, 0.05))
+end # for
+
+# Plot data
+scatterlines!(ax, x, y)
+
+fig
+```
+
+Everything looks good. Let's again test it on the @iwasawa2022 data.
+
+```{julia}
+Random.seed!(42)
+# Define prior parameters
+prior_params = (
+    a=(log(0.1), 0.1),
+    b=(0, 1),
+    c=(0, 1),
+    σ²=(0, 0.01)
+)
+# Define data
+data = df_group[2]
+# Clean data
+outliers_idx = fit_logistic_and_detect_outliers(
+    log2.(data.concentration_ugmL), data.OD, threshold=2
+)
+data_clean = data[.!outliers_idx, :]
+
+# Perform inference
+model = logistic_alt_model(
+    data_clean.concentration_ugmL,
+    data_clean.OD,
+    prior_params
+)
+
+# Define number of steps
+n_burnin = 10_000
+n_samples = 1_000
+
+chain = Turing.sample(
+    model, Turing.NUTS(), Turing.MCMCThreads(), n_burnin + n_samples, 4
+)
+```
+
+Let's look at the posterior distribution of the parameters.
+
+```{julia}
+# Plot corner plot for chains
+PairPlots.pairplot(chain[n_burnin+1:end, :, :])
+```
+
+Nothing looks obviously wrong. Let's plot the posterior predictive check.
+
+```{julia}
+Random.seed!(42)
+
+# Define unique concentrations
+unique_concentrations = sort(unique(data_clean.concentration_ugmL))
+
+# Initialize matrix to store samples
+y_samples = Array{Float64}(
+    undef, length(unique_concentrations), n_samples
+)
+
+# Loop through samples
+for i in 1:n_samples
+    # Generate mean for sample
+    y_samples[:, i] = logistic_alt(
+        unique_concentrations,
+        chain[:a][i],
+        chain[:b][i],
+        chain[:c][i],
+        chain[:ic50][i]
+    )
+    # Add noise
+    y_samples[:, i] .+= randn(length(unique_concentrations)) * √(chain[:σ²][i])
+end # for
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="antibiotic concentration",
+    ylabel="optical density",
+    title="Posterior Predictive Check",
+    xscale=log2
+)
+
+# Plot samples
+for i in 1:n_samples
+    lines!(
+        ax,
+        unique_concentrations,
+        y_samples[:, i],
+        color=(ColorSchemes.Paired_12[1], 0.5)
+    )
+end # for
+
+# Plot data
+scatter!(ax, data_clean.concentration_ugmL, data_clean.OD)
+
+fig
+```
+
+With this parameterization, the model performs as well as the previous one.
+
+## Conclusion
+
+In this notebook, we have performed Bayesian inference on the data from
+@iwasawa2022 using two different parameterizations of the logistic function.
+Both parameterizations perform equally well, and we are able to recover the
+ground truth parameters from simulated data. Furthermore, implementing an
+outlier detection scheme improved the fit significantly.
