@@ -7,6 +7,7 @@ project:
     - paper.qmd
     - supplementary.qmd
     - code.qmd
+    - code/metropolis_hastings_evolution.qmd
     - code/evolutionary_dynamics.qmd
     - code/rhvae_sim.qmd
 
@@ -91,6 +92,8 @@ website:
         menu:
           - text: "Overview"
             file: code.qmd
+          - text: "Metropolis-Hastings Evolution"
+            file: code/metropolis_hastings_evolution.qmd
           - text: "Evolutionary Dynamics Simulation"
             file: code/evolutionary_dynamics.qmd
           - text: "RHVAE training on Simulated Data"
@@ -107,6 +110,7 @@ website:
         - code.qmd
         - section: "Notebooks"
           contents:
+            - code/metropolis_hastings_evolution.qmd
             - code/evolutionary_dynamics.qmd
             - code/rhvae_sim.qmd
 format:
