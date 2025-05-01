@@ -1,0 +1,821 @@
+---
+title: "Evolutionary Dynamics Simulation"
+author:
+  - name: Manuel Razo-Mejia
+    orcid: 0000-0002-9510-0527
+    affiliations: 
+      - ref: stanfordbio
+affiliations:
+  - id: stanfordbio
+    number: 1
+    name: Department of Biology, Stanford University
+    city: Stanford
+    state: California
+    country: United States of America
+keywords:
+  - evolutionary dynamics
+  - fitness landscapes
+  - genotype-phenotype density
+  - Metropolis-Hastings evolutionary algorithm
+format:
+  html:
+    code-fold: false
+    toc: true
+engine: julia
+julia:
+  exeflags: ["--project=../../Antibiotic"]
+---
+
+# Evolutionary Dynamics Simulation
+
+In this notebook, we simulate the dynamics of populations evolving in a 2-dimensional phenotypic space under various fitness landscapes and a fixed mutational landscape. We'll use the Metropolis-Hastings algorithm to model evolution as a biased random walk influenced by both fitness and mutational constraints.
+
+## Setup Environment
+
+First, let's import the necessary packages for our simulation.
+
+```{julia}
+#| output: false
+# Import custom project package
+import Antibiotic
+import Antibiotic.mh as mh # Metropolis-Hastings dynamics module
+
+# Import packages for storing results
+import DimensionalData as DD
+
+# Import JLD2 for saving results
+import JLD2
+
+# Import IterTools for iterating over Cartesian products
+import IterTools
+
+# Import basic math libraries
+import StatsBase
+import LinearAlgebra
+import Random
+import Distributions
+import Distances
+
+# Packages for visualization
+using CairoMakie
+import ColorSchemes
+
+# Activate Makie backend
+CairoMakie.activate!()
+
+# Set custom plotting style
+Antibiotic.viz.theme_makie!()
+
+# Set random seed for reproducibility
+Random.seed!(42)
+```
+
+## Simulation Parameters
+
+Let's define the parameters that govern our evolutionary simulation. The things
+we need to define are:
+
+- The dimensionality of the phenotype space `n_dim`
+- The number of phenotypic initial conditions, i.e., number of lineages
+(positions in phenotype space) `n_sim`
+- The number of replicates (evolving strains per lineage) `n_rep`
+- The inverse temperature (controls selection strength) `β`
+- The mutation step size `µ`
+- The number of evolution steps `n_steps`
+- The number of fitness landscapes `n_fit_lans`
+- The range of peak means `peak_mean_min` and `peak_mean_max`
+- The range of fitness amplitudes `fit_amp_min` and `fit_amp_max`
+- The range of fitness covariances `fit_cov_min` and `fit_cov_max`
+- The number of fitness peaks `n_fit_peaks_min` and `n_fit_peaks_max`
+```{julia}
+#| output: false
+# Phenotype space dimensionality
+n_dim = 2
+# Number of initial conditions (positions in phenotype space)
+n_sim = 10
+# Number of replicates (evolving strains per initial condition)
+n_rep = 2
+# Inverse temperature (controls selection strength)
+β = 10.0
+# Mutation step size
+µ = 0.1
+# Number of evolution steps
+n_steps = 300
+
+# Define number of fitness landscapes
+n_fit_lans = 50
+
+# Define range of peak means
+peak_mean_min = -4.0
+peak_mean_max = 4.0
+
+# Define range of fitness amplitudes
+fit_amp_min = 1.0
+fit_amp_max = 5.0
+
+# Define covariance range
+fit_cov_min = 3.0
+fit_cov_max = 10.0
+
+# Define possible number of fitness peaks
+n_fit_peaks_min = 1
+n_fit_peaks_max = 4
+```
+
+Having defined these parameters, we must define the two functions that govern
+the dynamics of the system:
+
+- The genotype-phenotype density function $GP(\underline{p})$
+- The fitness functions $F_E(\underline{p})$ for each environment $E$.
+
+Let's start by defining the genotype-phenotype density function.
+
+## Genotype-Phenotype Density Function
+
+The genotype-phenotype density function $GP(\underline{p})$ represents
+constraints on phenotypic evolution due to the underlying genotype-phenotype
+mapping. It defines which regions of phenotypic space are more or less
+accessible to mutations.
+
+In our simulation, we model the genotype-phenotype density function as a
+collection of inverted Gaussian peaks. These peaks define areas of phenotypic
+space with lower densities of possible mutations. In other words, we define
+four "wells" in which the genotype-phenotype density drops, making it more
+unlikely for mutations to take a population towards these regions.
+
+For illustrative purposes, as done in the main text, we will define the
+genotype-phenotype density function as a collection of four Gaussian peaks,
+which we will place at the corners of a square in phenotype space.
+
+```{julia}
+#| output: false
+# GP density peak amplitude
+gp_evo_amplitude = 1.0
+
+# GP density peak means - defines 4 peaks in a square arrangement
+gp_means = [
+    [-1.5, -1.5],
+    [1.5, -1.5],
+    [1.5, 1.5],
+    [-1.5, 1.5],
+]
+
+# GP density peak covariance (controls spread of each peak)
+gp_evo_covariance = 0.45
+
+# Create GP density peaks object using the `GaussianPeaks` constructor
+gp_evo_peaks = mh.GaussianPeaks(
+    gp_evo_amplitude,
+    gp_means,
+    gp_evo_covariance
+)
+
+# Define grid on which to evaluate GP density landscape
+gp_evo_grid = range(peak_mean_min, peak_mean_max, length=100)
+
+# Evaluate GP density landscape on grid
+gp_evo_grid_points = mh.genetic_density(
+    tuple(repeat([gp_evo_grid], n_dim)...),
+    gp_evo_peaks
+)
+
+# Define grid of possible initial conditions
+init_grid = [[x...] for x in IterTools.product(fill(gp_evo_grid, 2)...)]
+```
+
+Let's visualize this mutational landscape:
+
+```{julia}
+# Define ranges of phenotypes to evaluate
+x = range(-4, 4, length=100)
+y = range(-4, 4, length=100)
+
+# Initialize figure
+fig = Figure(size=(350, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    title="Genotype-to-Phenotype\nDensity",
+    titlesize=14,
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+
+# Evaluate mutational landscape
+M = mh.genetic_density(x, y, gp_evo_peaks)
+
+# Plot mutational landscape
+hm_gp = heatmap!(ax, x, y, M, colormap=Reverse(ColorSchemes.Purples_9))
+
+# Add contour plot
+contour!(ax, x, y, M, color=:white)
+
+# Add colorbar for mutational landscape
+Colorbar(
+    fig[1, 2],
+    hm_gp,
+    label="genotype-phenotype\ndensity",
+    labelsize=13,
+    height=Relative(1),
+    ticksvisible=false,
+    ticklabelsvisible=false
+)
+
+fig
+```
+
+The mutational landscape shows four peaks (in darker purple) representing
+regions of phenotypic space that have lower accessibility through mutations.
+The lighter regions between these peaks represent "valleys" which are much
+easier for populations to traverse.
+
+Let's continue by defining the fitness landscapes that we'll use to simulate
+evolutionary dynamics.
+
+## Fixed Evolution Condition
+
+We first define a reference fitness landscape (evolution condition) that we'll
+use as a baseline for comparison. This is the simplest possible fitness
+landscape with a single peak in the center of the phenotype space.
+
+```{julia}
+#| output: false
+# Evolution condition amplitude
+fit_evo_amplitude = 5.0
+# Evolution condition mean
+fit_evo_mean = [0.0, 0.0]
+# Evolution condition covariance
+fit_evo_covariance = 3.0
+# Create peak
+fit_evo_peak = mh.GaussianPeak(
+    fit_evo_amplitude,
+    fit_evo_mean,
+    fit_evo_covariance
+)
+```
+
+Let's visualize this reference fitness landscape:
+
+```{julia}
+# Initialize figure
+fig = Figure(size=(350, 300))
+
+# Add axis
+ax = Axis(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    title="reference fitness landscape",
+    titlesize=14,
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+
+# Evaluate fitness landscape
+F = mh.fitness(x, y, fit_evo_peak)
+
+# Plot fitness landscape
+hm_fit = heatmap!(ax, x, y, F, colormap=:algae)
+
+# Add contour plot
+contour!(ax, x, y, F, color=:white)
+
+# Add colorbar for fitness landscape
+Colorbar(
+    fig[1, 2],
+    hm_fit,
+    label="fitness",
+    labelsize=13,
+    height=Relative(1),
+    ticksvisible=false,
+    ticklabelsvisible=false
+)
+
+fig
+```
+
+This fitness landscape shows a single peak centered at `[0, 0]`. The color
+represents fitness, with darker regions having higher fitness. The contour lines
+show equal fitness values.
+
+## Alternative Fitness Landscapes
+
+To explore how evolution proceeds in different environments, we generate a
+variety of fitness landscapes with randomly selected numbers, positions, and
+shapes of fitness peaks. The sampled numbers of fitness peaks, positions, and
+amplitudes will be drawn from uniform distributions within the ranges defined
+above.
+
+```{julia}
+#| output: false
+# Reset random seed for reproducibility
+Random.seed!(42)
+
+# Initialize array to hold fitness landscapes
+fit_lans = Array{mh.AbstractPeak}(undef, n_fit_lans)
+
+# Add fixed evolution condition to fitness landscapes
+fit_lans[1] = fit_evo_peak
+
+# Loop over number of fitness landscapes
+for i in 2:n_fit_lans
+    # Sample number of fitness peaks
+    n_fit_peaks = rand(n_fit_peaks_min:n_fit_peaks_max)
+
+    # Sample fitness means as 2D vectors from uniform distribution
+    fit_means = [
+        rand(Distributions.Uniform(peak_mean_min, peak_mean_max), 2)
+        for _ in 1:n_fit_peaks
+    ]
+
+    # Sample fitness amplitudes from uniform distribution
+    fit_amplitudes = rand(
+        Distributions.Uniform(fit_amp_min, fit_amp_max), n_fit_peaks
+    )
+
+    # Sample fitness covariances from uniform distribution
+    fit_covariances = rand(
+        Distributions.Uniform(fit_cov_min, fit_cov_max), n_fit_peaks
+    )
+
+    # Check dimensionality
+    if n_fit_peaks == 1
+        # Create fitness peaks
+        fit_lans[i] = mh.GaussianPeak(
+            first(fit_amplitudes), first(fit_means), first(fit_covariances)
+        )
+    else
+        # Create fitness peaks
+        fit_lans[i] = mh.GaussianPeaks(
+            fit_amplitudes, fit_means, fit_covariances
+        )
+    end
+end
+```
+
+Let's visualize a sample of these fitness landscapes:
+
+```{julia}
+Random.seed!(42)
+
+# Define number of rows and columns
+n_rows = 4
+n_cols = 4
+
+# Define number of landscapes to display
+n_sample = n_rows * n_cols
+
+# Initialize figure
+fig = Figure(size=(600, 600))
+
+# Add global grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Loop over a sample of fitness landscapes
+for (i, idx) in enumerate(1:n_sample)
+    # Define row and column indices
+    row = (i - 1) ÷ n_cols + 1
+    col = (i - 1) % n_cols + 1
+
+    # Create subplot
+    ax = Axis(
+        gl[row, col],
+        aspect=AxisAspect(1),
+        title="landscape $(idx)",
+        titlesize=12,
+        yticklabelsvisible=false,
+        xticklabelsvisible=false,
+    )
+
+    # Evaluate fitness landscape
+    F = mh.fitness(x, y, fit_lans[idx])
+
+    # Plot fitness landscape
+    hm_fit = heatmap!(ax, x, y, F, colormap=:algae)
+
+    # Add contour plot
+    contour!(ax, x, y, F, color=:white)
+end
+
+# Set global axis labels
+Label(
+    fig[:, end, Bottom()],
+    "phenotype 1",
+    fontsize=14,
+    padding=(0, 0, 0, 10),
+)
+
+Label(
+    fig[1, :, Left()],
+    "phenotype 2",
+    fontsize=14,
+    rotation=π / 2,
+)
+
+fig
+```
+
+These fitness landscapes represent different environments in which our
+populations will evolve. Each landscape has a unique configuration of fitness
+peaks, with varying heights, positions, and shapes.
+
+We are now ready to simulate the evolutionary dynamics of our populations.
+
+## Simulating Evolution with Metropolis-Hastings
+
+Now we'll simulate the evolutionary dynamics using the Metropolis-Hastings
+algorithm. In this algorithm:
+
+1. We start with an initial phenotype
+2. We propose a random mutation (a step in phenotype space)
+3. We accept or reject the mutation based on both fitness and genotype-phenotype
+   density
+4. We repeat for many generations
+
+The Metropolis-Hastings acceptance probability is given by:
+
+$$
+P_{\text{accept}} = \min\left(
+    1,
+    \frac{F_E(\underline{x}')^β \cdot GP(\underline{x}')^β}
+    {F_E(\underline{x})^β \cdot GP(\underline{x})^β}
+\right)
+$${#eq-acceptance-probability}
+
+where $F_E(\underline{x})$ is the fitness in environment $E$,
+$GP(\underline{x})$ is the genotype-phenotype density, and $\beta$ is the
+inverse temperature parameter controlling selection strength.
+
+Our first step is to sample initial conditions for our replicates. For this, we
+sample initial positions on phenotype space from a uniform distribution,
+taking into account the mutational landscape (not to start at a low mutational
+peak).
+
+```{julia}
+#| output: false
+# Reset random seed for reproducibility
+Random.seed!(42)
+
+# Sample initial positions on phenotype space from uniform distribution taking
+# into account mutational landscape (not to start at a low mutational peak)
+x0 = StatsBase.sample(
+    vec(init_grid),
+    StatsBase.Weights(vec(gp_evo_grid_points)),
+    n_sim
+)
+
+# Select initial conditions for replicates from multivariate normal distribution
+# around each initial condition
+x0_reps = reduce(
+    (x, y) -> cat(x, y, dims=3),
+    [
+        rand(Distributions.MvNormal(x0[i], 0.1), n_rep)
+        for i in 1:n_sim
+    ]
+)
+# Change order of dimensions
+x0_reps = permutedims(x0_reps, (1, 3, 2))
+```
+
+Next, we initialize a very convenient data structure from the
+[DimensionalData.jl](https://rafaqz.github.io/DimensionalData.jl/v0.29.15/)
+package to hold our trajectories and fitness values for each replicate,
+landscape, and evolution condition.
+
+```{julia}
+#| output: false
+# Define dimensions to be used with DimensionalData
+phenotype = DD.Dim{:phenotype}([:x1, :x2]) # phenotype
+fitness = DD.Dim{:fitness}([:fitness]) # fitness
+time = DD.Dim{:time}(0:n_steps) # time
+lineage = DD.Dim{:lineage}(1:n_sim) # lineage
+replicate = DD.Dim{:replicate}(1:n_rep) # replicate
+landscape = DD.Dim{:landscape}(1:n_fit_lans) # landscape
+evo = DD.Dim{:evo}(1:n_fit_lans) # evolution condition
+
+# Initialize DimensionalData array to hold trajectories and fitness
+phenotype_traj = DD.zeros(
+    Float32,
+    phenotype,
+    time,
+    lineage,
+    replicate,
+    landscape,
+    evo,
+)
+fitness_traj = DD.zeros(
+    Float32,
+    fitness,
+    time,
+    lineage,
+    replicate,
+    landscape,
+    evo,
+)
+
+# Stack arrays to store trajectories in phenotype and fitness dimensions
+x_traj = DD.DimStack(
+    (phenotype=phenotype_traj, fitness=fitness_traj),
+)
+
+# Store initial conditions
+x_traj.phenotype[time=1] = repeat(
+    x0_reps,
+    outer=(1, 1, 1, n_fit_lans, n_fit_lans)
+)
+
+# Map initial phenotype to fitness
+x_traj.fitness[time=1] = repeat(
+    reduce(
+        (x, y) -> cat(x, y, dims=3),
+        mh.fitness.(Ref(x0_reps), fit_lans)
+    ),
+    outer=(1, 1, 1, 1, n_fit_lans)
+)
+```
+
+Now we can loop over landscapes, lineages, and replicates to simulate the
+evolutionary dynamics of our populations. The core function to run the
+simulations is already implemented in the `mh` module of our custom package.
+
+```{julia}
+#| output: false
+Random.seed!(42)
+
+# Loop over landscapes
+for evo in DD.dims(x_traj, :evo)
+    # Loop over lineages
+    for lin in DD.dims(x_traj, :lineage)
+        # Loop over replicates
+        for rep in DD.dims(x_traj, :replicate)
+            # Run Metropolis-Hastings algorithm
+            trajectory = mh.evo_metropolis_hastings(
+                x_traj.phenotype[
+                    time=1,
+                    lineage=lin,
+                    replicate=rep,
+                    landscape=evo,
+                    evo=evo,
+                ].data,
+                fit_lans[evo],
+                gp_evo_peaks,
+                β,
+                µ,
+                n_steps
+            )
+
+            # Store trajectory
+            x_traj.phenotype[
+                lineage=lin,
+                replicate=rep,
+                evo=evo,
+            ] .= trajectory
+
+            # Calculate and store fitness for each point in the trajectory
+            x_traj.fitness[
+                lineage=lin,
+                replicate=rep,
+                evo=evo,
+            ] = mh.fitness(trajectory, fit_lans)
+        end
+    end
+end
+```
+
+## Visualize Evolutionary Trajectories
+
+Having run the simulations, we can now visualize some of the evolutionary
+trajectories to understand how populations navigate the phenotypic space.
+
+```{julia}
+Random.seed!(42)
+
+# Define number of rows and columns
+n_rows = 4
+n_cols = 4
+
+# Define number of landscapes to display
+n_sample = n_rows * n_cols
+
+# Initialize figure
+fig = Figure(size=(600, 600))
+
+# Add global grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Loop over a sample of fitness landscapes
+for (i, idx) in enumerate(1:n_sample)
+    # Define row and column indices
+    row = (i - 1) ÷ n_cols + 1
+    col = (i - 1) % n_cols + 1
+
+    # Create subplot
+    ax = Axis(
+        gl[row, col],
+        aspect=AxisAspect(1),
+        title="landscape $(idx)",
+        titlesize=12,
+        yticklabelsvisible=false,
+        xticklabelsvisible=false,
+    )
+
+    # Evaluate fitness landscape
+    F = mh.fitness(x, y, fit_lans[idx])
+
+    # Plot fitness landscape
+    hm_fit = heatmap!(ax, x, y, F, colormap=:algae)
+
+    # Add contour plot
+    contour!(ax, x, y, F, color=:black)
+
+    # Evaluate genetic density
+    M = mh.genetic_density(x, y, gp_evo_peaks)
+
+    # Plot genetic density as contour lines
+    contour!(ax, x, y, M, color=:white)
+
+    # Set limits
+    xlims!(ax, -4, 4)
+    ylims!(ax, -4, 4)
+
+    # Initialize counter for color index
+    color_idx = 0
+
+    # Plot evolutionary trajectories
+    for lin in DD.dims(x_traj, :lineage)
+        for rep in DD.dims(x_traj, :replicate)
+            # Extract x and y coordinates
+            x_data = x_traj.phenotype[
+                # time=DD.At(1:n_steps+1),
+                phenotype=DD.At(:x1),
+                lineage=lin,
+                replicate=rep,
+                landscape=idx,
+                evo=idx,
+            ].data
+            y_data = x_traj.phenotype[
+                # time=DD.At(1:n_steps+1),
+                phenotype=DD.At(:x2),
+                lineage=lin,
+                replicate=rep,
+                landscape=idx,
+                evo=idx,
+            ].data
+
+            # Plot trajectory
+            color_idx += 1
+            lines!(
+                ax,
+                x_data,
+                y_data,
+                color=ColorSchemes.glasbey_hv_n256[color_idx],
+                linewidth=1
+            )
+
+            # Plot initial condition
+            scatter!(
+                ax,
+                x_data[1],
+                y_data[1],
+                color=ColorSchemes.glasbey_hv_n256[color_idx],
+                markersize=12,
+                marker=:xcross,
+                strokecolor=:black,
+                strokewidth=1.5,
+            )
+
+            # Plot final condition
+            scatter!(
+                ax,
+                x_data[end],
+                y_data[end],
+                color=ColorSchemes.glasbey_hv_n256[color_idx],
+                markersize=12,
+                marker=:utriangle,
+                strokecolor=:black,
+                strokewidth=1.5,
+            )
+        end
+    end
+end
+
+# Set global axis labels
+Label(
+    fig[:, end, Bottom()],
+    "phenotype 1",
+    fontsize=14,
+    padding=(0, 0, 0, 10),
+)
+
+Label(
+    fig[1, :, Left()],
+    "phenotype 2",
+    fontsize=14,
+    rotation=π / 2,
+)
+
+fig
+```
+
+In these visualizations, we can observe several key features of evolutionary
+dynamics:
+
+1. **Fitness landscape influence**: Populations tend to climb fitness peaks
+(brighter regions).
+2. **Mutational constraints**: Trajectories are influenced by the
+genotype-phenotype density map (white contour lines), avoiding regions of low
+density.
+3. **Initial condition effects**: Different starting points can lead to
+different evolutionary outcomes.
+4. **Stochasticity**: Even with the same starting point (replicate lines of the
+same color), stochasticity leads to different evolutionary paths.
+
+## Fitness Trajectory Analysis
+
+Let's analyze how fitness changes over time during evolution:
+
+```{julia}
+Random.seed!(42)
+
+# Define number of rows and columns
+n_rows = 4
+n_cols = 4
+
+# Define number of landscapes to display
+n_sample = n_rows * n_cols
+
+# Initialize figure
+fig = Figure(size=(600, 600))
+
+# Add global grid layout
+gl = fig[1, 1] = GridLayout()
+
+# Loop over a sample of fitness landscapes
+for (i, idx) in enumerate(1:n_sample)
+    # Define row and column indices
+    row = (i - 1) ÷ n_cols + 1
+    col = (i - 1) % n_cols + 1
+
+    # Create subplot
+    ax = Axis(
+        gl[row, col],
+        xlabel="time (generations)",
+        ylabel="fitness",
+        title="landscape $(idx)",
+        titlesize=12,
+        yticklabelsvisible=false,
+        xticklabelsvisible=false,
+        xlabelsize=10,
+        ylabelsize=10,
+    )
+
+    # Plot fitness trajectories
+    for lin in DD.dims(x_traj, :lineage)
+        for rep in DD.dims(x_traj, :replicate)
+            # Extract fitness data
+            fit_data = x_traj.fitness[
+                fitness=DD.At(:fitness),
+                lineage=lin,
+                replicate=rep,
+                landscape=idx,
+                evo=idx,
+            ].data
+
+            # Plot trajectory
+            color_idx = (lin - 1) * n_rep + rep
+            lines!(
+                ax,
+                0:n_steps,
+                vec(fit_data),
+                color=ColorSchemes.glasbey_hv_n256[color_idx],
+                linewidth=1
+            )
+        end
+    end
+end
+
+fig
+```
+
+## Conclusion
+
+In this notebook, we've simulated evolutionary dynamics in a 2D phenotypic space
+under various fitness landscapes and a fixed mutational landscape. We've used
+the Metropolis-Hastings algorithm to model evolution as a biased random walk
+influenced by both fitness and mutational constraints.
+
+Key insights from our simulations:
+
+1. **Fitness-mutation interplay**: Evolution is shaped by both the fitness landscape (selection) and the mutational landscape (genetic constraints).
+2. **Multiple evolutionary outcomes**: Different initial conditions can lead to different evolutionary endpoints, even in the same fitness landscape.
+3. **Stochastic effects**: Even with identical starting points, stochasticity in the evolutionary process leads to variation in outcomes.
+4. **Landscape navigation**: Populations navigate the phenotypic space by climbing fitness gradients while being constrained by the mutational landscape.
+
+This approach allows us to explore how populations might adapt to various
+environments given underlying genetic constraints, providing insights into the
+predictability and paths of evolution.

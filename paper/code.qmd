@@ -1,0 +1,33 @@
+---
+title: "Code Overview"
+author: "Manuel Razo-Mejia"
+format:
+  html:
+    toc: true
+---
+
+# Code Documentation
+
+This section provides interactive code examples and demonstrations of the computational methods used in our research on evolutionary landscapes.
+
+## Available Notebooks
+
+We've provided several Jupyter notebooks to help you understand our analysis workflow:
+
+1. [Evolutionary Dynamics](code/evolutionary_dynamics.qmd) - Simulating evolutionary dynamics in a 2D phenotypic space.
+2. [RHVAE on Simulated Data](code/rhvae_sim.qmd) - Training a Riemannian Hamiltonian Variational Autoencoder (RHVAE) on simulated data.
+
+## Running the Code
+
+All notebooks can be run interactively if you have Julia installed with the required packages. Each notebook is self-contained with the necessary package imports.
+
+### Required Packages
+
+- CairoMakie
+- DataFrames
+- CSV
+- Statistics
+- StatsBase
+- Other specialized packages as needed
+
+Click on any of the notebooks in the sidebar to explore the code in detail. 
