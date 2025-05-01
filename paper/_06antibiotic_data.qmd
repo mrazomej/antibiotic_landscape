@@ -55,6 +55,7 @@ using PCA, VAE, and RHVAE (first three panels) trained on $IC_{50}$ values, with
 colors representing different evolution conditions, showing improved
 disentanglement of lineages in non-linear latent spaces and superior
 reconstruction accuracy of RHVAE compared to other dimensionality reduction
-methods. The rightmost panel shows the reconstruction error of the three methods
-as a function of the number of PCs used for dimensionality
+methods. Different colors represent different lineages evolved in different
+antibiotics. The rightmost panel shows the reconstruction error of the three
+methods as a function of the number of PCs used for dimensionality
 reduction.](./fig/main/fig06_v02_compiled){#fig-06}
