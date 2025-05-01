@@ -88,9 +88,11 @@ space using Procrustes analysis. The RHVAE better preserves phenotypic
 relationships than PCA or vanilla VAE, as evidenced by the highlighted points
 (diamond markers). (B) Comparison of all pairwise Euclidean distances between
 genotypes in the ground truth phenotypic space versus the different latent
-spaces, showing RHVAE better preserves the original distances. (C)
-Reconstruction error (MSE) comparison showing 2D-RHVAE achieves accuracy
-comparable to a 10-dimensional PCA model. (D) Metric volume visualization of the
-RHVAE latent space (left) and with projected data points (right), revealing
-regions of high curvature that correspond to areas of low genotype-phenotype
-density in the simulation.](./fig/main/fig04_v04){#fig-04}
+spaces, showing RHVAE better preserves the original distances. Given the large
+number of data points and the even larger number of pairwise comparisons, the
+data are shown as a smear rather than single points. (C) Reconstruction error
+(MSE) comparison showing 2D-RHVAE achieves accuracy comparable to a
+10-dimensional PCA model. (D) Metric volume visualization of the RHVAE latent
+space (left) and with projected data points (right), revealing regions of high
+curvature that correspond to areas of low genotype-phenotype density in the
+simulation.](./fig/main/fig04_v04){#fig-04}
