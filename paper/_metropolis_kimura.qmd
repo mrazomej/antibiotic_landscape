@@ -1,0 +1,167 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+---
+
+## Metropolis-Kimura Evolutionary Dynamics {#sec-metropolis}
+
+In the main text, we describe a simple algorithm for evolving a population as a
+biased random walk on a phenotypic space controlled by both a fitness function
+and a genotype-phenotype density function. Here, we provide a more detailed
+description of the algorithm and its implementation. 
+
+### Landscape Description
+
+We assume that phenotypes driving adaptation can be described by real-valued
+numbers. Let $\underline{x}(t) = (x_1(t), x_2(t), \cdots, x_N(t))$ be an $N$
+dimensional vector describing the phenotype of a population at time $t$. The
+fitness for a given environment $E$ is a scalar function $F_E(\underline{x})$
+such that
+
+$$
+F_E: \mathbb{R}^N \to \mathbb{R},
+$${#eq-fitnes}
+
+i.e, the coordinates in phenotype space map to a fitness value. Throughout this
+work, we consider a series of Gaussian fitness peaks, i.e.,
+
+$$
+F_E(\underline{x}) = 
+\sum_{p=1}^P A_p 
+\exp\left(
+    -\frac{1}{2}
+    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-fitness-peaks}
+
+where $P$ is the number of peaks, $A_p$ is the amplitude of the $p$-th peak,
+$\underline{\hat{x}}^{(p)}$ is the $N$-dimensional vector of optimal phenotypes
+for the $p$-th peak, and $\Sigma_p$ is the $N \times N$ covariance matrix for
+the $p$-th peak. This formulation allows for multiple peaks in the fitness
+landscape, each potentially having different heights, widths, and covariance
+structures between dimensions. The covariance matrix $\Sigma_p$ captures
+potential interactions between different phenotypic dimensions, allowing for
+more complex and realistic fitness landscapes.
+
+In the same vein, we define a genotype-phenotype density function
+$GP(\underline{x})$ as a scalar function that maps a phenotype to a mutational
+effect, i.e.,
+
+$$
+GP: \mathbb{R}^N \to \mathbb{R},
+$${#eq-genotype-phenotype-density}
+
+where $GP(\underline{x})$ is related to the probability of a genotype mapping to
+a phenotype $\underline{x}$. As a particular density function we will consider a
+set of negative Gaussian peaks that will serve as "mutational barriers" that
+limit the range of phenotypes that can be reached. The deeper the peak, the less
+probable it is that a genotype will map to a phenotype within the peak. This
+idea captured by the following mutational landscape
+
+$$
+GP(\underline{x}) = 
+\sum_{p=1}^P -B_p 
+\exp\left(
+    -\frac{1}{2}
+    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-genotype-phenotype-density-peaks}
+
+where $B_p$ is the depth of the $p$-th peak, and $\underline{\hat{x}}^{(p)}$ is
+the $N$-dimensional vector of optimal phenotypes for the $p$-th peak.
+
+### Metropolis-Kimura Algorithm
+
+We introduce a biologically motivated algorithm that combines elements of the
+Metropolis-Hastings algorithm with Kimura's classical population genetics
+theory. This approach implements a two-step process that separately models:
+
+1. The probability of mutation occurring (mutation accessibility) as governed by the genotype-phenotype density.
+2. The probability of fixation within a population (selection) determined by the fitness effect of such mutation and the effective population size.
+
+#### Biological Motivation
+
+In natural populations, evolution proceeds through two distinct processes:
+
+1. **Mutation**: New variants arise through random genetic changes. The probability of specific mutations depends on molecular mechanisms and constraints of the genotype-phenotype map.
+
+2. **Fixation**: Once a mutation occurs, it must spread through the population to become fixed. The probability of fixation depends on the selection coefficient (fitness advantage) and the effective population size.
+
+#### Mathematical Framework
+
+##### Mutation Probability
+
+The probability of a mutation from phenotype $\underline{x}$ to $\underline{x}'$ is modeled using a Metropolis-like criterion based on the genotype-phenotype density:
+
+$$
+\pi_{\text{mut}}(\underline{x} \to \underline{x}') = 
+\min\left(1, \left(\frac{GP(\underline{x}')}{GP(\underline{x})}\right)^{\beta}\right)
+$${#eq-mutation-probability}
+
+Here, $GP(\underline{x})$ represents the genotype-phenotype density at phenotype $\underline{x}$, and $\beta$ is a parameter controlling the strength of mutational constraints. The higher $\beta$ is, the less likely a mutation going downhill in genotype-phenotype density is to be accepted.
+
+##### Kimura's Fixation Probability
+
+Once a mutation occurs, its probability of fixation in a population of effective size $N$ is given by Kimura's formula
+
+$$
+\pi_{\text{fix}}(\underline{x} \to \underline{x}') = 
+\frac{1 - e^{-2s}}{1 - e^{-2Ns}}
+$${#eq-kimura-fixation-probability}
+
+where $s$ is the selection coefficient. We compute this selection coefficient as the difference in fitness between the new and old phenotype divided by the fitness of the old phenotype:
+
+$$
+s = \frac{F_E(\underline{x}') - F_E(\underline{x})}{F_E(\underline{x})}
+$${#eq-selection-coefficient}
+
+This equation captures a fundamental result from population genetics: beneficial mutations ($s > 0$) have a higher probability of fixation, with the probability approaching $2s$ for small positive selection coefficients and approaching 1 for large positive selection coefficients. Deleterious mutations ($s < 0$) have an exponentially decreasing probability of fixation as population size increases.
+
+#### Overall Acceptance Probability
+
+The overall acceptance probability—defined as the probability of a proposed step $\underline{x} \rightarrow \underline{x}'$—is the product of the mutation probability and the fixation probability:
+
+$$
+\pi_{\text{accept}}(\underline{x} \to \underline{x}') = 
+\pi_{\text{mut}}(\underline{x} \to \underline{x}') \cdot 
+\pi_{\text{fix}}(\underline{x} \to \underline{x}')
+$${#eq-overall-acceptance-probability}
+
+This two-step process better reflects the biological reality of evolution, where both mutational accessibility and selection contribute to evolutionary trajectories.
+
+### Effect of Inverse Temperature
+
+@fig-metropolis-inverse-temperature shows the effect of the inverse temperature
+parameter $\beta$ influences evolutionary trajectories in our
+Metropolis-Kimura framework. Through a series of panels showing both
+phenotypic trajectories (upper) and fitness dynamics (lower), we can observe how
+different $\beta$ values affect the balance between exploration and exploitation
+in phenotypic space.
+
+At low $\beta$ values (left panels), the evolutionary trajectories exhibit
+highly stochastic behavior, with populations taking meandering paths through the
+phenotypic landscape. This represents a regime where genetic drift plays a
+dominant role. As $\beta$ increases (moving right), the trajectories become
+increasingly deterministic, with populations taking more direct paths toward
+fitness peaks, while avoiding genotype-to-phenotype density valleys. This
+transition reflects a shift from drift-dominated to selection-dominated
+dynamics, where populations more strictly follow the local fitness gradient. The
+fitness trajectories in the lower panels further reinforce this pattern, showing
+more erratic fitness fluctuations at low $\beta$ and more monotonic increases at
+high $\beta$, consistent with stronger selective pressures.
+
+![**Effect of inverse temperature on adaptive dynamics**. Upper panels:
+Population trajectories on a landscape with a single fitness peak and four
+genotype-phenotype density peaks. Black dashed lines indicate fitness landscape
+contours, while white solid lines show genotype-phenotype density contours.
+Colored lines represent independent population trajectories, with initial
+positions (crosses) and final positions (triangles). Lower panels: Temporal
+evolution of population fitness. Panels from left to right show increasing
+values of inverse temperature ($\beta$), demonstrating increasingly
+deterministic adaptive trajectories.](./fig/supplementary/figSI_sim_beta_effect){#fig-metropolis-inverse-temperature}
