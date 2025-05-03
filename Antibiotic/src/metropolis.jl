@@ -604,8 +604,6 @@ function evo_metropolis_hastings(
         end
     end
     return x
-<<<<<<< HEAD
-=======
 end
 
 ## -----------------------------------------------------------------------------
@@ -794,5 +792,4 @@ function evo_metropolis_kimura(
         end
     end
     return x
->>>>>>> df0234e919326e4eb10bc406fc48748e86dc5881
 end
