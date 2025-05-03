@@ -57,7 +57,7 @@ latent space relate to distances in data space.
 manner.
 
 The RHVAE is particularly useful for our application because:
-- It captures non-linear relationships between fitness profiles and underlying
+- It captures nonlinear relationships between fitness profiles and underlying
 phenotypes.
 - It provides meaningful distances in latent space via the learned metric
 tensor.
@@ -736,7 +736,7 @@ the latent space.
 
 One of the main advantages of the RHVAE is that it learns a Riemannian metric on
 the latent space, which allows us to relate distances in the latent space with
-distances in the original data space, despite the non-linear transformations.
+distances in the original data space, despite the nonlinear transformations.
 
 The metric tensor, $\underline{\underline{G}}(\underline{z})$, is a
 position-dependent positive-definite matrix that we can evaluate at any point

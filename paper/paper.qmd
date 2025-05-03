@@ -13,7 +13,7 @@ fitness measurements to learn a map from high-dimensional fitness profiles to a
 low-dimensional latent space in a geometry-informed manner. We demonstrate that
 our approach using a Riemannian Hamiltonian Variational Autoencoder (RHVAE)
 outperforms traditional linear dimensionality reduction techniques by capturing
-the non-linear structure of the phenotype-fitness map. When applied to simulated
+the nonlinear structure of the phenotype-fitness map. When applied to simulated
 adaptive dynamics, we show that the learned latent space retains information
 about the underlying adaptive phenotypic space and accurately reconstructs
 complex fitness landscapes. We then apply this method to a dataset of
