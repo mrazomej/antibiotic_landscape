@@ -372,10 +372,11 @@ Box(
 # Add section title
 Label(
     gl05B_banner[1, 1],
-    "antibiotic resistance progression",
+    "antibiotic resistance progression in evolution\ncondition",
     fontsize=12,
     padding=(0, 0, 0, 0),
     halign=:left,
+    justification=:left,
     tellwidth=false, # prevent column from contracting because of label size
     alignmode=Mixed(; left=-5) # Moves text to the left
 )
@@ -426,7 +427,6 @@ println("Plotting Fig05B...")
 
 # Define data to use
 data_raw = df_raw[(df_raw.antibiotic.=="KM").&(df_raw.env.=="Parent_in_KM").&(df_raw.strain_num.==13).&.!(df_raw.blank).&(df_raw.concentration_ugmL.>0), :]
-# Remove blank measurement
 # Group data by day
 df_raw_group = DF.groupby(data_raw, :day)
 
