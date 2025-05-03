@@ -1,4 +1,4 @@
-# `RHVAE v01`
+# `RHVAE v05`
 
 ## `RHVAE` specific features
 

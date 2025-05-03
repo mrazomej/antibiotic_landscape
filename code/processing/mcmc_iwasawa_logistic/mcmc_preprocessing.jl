@@ -20,7 +20,7 @@ println("Listing MCMC files...")
 out_dir = "$(git_root())/output/mcmc_iwasawa_logistic"
 
 # List all files in the output directory
-files = sort(Glob.glob("$(out_dir)/*.csv"[2:end], "/"))
+files = sort(Glob.glob("$(out_dir)/chain*.csv"[2:end], "/"))
 
 # Initialize empty dataframe to store metadata
 df_meta = DF.DataFrame()
@@ -119,6 +119,9 @@ logic50_mean = Matrix{Float32}(
 logic50_lower = similar(logic50_mean)
 logic50_upper = similar(logic50_mean)
 
+# Initialize dataframe to save metadata
+df_filt_meta = DF.DataFrame()
+
 # Loop through groups
 for (i, data) in enumerate(df_group)
     # Sort data by stress
@@ -128,10 +131,19 @@ for (i, data) in enumerate(df_group)
         logic50_mean[:, i] = Float32.(data.logic50_mean)
         logic50_lower[:, i] = Float32.(data.logic50_ci_lower)
         logic50_upper[:, i] = Float32.(data.logic50_ci_upper)
+        # Append metadata to dataframe
+        DF.append!(df_filt_meta, data[1:1, [:day, :strain_num, :design, :env]])
     else
         println("group $i stress does not match")
     end # if
 end # for
+
+# Add strain and evolution condition by splitting env
+DF.insertcols!(
+    df_filt_meta,
+    :strain => getindex.(split.(df_filt_meta.env, "_in_"), 1),
+    :evolution => getindex.(split.(df_filt_meta.env, "_in_"), 2)
+)
 
 ## =============================================================================
 
@@ -205,7 +217,9 @@ JLD2.save(
         "logic50_mean" => logic50_mean,
         "logic50_mean_std" => logic50_mean_std,
         "logic50_mcmc" => logic50_mcmc,
-        "logic50_mcmc_std" => logic50_mcmc_std
+        "logic50_mcmc_std" => logic50_mcmc_std,
+        "logic50_meta" => df_filt_meta,
+        "drugs" => sort(unique(df_ic50_thresh.drug))
     )
 )
 

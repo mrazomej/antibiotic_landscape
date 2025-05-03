@@ -89,6 +89,9 @@ docs/site/
 # environment.
 Manifest.toml
 
+# Files to ignore
+*jld2
+
 # Directories to ignore
 */*/tmp/*
 doc/*_files/*

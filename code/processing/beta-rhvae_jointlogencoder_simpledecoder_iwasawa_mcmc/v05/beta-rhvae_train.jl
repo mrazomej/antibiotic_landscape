@@ -31,7 +31,7 @@ Random.seed!(42)
 # Define model hyperparameters
 
 # Define number of epochs
-n_epoch = 100
+n_epoch = 102
 # Define number of samples in batch
 n_batch = 256
 # Define number of samples when computing loss
@@ -64,6 +64,7 @@ loss_kwargs = (
     βₒ=βₒ,
     logp_prefactor=logp_prefactor,
     logq_prefactor=logq_prefactor,
+    :∇H_kwargs => (adtype=:TaylorDiff,)
 )
 
 ## =============================================================================

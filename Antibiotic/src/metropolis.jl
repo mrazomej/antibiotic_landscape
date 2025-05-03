@@ -604,4 +604,195 @@ function evo_metropolis_hastings(
         end
     end
     return x
+<<<<<<< HEAD
+=======
+end
+
+## -----------------------------------------------------------------------------
+# Metropolis-Kimura evolutionary dynamics
+## -----------------------------------------------------------------------------
+
+@doc raw"""
+    evo_metropolis_kimura(x0, fitness_peaks, gen_peaks, N, µ, n_steps)
+
+Perform evolutionary algorithm to simulate phenotypic evolution using a
+Metropolis-Hastring-like mutation probability and Kimura's fixation probability.
+
+# Arguments
+- `x0::AbstractVector`: Initial phenotype vector.
+- `fitness_peaks::AbstractPeak`: Fitness landscape defined by one or more
+  Gaussian peaks.
+- `gen_peaks::AbstractPeak`: Genetic density landscape defined by one or more
+  Gaussian peaks.
+- `N::Real`: Effective population size.
+- `µ::Real`: Mutation step size standard deviation.
+- `n_steps::Int`: Number of steps to simulate.
+
+# Returns
+- `Matrix{Float64}`: Matrix of phenotypes, where each column represents a step
+  in the simulation.
+
+# Description
+This function implements the Metropolis-Hastings algorithm to simulate
+phenotypic evolution in a landscape defined by fitness and mutational
+accessibility. It uses Kimura's fixation probability formula to determine
+acceptance of proposed mutations. The algorithm follows these steps:
+
+1. Initialize the phenotype trajectory with the given starting point.
+2. For each step: a. Propose a new phenotype by adding Gaussian noise. b.
+   Calculate the fitness and mutational landscape values for the new phenotype.
+   c. Compute the selection coefficient s = (F_new - F)/F d. Calculate mutation
+      probability P_mut = min(1, M_new/M) e. Calculate fixation probability
+   using Kimura's equation: P_fix = (1 - exp(-2s))/(1 - exp(-2Ns)) f. Accept or
+   reject based on P_accept = P_mut * P_fix
+3. Return the complete phenotype trajectory.
+
+where F is the fitness function and M is the mutational landscape function.
+"""
+function evo_metropolis_kimura(
+    x0::AbstractVector,
+    fitness_peaks::AbstractPeak,
+    gen_peaks::AbstractPeak,
+    N::Real,
+    β::Real,
+    µ::Real,
+    n_steps::Int,
+)
+    # Initialize array to hold phenotypes
+    x = Matrix{Float64}(undef, length(x0), n_steps + 1)
+    # Set initial phenotype
+    x[:, 1] = x0
+
+    # Compute fitness and mutational landscape at initial phenotype
+    fitness_val = fitness(x0, fitness_peaks)
+    gen_val = genetic_density(x0, gen_peaks)
+
+    # Loop over steps
+    for t in 1:n_steps
+        # Propose new phenotype
+        x_new = x[:, t] + µ * randn(length(x0))
+
+        # Calculate fitness and mutational landscape
+        fitness_val_new = fitness(x_new, fitness_peaks)
+        gen_val_new = genetic_density(x_new, gen_peaks)
+
+        # Compute selection coefficient
+        s = (fitness_val_new - fitness_val) /
+            (fitness_val + eps(eltype(fitness_val)))
+
+        # Compute mutation probability
+        P_mut = min(1, (gen_val_new / gen_val)^β)
+
+        # Compute fixation probability using Kimura's equation
+        # Use Taylor expansion approximation when s << N for numerical stability
+        if (1 / (2 * N)) * 10 < s < 0.1
+            # For small s, use Taylor expansion
+            P_fix = 2 * s
+        else
+            # Otherwise use full Kimura equation
+            P_fix = (1 - exp(-2 * s)) / (1 - exp(-2 * N * s))
+        end
+
+        # Compute acceptance probability
+        P_accept = P_mut * P_fix
+
+        # Accept or reject proposal
+        if rand() < P_accept
+            # Accept proposal
+            x[:, t+1] = x_new
+            # Update fitness and mutational landscape
+            fitness_val = fitness_val_new
+            gen_val = gen_val_new
+        else
+            # Reject proposal
+            x[:, t+1] = x[:, t]
+        end
+    end # for
+    return x
+end # function
+
+## -----------------------------------------------------------------------------
+
+@doc raw"""
+    evo_metropolis_kimura(x0, fitness_peaks, gen_peaks, N, µ, n_steps, bounds)
+
+Similar to the unbounded version, but with bounds on the phenotype space.
+
+# Additional Arguments
+- `bounds::Vector{Tuple{Float64, Float64}}`: Vector of (min, max) tuples
+  specifying the allowed range for each dimension.
+"""
+function evo_metropolis_kimura(
+    x0::AbstractVector,
+    fitness_peaks::AbstractPeak,
+    gen_peaks::AbstractPeak,
+    N::Real,
+    µ::Real,
+    n_steps::Int,
+    bounds::Vector{Tuple{Float64,Float64}}
+)
+    # Check that number of bounds matches dimensions
+    if length(bounds) != length(x0)
+        throw(ArgumentError("Number of bounds ($(length(bounds))) must match number of dimensions ($(length(x0)))"))
+    end
+
+    # Check that initial point is within bounds
+    if !all(b[1] <= x <= b[2] for (x, b) in zip(x0, bounds))
+        throw(ArgumentError("Initial point must be within bounds"))
+    end
+
+    # Initialize array to hold phenotypes
+    x = Matrix{Float64}(undef, length(x0), n_steps + 1)
+    # Set initial phenotype
+    x[:, 1] = x0
+
+    # Compute fitness and mutational landscape at initial phenotype
+    fitness_val = fitness(x0, fitness_peaks)
+    gen_val = genetic_density(x0, gen_peaks)
+
+    # Loop over steps
+    for t in 1:n_steps
+        # Propose new phenotype
+        x_new = x[:, t] + µ * randn(length(x0))
+
+        # Check if proposal is within bounds
+        within_bounds = all(b[1] <= x <= b[2] for (x, b) in zip(x_new, bounds))
+
+        if within_bounds
+            # Calculate fitness and mutational landscape
+            fitness_val_new = fitness(x_new, fitness_peaks)
+            gen_val_new = genetic_density(x_new, gen_peaks)
+
+            # Compute selection coefficient
+            s = (fitness_val_new - fitness_val) / fitness_val
+
+            # Compute mutation probability
+            P_mut = min(
+                1, gen_val_new / gen_val
+            )
+
+            # Compute fixation probability using Kimura's equation
+            P_fix = (1 - exp(-2 * s)) / (1 - exp(-2 * N * s))
+
+            # Compute acceptance probability
+            P_accept = P_mut * P_fix
+
+            # Accept or reject proposal
+            if rand() < P_accept
+                # Accept proposal
+                x[:, t+1] = x_new
+                # Update fitness and mutational landscape
+                fitness_val = fitness_val_new
+                gen_val = gen_val_new
+            else
+                # Reject proposal
+                x[:, t+1] = x[:, t]
+            end
+        else
+            # Automatically reject out-of-bounds proposals
+            x[:, t+1] = x[:, t]
+        end
+    end
+    return x
+>>>>>>> df0234e919326e4eb10bc406fc48748e86dc5881
 end
