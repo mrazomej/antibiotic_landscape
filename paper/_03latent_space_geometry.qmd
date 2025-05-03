@@ -7,27 +7,25 @@ csl: ieee.csl
 
 ## Data-Driven Dimensionality Reduction via Geometric Variational Autoencoders
 
-Given the high-dimensional dataset of simulated fitness profiles emulating a
-plausible picture of the underlying data-generating process of many modern
-experimental evolution setups [@kinsler2020; @maeda2020; @iwasawa2022;
-@ascensao2023; @ghosh2025], we next seek to develop a data-driven method to
-reverse the mapping from phenotypes to fitness values to reconstruct the
-phenotypic coordinates of a genotype, based only on fitness information in
-different environments. @fig-03(A) shows a schematic depiction of the idea
-behind dimensionality reduction applied to fitness profiles. With fitness
-profiles as vectors on a high-dimensional data space, dimensionality reduction
-techniques implicitly assume that the positions of points in the data space are
-highly constrained to occupy only a subset of the available volume. More
-formally, dimensionality reduction techniques assume that the data points lie on
-a low-dimensional manifold embedded in the high-dimensional data space. Here,
-low-dimensionality refers to having the effective number of degrees of freedom
-required to describe the data being lower than the dimension of the data space.
-The goal of dimensionality reduction is to find such an embedded manifold that
-captures the underlying structure of the data. When possible, plotting this
-embedded manifold as a flat space (either two or three dimensions) allows for
-the visualization of the underlying data structure. Given the conceptual picture
-we have developed so far, the hope is that the low-dimensional latent space
-captures features of the structure of the underlying phenotypic space.
+Using our simulated fitness profiles that mimic data from modern experimental
+evolution studies [@kinsler2020; @maeda2020; @iwasawa2022; @ascensao2023;
+@ghosh2025], we now develop a data-driven approach to infer phenotypic
+coordinates from fitness measurements across different environments. @fig-03(A)
+shows a schematic depiction of the idea behind dimensionality reduction applied
+to fitness profiles. With fitness profiles as vectors on a high-dimensional data
+space, dimensionality reduction techniques implicitly assume that the positions
+of points in the data space are highly constrained to occupy only a subset of
+the available volume. More formally, dimensionality reduction techniques assume
+that the data points lie on a low-dimensional manifold embedded in the
+high-dimensional data space. Here, low-dimensionality refers to having the
+effective number of degrees of freedom required to describe the data being lower
+than the dimension of the data space. The goal of dimensionality reduction is to
+find such an embedded manifold that captures the underlying structure of the
+data. When possible, plotting this embedded manifold as a flat space (either two
+or three dimensions) allows for the visualization of the underlying data
+structure. Given the conceptual picture we have developed so far, the hope is
+that the low-dimensional latent space captures features of the structure of the
+underlying phenotypic space.
 
 Recently, the field has focused on linear dimensionality reduction techniques
 such as singular value decomposition [@kinsler2020] or related methods such as

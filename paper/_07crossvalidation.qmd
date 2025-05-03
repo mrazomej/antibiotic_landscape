@@ -7,13 +7,16 @@ csl: ieee.csl
 
 ## Non-Linear Latent Space Coordinates are more Predictive of Out of Sample Data
 
-Training a model on simulated data where the ground truth was known strongly
-suggested that the nonlinear latent space coordinates are representative of the
-underlying phenotypic coordinates that give rise to the observed fitness
-profiles. This observation is important because it suggests that these
-nonlinear latent space coordinates must capture more information about the
-biological system under study, allowing for more accurate predictions of
-out-of-sample data.
+In our simulations, we designed abstract phenotypic coordinates that determined
+fitness across environments. Applying our proposed method demonstrated that the
+nonlinear latent space can recover the relative positions in this abstract
+phenotypic space using fitness data only. While these latent coordinates don't
+necessarily represent interpretable biological traits, they effectively capture
+the underlying structure of the space that determines the genotype fitness in
+different environments. This success in recovering structural relationships from
+simulated data encouraged us to test whether the equivalent latent coordinates
+recovered from experimental data can be used to make more accurate predictions
+of out-of-sample data.
 
 To test this hypothesis, we adapted the cross-validation approach developed by
 @kinsler2020. Their original method assesses how linear components predict
@@ -60,6 +63,3 @@ antibiotics, the 2D nonlinear latent space coordinates provide more accurate
 predictions than any number of linear dimensions, demonstrating that nonlinear
 latent space representations capture more meaningful biological information
 about the underlying phenotypic state.](./fig/main/fig07_v01_compiled){#fig-07}
-
-
-  

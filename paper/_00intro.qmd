@@ -11,12 +11,12 @@ modern evolutionary biology [@Lassig2017; @manrubia2021]. Although the field has
 seen a surge in predictive modeling being deployed in real-world applications
 ranging from viral dynamics [@uksza2014] to cancer immunotherapy [@luksza2017],
 it is still unclear to what extent evolutionary trajectories under different
-environmental pressures can be predicted. Two main challenges make this question
-difficult to answer. First, the vast number of genetic changes available to a
-population makes it impossible to exhaustively sample and measure the phenotypic
-consequences of each mutation [@louis2016]. Second, for most but a few simple
-model systems, it is unknown what the phenotypic changes driving adaptation are
-[@shoval2012].
+environmental pressures can be predicted. Multiple challenges make this question
+difficult to answer. Among these, the vast number of genetic changes available
+to a population makes it impossible to exhaustively sample and measure the
+phenotypic consequences of each mutation [@louis2016]. Additionally, for most
+but a few simple model systems, it is unknown what the phenotypic changes
+driving adaptation are [@shoval2012].
 
 Nevertheless, advances in modern high-throughput technologies have made it
 possible to measure the fitness of multiple genotypes, opening up the
