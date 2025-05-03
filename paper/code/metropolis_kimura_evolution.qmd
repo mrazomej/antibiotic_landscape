@@ -1,5 +1,5 @@
 ---
-title: Energy-based evolutionary dynamics
+title: Metropolis-Kimura Evolutionary Dynamics
 author:
   - name: Manuel Razo-Mejia
     orcid: 0000-0002-9510-0527
@@ -17,7 +17,7 @@ keywords:
   - fitness landscape
   - genotype-phenotype density
   - Metropolis-Hastings
-  - Kimura's fixation probability
+  - Population genetics
 format:
   html:
     code-fold: false
