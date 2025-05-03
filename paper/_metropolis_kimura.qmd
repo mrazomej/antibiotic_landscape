@@ -135,33 +135,33 @@ $${#eq-overall-acceptance-probability}
 
 This two-step process better reflects the biological reality of evolution, where both mutational accessibility and selection contribute to evolutionary trajectories.
 
-### Effect of Inverse Temperature
+### Effect of Population Size
 
-@fig-metropolis-inverse-temperature shows the effect of the inverse temperature
-parameter $\beta$ influences evolutionary trajectories in our
-Metropolis-Kimura framework. Through a series of panels showing both
-phenotypic trajectories (upper) and fitness dynamics (lower), we can observe how
-different $\beta$ values affect the balance between exploration and exploitation
-in phenotypic space.
+@fig-metropolis-population-effect shows the effect of population size parameter
+$N$ influences evolutionary trajectories in our Metropolis-Kimura framework.
+Through a series of panels showing both phenotypic trajectories (upper) and
+fitness dynamics (lower), we can observe how different population sizes affect
+the balance between exploration and exploitation in phenotypic space.
 
-At low $\beta$ values (left panels), the evolutionary trajectories exhibit
+At small population sizes (left panels), the evolutionary trajectories exhibit
 highly stochastic behavior, with populations taking meandering paths through the
 phenotypic landscape. This represents a regime where genetic drift plays a
-dominant role. As $\beta$ increases (moving right), the trajectories become
-increasingly deterministic, with populations taking more direct paths toward
-fitness peaks, while avoiding genotype-to-phenotype density valleys. This
+dominant role. As population size increases (moving right), the trajectories
+become increasingly deterministic, with populations taking more direct paths
+toward fitness peaks, while avoiding genotype-to-phenotype density valleys. This
 transition reflects a shift from drift-dominated to selection-dominated
 dynamics, where populations more strictly follow the local fitness gradient. The
 fitness trajectories in the lower panels further reinforce this pattern, showing
-more erratic fitness fluctuations at low $\beta$ and more monotonic increases at
-high $\beta$, consistent with stronger selective pressures.
+more erratic fitness fluctuations at small population sizes and more monotonic
+increases at large population sizes, consistent with stronger selective
+pressures.
 
-![**Effect of inverse temperature on adaptive dynamics**. Upper panels:
+![**Effect of population size on adaptive dynamics**. Upper panels:
 Population trajectories on a landscape with a single fitness peak and four
 genotype-phenotype density peaks. Black dashed lines indicate fitness landscape
 contours, while white solid lines show genotype-phenotype density contours.
 Colored lines represent independent population trajectories, with initial
 positions (crosses) and final positions (triangles). Lower panels: Temporal
 evolution of population fitness. Panels from left to right show increasing
-values of inverse temperature ($\beta$), demonstrating increasingly
-deterministic adaptive trajectories.](./fig/supplementary/figSI_sim_beta_effect){#fig-metropolis-inverse-temperature}
+values of population size ($N$), demonstrating increasingly
+deterministic adaptive trajectories.](./fig/supplementary/figSI_sim_population_effect){#fig-metropolis-population-effect}
