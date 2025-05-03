@@ -29,25 +29,25 @@ the visualization of the underlying data structure. Given the conceptual picture
 we have developed so far, the hope is that the low-dimensional latent space
 captures features of the structure of the underlying phenotypic space.
 
-Traditionally, the field has focused on linear dimensionality reduction
-techniques such as singular value decomposition [@kinsler2020] or related
-methods such as sparse structure discovery [@petti2023]. Although
-computationally efficient, these methods are limited by the rigid assumption
-that fitness is a linear function of some latent phenotypes. To step away from
-such strong assumptions, we can take advantage of the advances in
-deep-learning-based dimensionality reduction techniques, such as the variational
-autoencoder (VAE) [@kingma2014a]. However, the original VAE framework comes with
-the limitation that the learned latent representation---built from non-linear
-transformations of the input data---does not contain any geometric information
-about how such non-linear transformations affect the geometry of the learned
-space [@arvanitidis2018]. This is analogous to having a 2D map of the surface of
-the earth (the latent space), where, to know how distances between two points on
-the map correspond to distances on the surface of the planet (the data space),
-we need a position-dependent "scale bar"---more formally, a metric tensor---that
-allows us to convert distances between representations. This metric tensor is
-not encoded in the original VAE framework, rendering distances between points in
-the latent space meaningless as they are not directly related to the distances
-in the data space.
+Recently, the field has focused on linear dimensionality reduction techniques
+such as singular value decomposition [@kinsler2020] or related methods such as
+sparse structure discovery [@petti2023]. Although computationally efficient,
+these methods are limited by the rigid assumption that fitness is a linear
+function of some latent phenotypes. To step away from such strong assumptions,
+we can take advantage of the advances in deep-learning-based dimensionality
+reduction techniques, such as the variational autoencoder (VAE) [@kingma2014a].
+However, the original VAE framework comes with the limitation that the learned
+latent representation---built from nonlinear transformations of the input
+data---does not contain any geometric information about how such nonlinear
+transformations affect the geometry of the learned space [@arvanitidis2018].
+This is analogous to having a 2D map of the surface of the earth (the latent
+space), where, to know how distances between two points on the map correspond to
+distances on the surface of the planet (the data space), we need a
+position-dependent "scale bar"---more formally, a metric tensor---that allows us
+to convert distances between representations. This metric tensor is not encoded
+in the original VAE framework, rendering distances between points in the latent
+space meaningless as they are not directly related to the distances in the data
+space.
 
 To address both limitations on the linear and non-geometric nature of popular
 methods, we propose the use of a recent extension of the VAE framework---the
@@ -60,20 +60,20 @@ specialized network that learns the metric tensor of the latent space. The
 numbers below the architecture point to the conceptual steps of the RHVAE
 workflow shown in @fig-03(C). The RHVAE is conceptually similar to the
 traditional VAE, taking a high-dimensional fitness input $\underline{f}$ as
-input into an encoder network. This encoder network (along with the
-reparametrization trick [@kingma2014a]) outputs a sampled latent coordinate
-$\underline{z}$. However, before passing this sampled coordinate through a
-decoder network to reconstruct the fitness profile, the RHVAE uses concepts from
-Riemannian geometry and Hamiltonian mechanics to jointly train a separate
-network that learns the metric tensor of the latent space. This metric tensor
-network, thus, contains all the information needed to map distances in the
-low-dimensional map to distances in the original data space. We consider this
-feature of the RHVAE to be of utmost importance if the learned latent space is
-to be taken seriously as a representation of the underlying phenotypic space.
-Just as a map without a scale bar is not a useful guide to navigate the terrain,
-a latent space without a metric tensor is an incomplete representation of the
-underlying phenotypic space. We direct the reader to the Supplementary Material
-for a mathematically rigorous description of the model. 
+input into an encoder network. This encoder network outputs a sampled latent
+coordinate $\underline{z}$ [@kingma2014a]. However, before passing this sampled
+coordinate through a decoder network to reconstruct the fitness profile, the
+RHVAE uses concepts from Riemannian geometry and Hamiltonian mechanics to
+jointly train a separate network that learns the metric tensor of the latent
+space. This metric tensor network, thus, contains all the information needed to
+map distances in the low-dimensional map to distances in the original data
+space. We consider this feature of the RHVAE to be of utmost importance if the
+learned latent space is to be taken seriously as a representation of the
+underlying phenotypic space. Just as a map without a scale bar is not a useful
+guide to navigate the terrain, a latent space without a metric tensor is an
+incomplete representation of the underlying phenotypic space. We direct the
+reader to the Supplementary Material for a mathematically rigorous description
+of the model. 
 
 Next, we turn our attention to applying the RHVAE to the simulated fitness
 profiles. It is important to highlight that at no point does the RHVAE obtain

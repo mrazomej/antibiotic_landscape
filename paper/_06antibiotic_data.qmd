@@ -22,11 +22,11 @@ density is plotted as a function of the antibiotic concentration, obtaining the
 expected sigmoidal curve. Since this particular example shows data from
 evolution in the antibiotic being used as the $x$-axis, we can see how, as
 expected, the sigmoidal curve shifts to the right as the population evolves
-resistance to the antibiotic. From these titration curves, we can use Bayesian
-inference to extract the value of the antibiotic concentration at which the
-optical density is 50% of the maximum value. This value---known as the
-*antibiotic $IC_{50}$*---is a measure of the antibiotic resistance of the
-evolved strains (see Supplementary Material for more details).
+increasing resistance to the antibiotic over time. From these titration curves,
+we can use Bayesian inference to extract the value of the antibiotic
+concentration at which the optical density is 50% of the maximum value. This
+value---known as the *antibiotic $IC_{50}$*---is a measure of the antibiotic
+resistance of the evolved strains (see Supplementary Material for more details).
 
 @fig-06(C) shows the time trajectories of the $IC_{50}$ in all eight antibiotics
 for all cultures evolved in TET. Over time, all lineages increase their
@@ -35,7 +35,7 @@ Following the same approach as in @fig-04, @fig-06(D) shows the resulting latent
 spaces for PCA, VAE, and RHVAE trained on the $IC_{50}$ values for all eight
 antibiotics. Each color represents a lineage evolved on a different antibiotic.
 These projections show that the latent coordinates for different lineages are
-more disentangled in the non-linear latent spaces than in PCA. Moreover, the
+more disentangled in the nonlinear latent spaces than in PCA. Moreover, the
 rightmost panel shows that in terms of reconstruction error, RHVAE shows the
 lowest error---comparable to that of a 5-dimensional PCA.
 
@@ -53,7 +53,7 @@ in other antibiotics. Error bars represent the 95% credible region as obtained
 via Bayesian inference (see Supplementary Material) (D) Latent space projections
 using PCA, VAE, and RHVAE (first three panels) trained on $IC_{50}$ values, with
 colors representing different evolution conditions, showing improved
-disentanglement of lineages in non-linear latent spaces and superior
+disentanglement of lineages in nonlinear latent spaces and superior
 reconstruction accuracy of RHVAE compared to other dimensionality reduction
 methods. Different colors represent different lineages evolved in different
 antibiotics. The rightmost panel shows the reconstruction error of the three

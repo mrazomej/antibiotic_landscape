@@ -27,7 +27,7 @@ RHVAE-derived latent space, while they are not as pronounced in the other two
 latent spaces. Moreover, when looking at the commonly used PCA-derived latent
 space, we might be misled into believing that the two highlighted points
 (diamond markers) are genotypes with very similar phenotypic effects, when, in
-fact, they are extremely different, as captured by the non-linear latent spaces.
+fact, they are extremely different, as captured by the nonlinear latent spaces.
 This point is further highlighted in @fig-04(B), where we show the comparison of
 all pairwise distances between genotypes in the ground truth phenotypic space
 vs. the different latent spaces. Overall, the RHVAE-derived latent space

@@ -5,9 +5,9 @@ bibliography: references.bib
 csl: ieee.csl
 ---
 
-## Advantages of Non-linear Manifold Learning for Fitness Landscapes {#sec-nonlinear}
+## Advantages of Nonlinear Manifold Learning for Fitness Landscapes {#sec-nonlinear}
 
-In this section, we provide a theoretical justification for why non-linear
+In this section, we provide a theoretical justification for why nonlinear
 dimensionality reduction methods may offer advantages over linear methods when
 modeling fitness landscapes. We build upon the concept of a causal manifold that
 captures the relationship between genotypes and their fitness across multiple
@@ -90,18 +90,18 @@ While mathematically elegant and computationally tractable, this linear
 constraint may limit our ability to capture the true structure of the underlying
 phenotypic space efficiently.
 
-### Mathematical Advantages of Non-linear Manifolds
+### Mathematical Advantages of Nonlinear Manifolds
 
 A critical insight comes from the Whitney Embedding Theorem, which states that
 any smooth $d'$-dimensional manifold can be embedded in a Euclidean space of
 dimension $2d' + 1$. This theorem explains the "unreasonable effectiveness of
 linear maps" while simultaneously highlighting their limitations. If the true
-causal manifold has intrinsic dimension $d'$ but is non-linear, capturing its
+causal manifold has intrinsic dimension $d'$ but is nonlinear, capturing its
 structure with a linear approximation generally requires $d > d'$ dimensions.
 
 To formalize this intuition, we consider the causal manifold as a Riemannian
 manifold with a position-dependent metric tensor
-$\underline{\underline{G}}(\underline{z})$. On a non-linear manifold, this
+$\underline{\underline{G}}(\underline{z})$. On a nonlinear manifold, this
 tensor is not the identity matrix, meaning
 
 $$
@@ -124,7 +124,7 @@ where $\underline{\gamma}$ is a parametric curve with $\underline{\gamma}(0) =
 \underline{z}_1$ and $\underline{\gamma}(1) = \underline{z}_2$. The curve that
 minimizes this distance is called a **geodesic**.
 
-The key insight is that when the true causal manifold is non-linear,
+The key insight is that when the true causal manifold is nonlinear,
 approximating it with a linear method requires additional dimensions to
 compensate for the curvature. This is reflected in the singular value spectrum,
 where
@@ -138,9 +138,9 @@ In this case, dimensions beyond the intrinsic dimensionality $d'$ (with smaller
 singular values) are effectively "compensating" for the curvature of the true
 manifold.
 
-### Non-linear Methods for Manifold Learning
+### Nonlinear Methods for Manifold Learning
 
-To learn non-linear manifolds directly, we employ variational autoencoders
+To learn nonlinear manifolds directly, we employ variational autoencoders
 (VAEs) that can approximate the joint distribution between fitness profiles
 $\underline{f}$ and latent variables $\underline{z}$ representing coordinates on
 the causal manifold
@@ -173,60 +173,60 @@ this work, we add a third network that explicitly learns the metric tensor
 $\underline{\underline{G}}(\underline{z})$, allowing the model to capture the
 geometric structure of the manifold directly.
 
-### Comparative Advantages of Non-linear Methods
+### Comparative Advantages of Nonlinear Methods
 
-Non-linear methods offer several theoretical advantages over linear approaches:
+Nonlinear methods offer several theoretical advantages over linear approaches:
 
-1. **Dimensionality Efficiency**: Non-linear methods can potentially represent
+1. **Dimensionality Efficiency**: Nonlinear methods can potentially represent
 the same information with fewer dimensions. If the true causal manifold has
-intrinsic dimension $d'$ but is non-linear, linear methods may require $d > d'$
+intrinsic dimension $d'$ but is nonlinear, linear methods may require $d > d'$
 dimensions to achieve comparable accuracy.
 
-2. **Geometric Fidelity**: By learning the metric tensor directly, non-linear
+2. **Geometric Fidelity**: By learning the metric tensor directly, nonlinear
 methods can capture the true geometric structure of the fitness landscape,
 including features like multiple peaks, valleys, and saddle points that may be
 difficult to represent in a linear space.
 
 3. **Predictive Power**: If the true relationship between genotype and fitness
-is non-linear, non-linear methods should provide better predictive accuracy,
+is nonlinear, nonlinear methods should provide better predictive accuracy,
 especially for genotypes distant from those in the training set.
 
 4. **Information Compression**: By capturing the curvature of the manifold
-explicitly rather than through additional dimensions, non-linear methods can
+explicitly rather than through additional dimensions, nonlinear methods can
 provide a more compact and interpretable representation of the fitness
 landscape.
 
 ### Empirical Evidence and Caveats
 
-While the theoretical advantages of non-linear methods are clear, empirical
+While the theoretical advantages of nonlinear methods are clear, empirical
 validation is essential. We observe this advantage in practice through several
 metrics:
 
-1. **Reconstruction Error**: Non-linear methods achieve lower reconstruction
+1. **Reconstruction Error**: Nonlinear methods achieve lower reconstruction
 error for the same latent dimension compared to linear methods.
 
 2. **Singular Value Spectrum**: The slow decay of singular values in the data
-matrix suggests inherent non-linearity in the fitness landscape.
+matrix suggests inherent nonlinearity in the fitness landscape.
 
-3. **Generalization Performance**: Non-linear methods show better performance
+3. **Generalization Performance**: Nonlinear methods show better performance
 when predicting fitness for held-out genotypes.
 
-However, it's important to note that non-linear methods come with their own
+However, it's important to note that nonlinear methods come with their own
 challenges:
 
-1. **Overfitting Risk**: Non-linear methods may introduce spurious complexity
+1. **Overfitting Risk**: Nonlinear methods may introduce spurious complexity
 when the true structure is simple.
 
-2. **Interpretation Challenges**: The biological meaning of non-linear latent
+2. **Interpretation Challenges**: The biological meaning of nonlinear latent
 dimensions can be less straightforward than those from linear methods.
 
-3. **Training Complexity**: Non-linear methods typically require more data and
+3. **Training Complexity**: Nonlinear methods typically require more data and
 computational resources for effective training.
 
-4. **Validation Requirements**: Demonstrating that a learned non-linear
+4. **Validation Requirements**: Demonstrating that a learned nonlinear
 structure reflects true biological relationships rather than mathematical
 artifacts requires careful validation.
 
 In this work, we address these challenges through rigorous cross-validation,
 comparison with linear baselines, and direct analysis of the learned metric
-structure to ensure biological relevance of our non-linear representations.
+structure to ensure biological relevance of our nonlinear representations.

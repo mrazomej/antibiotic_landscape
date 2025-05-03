@@ -8,35 +8,26 @@ csl: ieee.csl
 ## Non-Linear Latent Space Coordinates are more Predictive of Out of Sample Data
 
 Training a model on simulated data where the ground truth was known strongly
-suggested that the non-linear latent space coordinates are representative of the
+suggested that the nonlinear latent space coordinates are representative of the
 underlying phenotypic coordinates that give rise to the observed fitness
 profiles. This observation is important because it suggests that these
-non-linear latent space coordinates must capture more information about the
+nonlinear latent space coordinates must capture more information about the
 biological system under study, allowing for more accurate predictions of
 out-of-sample data.
 
-To test this hypothesis, we followed an equivalent approach to that of
-@kinsler2020. In their study, the authors performed a bi-cross validation of the
-predictive power of an increasing number of linear components on out-of-sample
-data. This approach divides the data matrix into four quadrants, $A$, $B$, $C$,
-and $D$, where rows represent genotypes and columns represent antibiotics. The
-objective is to train a linear model on known genotype-antibiotic combinations
-to predict responses in the $A$ quadrant (containing held-out
-genotype-antibiotic combinations) based on the information contained in the
-other three quadrants (see Supplementary Material for a detailed description).
-While this approach works well for linear models, we needed to adapt it for our
-non-linear approaches. The analogous approach for the VAE and RHVAE is
-schematically depicted in @fig-07(A): First, we train a full model on fitness
-profiles from all but one antibiotic (85%-15% splits for training and validation
-data). This generates the latent space coordinates without using any information
-from the antibiotic that was left out. Next, we freeze the encoder
-parameters---equivalent to fixing the latent space coordinates---and train a
-decoder-only model on the missing antibiotic data (50%-50% splits for training
-and validation data). Intuitively, this procedure uses seven out of the eight
-antibiotic $IC_{50}$ values to determine genotype's latent space coordinates
-using the same train-validation split used throughout this work, and then, using
-only 50% of the genotypes for training, it tries to predict the $IC_{50}$ of the
-missing antibiotic.
+To test this hypothesis, we adapted the cross-validation approach developed by
+@kinsler2020. Their original method assesses how linear components predict
+out-of-sample data by dividing the data matrix into quadrants based on genotypes
+and antibiotics. We modified this approach for our nonlinear models as shown in
+@fig-07(A). First, we train our models (VAE and RHVAE) on fitness profiles from
+all but one antibiotic to generate latent space coordinates. Then, we freeze
+these coordinates and train only the decoder part to predict responses to the
+missing antibiotic. This approach allows us to directly compare how well
+different dimensionality reduction methods capture information needed for
+prediction. In essence, we use seven antibiotics to place each genotype in
+latent space, then test how accurately these coordinates predict resistance to
+the eighth antibiotic. We direct interested readers to the Supplementary
+Material for a detailed description of the of both approaches.
 
 @fig-07(B) compares the predictive power of the three models across different
 numbers of linear latent space dimensions in terms of reconstruction error. For
@@ -45,18 +36,18 @@ antibiotic over the validation set is plotted as a function of the number of
 linear dimensions used in the SVD bi-cross validation approach. The horizontal
 dashed lines represent the accuracy of the predicted $IC_{50}$ value for the
 2D-VAE (dark blue) and 2D-RHVAE (dark red) models. For all antibiotics, the 2D
-non-linear latent space coordinates are more predictive of the missing
+nonlinear latent space coordinates are more predictive of the missing
 antibiotic $IC_{50}$ values than any number of possible linear dimensions. This
-result is consistent with the hypothesis that the non-linear latent space
+result is consistent with the hypothesis that the nonlinear latent space
 coordinates capture more information about the phenotypic state of the system
 under study, allowing for more accurate predictions of out-of-sample data.
-Furthermore, increasing the dimensionality of the non-linear latent space from
+Furthermore, increasing the dimensionality of the nonlinear latent space from
 two to three dimensions only marginally improves the predictive power of the
-model, suggesting that the 2D non-linear latent space captures most of the
+model, suggesting that the 2D nonlinear latent space captures most of the
 information about the phenotypic state of the system (see Supplementary Material
 for a detailed discussion).
 
-![**Non-linear latent space models demonstrate superior predictive power for
+![**Nonlinear latent space models demonstrate superior predictive power for
 out-of-sample antibiotic data**. (A) Schematic representation of the
 cross-validation approach used to test predictive power: training a full model
 on all but one antibiotic to generate latent space coordinates (left), then
@@ -65,8 +56,8 @@ antibiotic data (right). (B) Comparison of predictive accuracy across models,
 showing reconstruction error for the missing antibiotic as a function of linear
 dimensions used in SVD bi-cross validation. Horizontal dashed lines represent
 the accuracy of 2D-VAE (dark blue) and 2D-RHVAE (dark red) models. For all
-antibiotics, the 2D non-linear latent space coordinates provide more accurate
-predictions than any number of linear dimensions, demonstrating that non-linear
+antibiotics, the 2D nonlinear latent space coordinates provide more accurate
+predictions than any number of linear dimensions, demonstrating that nonlinear
 latent space representations capture more meaningful biological information
 about the underlying phenotypic state.](./fig/main/fig07_v01_compiled){#fig-07}
 

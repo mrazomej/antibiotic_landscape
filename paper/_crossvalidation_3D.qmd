@@ -7,7 +7,7 @@ csl: ieee.csl
 
 ## Cross-Validation comparison of 2D and 3D latent spaces
 
-In Figure 7 in the main text, we tested the predictive power of 2D non-linear
+In Figure 7 in the main text, we tested the predictive power of 2D nonlinear
 latent space coordinates compared to linear latent space coordinates. There, we
 showed via a custom cross-validation scheme that the 2D latent space
 coordinates were more predictive of out-of-sample data than the linear latent
@@ -27,10 +27,10 @@ than the 2D latent space coordinates. This suggests that the phenotypic changes
 associated with the experimental setup can be captured with two effective
 degrees of freedom.
 
-![**Comparison of 2D and 3D non-linear latent space models for predicting
+![**Comparison of 2D and 3D nonlinear latent space models for predicting
 out-of-sample antibiotic data**. Reconstruction error for each missing
 antibiotic as a function of linear dimensions used in SVD cross-validation.
-Horizontal lines represent the accuracy of non-linear models: 2D-VAE (dark blue,
+Horizontal lines represent the accuracy of nonlinear models: 2D-VAE (dark blue,
 dashed), 2D-RHVAE (dark red, solid), 3D-VAE (dark green, dotted), and 3D-RHVAE
 (dark purple, dash-dotted). The 3D models show marginal improvement over their 2D
 counterparts for most antibiotics, suggesting that two effective degrees of

@@ -7,12 +7,12 @@ csl: ieee.csl
 
 ## Cross-Validation Methodology for Evaluating Latent Space Predictive Power
 
-To rigorously evaluate whether non-linear latent space coordinates capture more
+To rigorously evaluate whether nonlinear latent space coordinates capture more
 information about the underlying phenotypic state than linear projections, we
 implemented a cross-validation framework that tests each model's ability to
 predict responses to unseen antibiotics. This approach extends the bi-cross
 validation methodology described by @kinsler2020, adapting it for both linear
-(PCA/SVD) and non-linear (VAE and RHVAE) dimensionality reduction techniques.
+(PCA/SVD) and nonlinear (VAE and RHVAE) dimensionality reduction techniques.
 
 ### Theoretical Background
 
@@ -102,7 +102,7 @@ dimensionality needed to accurately predict the held-out antibiotic data.
 
 ### Non-Linear Cross-Validation (VAE and RHVAE)
 
-For non-linear models (VAE and RHVAE), we adapt the cross-validation approach to
+For nonlinear models (VAE and RHVAE), we adapt the cross-validation approach to
 account for the different model architecture. The procedure for each held-out
 antibiotic $i$ consists of two phases:
 
@@ -197,23 +197,23 @@ estimate $IC_{50}$ values in @iwasawa2022.
 
 ### Comparative Analysis
 
-To fairly compare the predictive power of linear and non-linear dimensionality
+To fairly compare the predictive power of linear and nonlinear dimensionality
 reduction techniques, we plotted the MSE for SVD at different ranks alongside
 the MSE for 2D VAE and 2D RHVAE models. This visualization, shown in Figure 7 in
-the main text, demonstrates that for all antibiotics, the 2D non-linear latent
+the main text, demonstrates that for all antibiotics, the 2D nonlinear latent
 space coordinates provide more accurate predictions than any number of linear
 dimensions.
 
-The key finding is that the non-linear latent spaces capture the underlying
+The key finding is that the nonlinear latent spaces capture the underlying
 phenotypic structure of the system more effectively than linear projections,
 thus enabling better predictions of out-of-sample data. This validates our
 hypothesis that the phenotypic space of antibiotic resistance has an inherently
-non-linear structure that is better represented by VAE and especially RHVAE
+nonlinear structure that is better represented by VAE and especially RHVAE
 models.
 
 ### Cross-Validation comparison of 2D and 3D latent spaces
 
-In Figure 7 in the main text, we tested the predictive power of 2D non-linear
+In Figure 7 in the main text, we tested the predictive power of 2D nonlinear
 latent space coordinates compared to linear latent space coordinates. There, we
 showed via a custom cross-validation scheme that the 2D latent space
 coordinates were more predictive of out-of-sample data than the linear latent
@@ -233,10 +233,10 @@ than the 2D latent space coordinates. This suggests that the phenotypic changes
 associated with the experimental setup can be captured with two effective
 degrees of freedom.
 
-![**Comparison of 2D and 3D non-linear latent space models for predicting
+![**Comparison of 2D and 3D nonlinear latent space models for predicting
 out-of-sample antibiotic data**. Reconstruction error for each missing
 antibiotic as a function of linear dimensions used in SVD cross-validation.
-Horizontal lines represent the accuracy of non-linear models: 2D-VAE (dark blue,
+Horizontal lines represent the accuracy of nonlinear models: 2D-VAE (dark blue,
 dashed), 2D-RHVAE (dark red, solid), 3D-VAE (dark green, dotted), and 3D-RHVAE
 (dark purple, dash-dotted). The 3D models show marginal improvement over their 2D
 counterparts for most antibiotics, suggesting that two effective degrees of

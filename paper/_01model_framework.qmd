@@ -9,39 +9,41 @@ csl: ieee.csl
 
 With the advent of high-throughput fitness assays, determining the fitness of
 multiple genotypes in a plethora of different environments has become a routine
-procedure in evolutionary biology [@kinsler2020; @maeda2020; @iwasawa2022;
-@ascensao2023]. Nevertheless, we argue that we still lack a simple conceptual
-framework to guide our interpretation of the patterns observed in these
-datasets. To that end, we propose a simple model of phenotype-fitness dynamics
-to serve as a guidepost for our interpretation of the data. 
+procedure in biology [@kinsler2020; @maeda2020; @iwasawa2022; @ascensao2023].
+Nevertheless, we argue that we still lack a simple conceptual framework to guide
+our interpretation of the patterns observed in these datasets. To that end, we
+propose a simple model of phenotype-fitness dynamics to serve as a guidepost for
+our interpretation of the data. 
 
 @fig-01(A) shows a schematic of the genotype-phenotype-fitness map. A genotype
-$g$ is mapped to a phenotype coordinate $\underline{p}$ via a function
-$\phi$---depicted as two potential molecular phenotypes, such as an efflux pump
-rate and the sensitivity of a membrane receptor. The fitness of each genotype is
-determined by the value of these phenotypes and the environment $E$ via a
-function $F$---depicted as the doubling time of a bacterial population. To
-formalize mathematically this conceptual model, we assume that phenotypes can be
-described by a vector of $P$ real-valued variables, $\underline{p} \in
-\mathbb{R}^P$. Thus, phenotypic space is a $P$-dimensional Euclidean space, and
-any genotype $g$ has a unique mapping to a phenotypic coordinate. However, this
-mapping is not necessarily bijective, i.e., multiple genotypes may map to the
-same phenotype. To represent the likelihood of sampling some genotype $g$ that
-maps to some coordinate $\underline{p}$ in phenotype space, we introduce a
-genotype-to-phenotype density map $GP: \mathbb{R}^P \to \mathbb{R}$. This
-function captures the empirical observation that the genotype-to-phenotype map
-is highly redundant, with many genotypes mapping to equivalent phenotypes and
-some phenotypes being extremely rare [@louis2016]. @fig-01(B, left) shows a
-schematic of one possible $GP$ map overlaid on a 2D phenotype space. For
-illustration purposes, we set the $GP$ map to contain four negative Gaussian
-peaks, representing four regions of the phenotype space that are unlikely to be
-sampled (see Supplementary Material for a more detailed discussion). The
-location and size of these peaks are assumed to be fixed by the
-genotype-to-phenotype map, irrespective of the environment. We also introduce a
-fitness function $F: \mathbb{R}^P \to \mathbb{R}$ that maps phenotypes to
-fitness values. However, the topography of the fitness landscape is determined
-by the environment $E$. @fig-01(B, right) shows a schematic of the simplest
-fitness landscape with a single symmetric Gaussian peak.
+$g$ produces a set of measurable traits or phenotypes $\underline{p}$---depicted
+as two potential molecular phenotypes, such as an efflux pump rate and the
+sensitivity of a membrane receptor. The fitness of each genotype is determined
+by the value of these phenotypes and the environment $E$---depicted as the
+doubling time of a bacterial population. To formalize this mathematically, we
+represent genotypes as points in a multi-dimensional phenotypic space, where
+each dimension is a different trait ($\underline{p} \in \mathbb{R}^P$, where $P$
+is the number of traits). Thus, any genotype $g$ has a unique mapping to a
+phenotypic coordinate. However, this mapping is not necessarily bijective, i.e.,
+multiple genotypes may map to the same phenotype. To represent the likelihood of
+sampling some genotype $g$ that maps to some coordinate $\underline{p}$ in
+phenotype space, we introduce a genotype-to-phenotype density map $GP$ that
+takes a given phenotypic coordinate $\underline{p}$ and returns a number
+proportional to the probability of sampling a genotype $g$ that maps to
+$\underline{p}$. This function captures the empirical observation that the
+genotype-to-phenotype map is highly redundant, with many genotypes mapping to
+equivalent phenotypes and some phenotypes being extremely rare [@louis2016].
+@fig-01(B, left) shows a schematic of one possible $GP$ map overlaid on a 2D
+phenotype space. For illustration purposes, we set the $GP$ map to contain four
+negative Gaussian peaks, representing four regions of the phenotype space that
+are unlikely to be sampled (see Supplementary Material for a more detailed
+discussion). The location and size of these peaks are assumed to be fixed by the
+genotype-to-phenotype map, irrespective of the environment. Finally, we
+introduce a fitness function $F$ that maps a phenotypic coordinate
+$\underline{p}$ to a fitness value in a particular environment. We assume the
+topography of the fitness landscape (the number, size, and position of fitness
+peaks) is determined by the environment $E$. @fig-01(B, right) shows a schematic
+of a simple fitness landscape with a single symmetric Gaussian peak.
 
 In recent experimental evolution studies, genotypes are evolved under a fixed
 environment, but the fitness is measured across multiple environments

@@ -24,7 +24,7 @@ the fitness landscapes, the lack of a metric in this space---limiting the
 predictions to the local neighborhood of the training data---makes it difficult
 to define where to trust the predictions of the model. The PCA model, on the
 other hand, is not able to capture the underlying structure of the fitness
-landscapes as there is a non-linear structure that cannot be captured by a
+landscapes as there is a nonlinear structure that cannot be captured by a
 linear transformation.
 
 ![**Geometry-informed latent space enables accurate reconstruction of complex
@@ -35,7 +35,7 @@ show reconstructions using the RHVAE (second row), VAE (third row), and PCA
 (fourth row) models. The RHVAE accurately captures the underlying topography,
 including the number and relative positions of fitness peaks. While the VAE
 captures general landscape shapes, it lacks a geometric metric to define
-prediction reliability regions. PCA fails to represent the non-linear structure
+prediction reliability regions. PCA fails to represent the nonlinear structure
 of the landscapes, demonstrating the limitations of linear dimensionality
 reduction for complex fitness landscape
 reconstruction.](./fig/main/fig05_v03){#fig-05}
