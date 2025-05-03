@@ -11,6 +11,7 @@ project:
     - code/evolutionary_dynamics.qmd
     - code/rhvae_sim.qmd
     - code/iwasawa_bayesian_inference.qmd
+    - code/metropolis_kimura_evolution.qmd
 
 # Title
 title: "Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps"
@@ -101,6 +102,8 @@ website:
             file: code/rhvae_sim.qmd
           - text: "Bayesian Inference of $IC_{50}$ Values"
             file: code/iwasawa_bayesian_inference.qmd
+          - text: "Metropolis-Kimura Evolution"
+            file: code/metropolis_kimura_evolution.qmd
     right:
       - icon: github
         href: https://github.com/mrazomej/antibiotic_landscape
@@ -117,6 +120,7 @@ website:
             - code/evolutionary_dynamics.qmd
             - code/rhvae_sim.qmd
             - code/iwasawa_bayesian_inference.qmd
+            - code/metropolis_kimura_evolution.qmd
 format:
   html:
     theme: cosmo

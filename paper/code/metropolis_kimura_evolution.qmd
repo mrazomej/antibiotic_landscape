@@ -1,0 +1,827 @@
+---
+title: Energy-based evolutionary dynamics
+author:
+  - name: Manuel Razo-Mejia
+    orcid: 0000-0002-9510-0527
+    affiliations:
+      - ref: stanfordbio
+affiliations:
+  - id: stanfordbio
+    number: 1
+    name: Department of Biology, Stanford University
+    city: Stanford
+    state: California
+    country: United States of America
+keywords:
+  - evolutionary dynamics
+  - fitness landscape
+  - genotype-phenotype density
+  - Metropolis-Hastings
+  - Kimura's fixation probability
+format:
+  html:
+    code-fold: false
+    toc: true
+engine: julia
+julia:
+  exeflags:
+    - '--project=../../Antibiotic'
+jupyter: julia-1.11
+---
+
+```{julia}
+#| output: false
+# Import project package
+import Antibiotic
+
+# Import basic math libraries
+import StatsBase
+import LinearAlgebra
+import Random
+import Distributions
+
+# Load CairoMakie for plotting
+using CairoMakie
+import ColorSchemes
+
+# Activate backend
+CairoMakie.activate!()
+
+# Set custom plotting style
+Antibiotic.viz.theme_makie!()
+```
+
+# Evolutionary dynamics on a fitness and genotype-phenotype density landscape
+
+In this notebook we will explore a simple model of evolution on a fitness
+landscape with an explicit genotype-phenotype density function.
+
+The setting is the following:
+
+Let $\underline{x}(t) = (x_1(t), x_2(t), \cdots, x_N(t))$ be an $N$ dimensional
+vector of phenotypes at time $t$. The fitness for a given environment $E$ is
+a scalar function $F_E(\underline{x})$ such that
+$$
+F_E: \mathbb{R}^N \to \mathbb{R},
+$${#eq-fitness-landscape}
+
+i.e, the coordinates in phenotype space map to a fitness value. As a particular
+fitness function we will consider a series of Gaussian fitness peaks, 
+
+$$
+F_E(\underline{x}) = 
+\sum_{p=1}^P A_p 
+\exp\left(
+    -\frac{1}{2}
+    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-fitness-landscape-gaussian}
+
+where $P$ is the number of peaks, $A_p$ is the amplitude of the $p$-th peak,
+$\underline{\hat{x}}^{(p)}$ is the $N$-dimensional vector of optimal phenotypes
+for the $p$-th peak, and $\Sigma_p$ is the $N \times N$ covariance matrix for
+the $p$-th peak. This formulation allows for multiple peaks in the fitness
+landscape, each potentially having different heights, widths, and covariance
+structures between dimensions. The covariance matrix $\Sigma_p$ captures
+potential interactions between different phenotypic dimensions, allowing for
+more complex and realistic fitness landscapes.
+
+In the same vein, we define a genotype-phenotype density map $GP(\underline{x})$
+as a scalar function that maps a phenotype to a number related to the
+probability of sampling a given phenotype, i.e.,
+
+$$
+GP: \mathbb{R}^N \to \mathbb{R},
+$${#eq-genotype-phenotype-density}
+
+where $GP(\underline{x})$ is related to the probability of a genotype mapping to
+a phenotype $\underline{x}$. As a particular genotype-phenotype density function
+we will consider a set of negative Gaussian peaks that will serve as "mutational
+barriers" that limit the range of phenotypes that can be reached. The deeper the
+peak, the more difficult it is to reach the phenotype associated with that peak.
+This idea is captured by the following genotype-phenotype density function:
+
+$$
+GP(\underline{x}) = 
+\sum_{p=1}^P -B_p 
+\exp\left(
+    -\frac{1}{2}(\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-genotype-phenotype-density-gaussian}
+
+where $B_p$ is the depth of the $p$-th peak, and $\underline{\hat{x}}^{(p)}$ is
+the $N$-dimensional vector of optimal phenotypes for the $p$-th peak.
+
+Both, the fitness landscape and the genotype-phenotype density function are
+built on Gaussian functions. Let's therefore define a `struct` to hold the
+parameters of a single peak.
+
+```{julia}
+#| output: false
+@doc raw"""
+    GaussianPeak
+
+A struct to hold the parameters of a single Gaussian peak.
+
+# Fields
+- `amplitude::AbstractFloat`: The amplitude of the peak.
+- `mean::AbstractVector`: The mean of the peak.
+- `covariance::AbstractMatrix`: The covariance matrix of the peak.
+"""
+struct GaussianPeak
+    amplitude::AbstractFloat
+    mean::AbstractVector
+    covariance::AbstractMatrix
+end
+```
+
+Next, let's define a function to evaluate the fitness landscape at a given
+phenotype.
+
+```{julia}
+#| output: false
+@doc raw"""
+    fitness(peak::GaussianPeak, x::AbstractVecOrMat; min_value::AbstractFloat=0.0)
+    fitness(peaks::Vector{GaussianPeak}, x::AbstractVecOrMat; min_value::AbstractFloat=0.0)
+
+Calculate the fitness value for a given phenotype `x` based on Gaussian peak(s).
+
+# Arguments
+- `peak::GaussianPeak`: A single Gaussian peak.
+- `peaks::Vector{GaussianPeak}`: A vector of Gaussian peaks.
+- `x::AbstractVecOrMat`: The phenotype(s) for which to calculate the fitness.
+  Can be a vector for a single phenotype or a matrix for multiple phenotypes,
+  where each column corresponds to a phenotype.
+- `min_value::AbstractFloat=1.0`: The minimum fitness value to be added to the
+  Gaussian contribution.
+
+# Returns
+The calculated fitness value(s).
+
+# Description
+The first method computes the fitness for a single Gaussian peak, while the
+second method computes the sum of fitness values for multiple Gaussian peaks. In
+both cases, the `min_value` is added to the Gaussian contribution to ensure a
+minimum fitness level.
+"""
+function fitness(
+    peak::GaussianPeak, x::AbstractVecOrMat; min_value::AbstractFloat=1.0
+)
+    # Calculate the Gaussian peak
+    gaussian = peak.amplitude * exp(
+        -0.5 *
+        (x - peak.mean)' *
+        LinearAlgebra.inv(peak.covariance) *
+        (x - peak.mean)
+    )
+    # Return the fitness by shifting the Gaussian peak by the minimum value
+    return gaussian + min_value
+end
+
+function fitness(
+    peaks::Vector{GaussianPeak},
+    x::AbstractVecOrMat;
+    min_value::AbstractFloat=1.0
+)
+    # Sum the Gaussian contributions from all peaks
+    total_gaussian = sum(
+        peak.amplitude *
+        exp(
+            -0.5 *
+            (x - peak.mean)' *
+            LinearAlgebra.inv(peak.covariance) *
+            (x - peak.mean)
+        )
+        for peak in peaks
+    )
+    # Return the fitness by shifting the Gaussian peak by the minimum value
+    return total_gaussian + min_value
+end
+```
+
+Let's test the fitness function with a single Gaussian peak.
+
+```{julia}
+# Define peak parameters
+amplitude = 1.0
+mean = [0.0, 0.0]
+covariance = [0.5 0.0; 0.0 0.5]
+
+# Create peak
+fit_peak = GaussianPeak(amplitude, mean, covariance)
+
+# Define range of phenotypes to evaluate
+x = range(-2, 2, length=100)
+y = range(-2, 2, length=100)
+
+# Create meshgrid
+F = fitness.(Ref(fit_peak), [[x, y] for x in x, y in y])
+
+# Initialize figure
+fig = Figure(size=(700, 300))
+
+# Add axis for 3D plot
+ax3 = Axis3(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    zlabel="fitness",
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+    zticklabelsvisible=false,
+)
+
+# Add axis for contour plot
+ax2 = Axis(
+    fig[1, 2],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+
+# Plot fitness landscape
+surface!(ax3, x, y, F, color=F, colormap=:algae)
+
+# Plot a heatmap of the fitness landscape
+hm = heatmap!(ax2, x, y, F, colormap=:algae)
+
+# Add a colorbar
+Colorbar(
+    fig[1, 3],
+    hm,
+    label="fitness",
+    labelsize=13,
+    height=Relative(1),
+    ticksvisible=false,
+    ticklabelsvisible=false
+)
+# Plot contour plot
+contour!(ax2, x, y, F, color=:white)
+
+fig
+```
+
+Next, let's define a function to evaluate the genotype-phenotype density
+function at a given phenotype.
+
+```{julia}
+#| output: false
+@doc raw"""
+    genotype_phenotype_density(
+        peak::Union{GaussianPeak, Vector{GaussianPeak}}, 
+        x::AbstractVecOrMat;
+        max_value::Float64 = 1.0
+    )
+
+Calculate the genotype-phenotype density value for a given phenotype `x` based
+on Gaussian peak(s).
+
+# Arguments
+- `peak::Union{GaussianPeak, Vector{GaussianPeak}}`: A single Gaussian peak or a
+  vector of Gaussian peaks.
+- `x::AbstractVecOrMat`: The phenotype(s) for which to calculate the genotype-
+  phenotype density. Can be a vector for a single phenotype or a matrix for
+  multiple phenotypes, where each column corresponds to a phenotype.
+- `max_value::Float64`: Optional. The maximum value of the genotype-phenotype
+  density. Default is 1.0.
+  1.0.
+
+# Returns
+The calculated genotype-phenotype density value(s).
+"""
+function genotype_phenotype_density(
+    peak::GaussianPeak, x::AbstractVecOrMat; max_value::AbstractFloat=1.0
+)
+    # Calculate the Gaussian peak
+    gaussian = peak.amplitude * exp(
+        -0.5 *
+        (x - peak.mean)' *
+        LinearAlgebra.inv(peak.covariance) *
+        (x - peak.mean)
+    )
+    # Return the genotype-phenotype density by inverting the Gaussian peak
+    # shifted by the maximum value
+    return -(gaussian - max_value)
+end
+
+function genotype_phenotype_density(
+    peaks::Vector{GaussianPeak},
+    x::AbstractVecOrMat;
+    max_value::AbstractFloat=1.0
+)
+    # Sum the Gaussian contributions from all peaks
+    total_gaussian = sum(
+        peak.amplitude *
+        exp(
+            -0.5 *
+            (x - peak.mean)' *
+            LinearAlgebra.inv(peak.covariance) *
+            (x - peak.mean)
+        )
+        for peak in peaks
+    )
+    # Return the genotype-phenotype density by inverting the Gaussian peak
+    # shifted by the maximum value
+    return -(total_gaussian - max_value)
+end
+```
+
+Let's test the genotype-phenotype density function with four Gaussian peaks in
+the corners of a square in phenotype space.
+
+```{julia}
+# Define peak parameters
+amplitude = 0.5
+means = [
+    [-1.5, -1.5],
+    [1.5, -1.5],
+    [1.5, 1.5],
+    [-1.5, 1.5],
+]
+covariance = [0.45 0.0; 0.0 0.45]
+
+# Create peak
+mut_peaks = GaussianPeak.(Ref(amplitude), means, Ref(covariance))
+
+# Define range of phenotypes to evaluate
+x = range(-3, 3, length=100)
+y = range(-3, 3, length=100)
+
+# Create meshgrid
+M = genotype_phenotype_density.(Ref(mut_peaks), [[x, y] for x in x, y in y])
+
+# Initialize figure
+fig = Figure(size=(700, 300))
+
+# Add axis for 3D plot
+ax3 = Axis3(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    zlabel="∝ probability of \nphenotype",
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+    zticklabelsvisible=false,
+)
+
+# Add axis for contour plot
+ax2 = Axis(
+    fig[1, 2],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+
+# Plot genotype-phenotype density
+surface!(ax3, x, y, M, color=M, colormap=Reverse(ColorSchemes.Purples_9))
+
+# Plot a heatmap of the genotype-phenotype density
+hm = heatmap!(ax2, x, y, M, colormap=Reverse(ColorSchemes.Purples_9))
+
+# Add a colorbar
+Colorbar(
+    fig[1, 3],
+    hm,
+    label="∝ probability of phenotype",
+    labelsize=13,
+    height=Relative(1),
+    ticksvisible=false,
+    ticklabelsvisible=false
+)
+
+# Plot contour plot
+contour!(ax2, x, y, M, color=:white)
+
+fig
+```
+
+## Evolutionary dynamics
+
+### Metropolis-Kimura Algorithm in Evolutionary Dynamics
+
+We now introduce a biologically motivated algorithm that combines elements of
+the Metropolis-Hastings algorithm with Motoo Kimura's population genetics
+theory. This approach implements a two-step process that separately models:
+
+1. The probability of mutation occurring (mutation accessibility) as governed by
+   the genotype-phenotype density.
+2. The probability of fixation within a population (selection) determined by the
+   fitness effect of such mutation and the effective population size.
+
+### Biological Motivation
+
+In natural populations, evolution proceeds through two distinct processes:
+
+1. **Mutation**: New variants arise through random genetic changes. The
+   probability of specific mutations depends on molecular mechanisms and
+   constraints of the genotype-phenotype map.
+
+2. **Fixation**: Once a mutation occurs, it must spread through the population
+   to become fixed. The probability of fixation depends on the selection
+   coefficient (fitness advantage) and the effective population size.
+
+### Mathematical Framework
+
+#### Mutation Probability
+
+The probability of a mutation from phenotype $\underline{x}$ to $\underline{x}'$
+is modeled using a Metropolis-like criterion based on the genotype-phenotype
+density:
+
+$$
+\pi_{\text{mut}}(\underline{x} \to \underline{x}') = 
+\min\left(1, \frac{GP(\underline{x}')}{GP(\underline{x})}\right)^{\beta}
+$${#eq-mutation-probability}
+
+Here, $GP(\underline{x})$ represents the genotype-phenotype density at phenotype
+$\underline{x}$, and $\beta$ is a parameter controlling the strength of
+mutational constraints. The higher $\beta$ is, the less likely a mutation going
+downhill in genotype-phenotype density is to be accepted.
+
+#### Kimura's Fixation Probability
+
+Once a mutation occurs, its probability of fixation in a population of effective
+size $N$ is given by Kimura's formula
+
+$$
+\pi_{\text{fix}}(\underline{x} \to \underline{x}') = 
+\frac{1 - e^{-2s}}{1 - e^{-2Ns}}
+$${#eq-kimura-fixation-probability}
+
+where $s$ is the selection coefficient. We compute this selection coefficient
+as the difference in fitness between the new and old phenotype divided by the
+fitness of the old phenotype, i.e.,
+
+$$
+s = \frac{F_E(\underline{x}') - F_E(\underline{x})}{F_E(\underline{x})}
+$${#eq-selection-coefficient}
+
+This equation captures a fundamental result from population genetics: beneficial
+mutations ($s > 0$) have a higher probability of fixation, with the probability
+approaching $2s$ for small positive selection coefficients and approaching 1 for
+large positive selection coefficients. Deleterious mutations ($s < 0$) have an
+exponentially decreasing probability of fixation as population size increases.
+
+#### Overall Acceptance Probability of Mutation
+
+The overall acceptance probability---defined as the probability of a proposed
+step $x \rightarrow x'$---is the product of the mutation probability and the
+fixation probability
+
+$$
+\pi_{\text{accept}}(\underline{x} \to \underline{x}') = 
+\pi_{\text{mut}}(\underline{x} \to \underline{x}') \cdot 
+\pi_{\text{fix}}(\underline{x} \to \underline{x}')
+$${#eq-overall-acceptance-probability}
+
+This two-step process better reflects the biological reality of evolution, where
+both mutational accessibility and selection contribute to evolutionary
+trajectories.
+
+### Numerical Implementation
+
+Let's now implement the Metropolis-Kimura algorithm in code.
+
+```{julia}
+#| output: false
+@doc raw"""
+    evo_metropolis_kimura(x0, fitness_peaks, gen_peaks, N, β, µ, n_steps)
+
+Perform evolutionary algorithm to simulate phenotypic evolution using a
+Metropolis-Hastings-like mutation probability and Kimura's fixation probability.
+
+# Arguments
+- `x0::AbstractVector`: Initial phenotype vector.
+- `fitness_peaks::Union{GaussianPeak, Vector{GaussianPeak}}`: Fitness landscape
+  defined by one or more Gaussian peaks.
+- `gen_peaks::Union{GaussianPeak, Vector{GaussianPeak}}`: Genotype-phenotype
+  density landscape defined by one or more Gaussian peaks.
+- `N::Real`: Effective population size.
+- `β::Real`: Parameter controlling the strength of mutational constraints.
+- `µ::Real`: Mutation step size standard deviation.
+- `n_steps::Int`: Number of steps to simulate.
+
+# Returns
+- `Matrix{Float64}`: Matrix of phenotypes, where each column represents a step
+  in the simulation.
+
+# Description
+This function implements a two-step evolutionary algorithm to simulate
+phenotypic evolution in a landscape defined by fitness and genotype-phenotype
+density. It uses the following steps:
+
+1. Initialize the phenotype trajectory with the given starting point.
+2. For each step: 
+   a. Propose a new phenotype by adding Gaussian noise. 
+   b. Calculate the fitness and genotype-phenotype density values for the new 
+      phenotype.
+   c. Compute the mutation probability P_mut = min(1, (GP(x_new)/GP(x))^β)
+   d. Compute the selection coefficient s = (F_new - F)/F
+   e. Calculate fixation probability using Kimura's equation:
+      P_fix = (1 - exp(-2s))/(1 - exp(-2Ns))
+   f. Accept or reject based on P_accept = P_mut * P_fix
+3. Return the complete phenotype trajectory.
+"""
+function evo_metropolis_kimura(
+    x0::AbstractVector,
+    fitness_peaks::Union{GaussianPeak,Vector{GaussianPeak}},
+    gen_peaks::Union{GaussianPeak,Vector{GaussianPeak}},
+    N::Real,
+    β::Real,
+    µ::Real,
+    n_steps::Int,
+)
+    # Initialize array to hold phenotypes
+    x = Matrix{Float64}(undef, length(x0), n_steps + 1)
+    # Set initial phenotype
+    x[:, 1] = x0
+
+    # Compute fitness and genotype-phenotype density at initial phenotype
+    fitness_val = fitness(fitness_peaks, x0)
+    gen_val = genotype_phenotype_density(gen_peaks, x0)
+
+    # Loop over steps
+    for t in 1:n_steps
+        # Propose new phenotype
+        x_new = x[:, t] + µ * randn(length(x0))
+
+        # Calculate fitness and genotype-phenotype density
+        fitness_val_new = fitness(fitness_peaks, x_new)
+        gen_val_new = genotype_phenotype_density(gen_peaks, x_new)
+
+        # Compute selection coefficient
+        s = (fitness_val_new - fitness_val) /
+            (fitness_val + eps(eltype(fitness_val)))
+
+        # Compute mutation probability
+        P_mut = min(1, (gen_val_new / gen_val)^β)
+
+        # Compute fixation probability using Kimura's equation
+        # Use approximation when s is very small for numerical stability
+        if abs(s) < 1e-10
+            P_fix = 1 / N
+        elseif abs(s) < 0.1
+            # For small s, use approximation
+            P_fix = (1 - exp(-2 * s)) / (1 - exp(-2 * N * s))
+            # Check for potential numerical issues
+            if !isfinite(P_fix) || P_fix < 0
+                P_fix = s > 0 ? 2 * s : 1 / N
+            end
+        else
+            # Otherwise use full Kimura equation
+            P_fix = (1 - exp(-2 * s)) / (1 - exp(-2 * N * s))
+        end
+
+        # Compute acceptance probability
+        P_accept = P_mut * P_fix
+
+        # Accept or reject proposal
+        if rand() < P_accept
+            # Accept proposal
+            x[:, t+1] = x_new
+            # Update fitness and genotype-phenotype density
+            fitness_val = fitness_val_new
+            gen_val = gen_val_new
+        else
+            # Reject proposal
+            x[:, t+1] = x[:, t]
+        end
+    end # for
+    return x
+end # function
+```
+
+Let's test this function with the previously defined fitness and
+genotype-phenotype density functions.
+
+```{julia}
+#| output: false
+Random.seed!(42)
+
+# Define peak parameters
+amplitude = 5.0
+mean = [0.0, 0.0]
+covariance = [3.0 0.0; 0.0 3.0]
+# Create peak
+fit_peak = GaussianPeak(amplitude, mean, covariance)
+# Define peak parameters
+amplitude = 1.0
+means = [
+    [-1.5, -1.5],
+    [1.5, -1.5],
+    [1.5, 1.5],
+    [-1.5, 1.5],
+]
+covariance = [0.45 0.0; 0.0 0.45]
+
+# Create peak
+mut_peaks = GaussianPeak.(Ref(amplitude), means, Ref(covariance))
+
+# Set initial phenotype
+x0 = [-2.5, -2.5]
+
+# Set parameters
+N = 10 # Effective population size 
+β = 10.0    # Mutational constraint parameter
+µ = 0.1    # Mutation step size
+n_steps = 3000
+
+# Run Metropolis-Kimura algorithm
+x_traj = evo_metropolis_kimura(x0, fit_peak, mut_peaks, N, β, µ, n_steps)
+```
+
+Let's plot the trajectory of the phenotypes in phenotype space.
+
+```{julia}
+Random.seed!(42)
+
+# Define range of phenotypes to evaluate
+x = range(-4, 4, length=100)
+y = range(-4, 4, length=100)
+
+# Create meshgrid
+F = fitness.(Ref(fit_peak), [[x, y] for x in x, y in y])
+M = genotype_phenotype_density.(Ref(mut_peaks), [[x, y] for x in x, y in y])
+
+# Initialize figure
+fig = Figure(size=(600, 300))
+
+# Add axis for trajectory in fitness landscape
+ax1 = Axis(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    title="Fitness landscape",
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+# Add axis for trajectory in genotype-phenotype density
+ax2 = Axis(
+    fig[1, 2],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    title="Genotype-phenotype\nDensity",
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+
+# Plot a heatmap of the fitness landscape
+heatmap!(ax1, x, y, F, colormap=:algae)
+# Plot heatmap of genotype-phenotype density
+heatmap!(ax2, x, y, M, colormap=Reverse(ColorSchemes.Purples_9))
+
+# Plot contour plot
+contour!(ax1, x, y, F, color=:white)
+contour!(ax2, x, y, M, color=:white)
+
+# Plot trajectory
+scatterlines!.(
+    [ax1, ax2],
+    Ref(x_traj[1, :]),
+    Ref(x_traj[2, :]),
+    color=ColorSchemes.seaborn_colorblind[4],
+    markersize=3
+)
+
+fig
+```
+
+We can see that the trajectory climbs the fitness peak, but it does so by
+avoiding regions of low genotype-phenotype density.
+
+Let's plot the fitness and the genotype-phenotype density for the phenotypes in the trajectory over time.
+
+```{julia}
+# Initialize arrays to hold fitness and genotype-phenotype density
+F_traj = Vector{Float64}(undef, n_steps + 1)
+M_traj = Vector{Float64}(undef, n_steps + 1)
+
+# Loop over steps
+for (i, x) in enumerate(eachcol(x_traj))
+    F_traj[i] = fitness(fit_peak, x)
+    M_traj[i] = genotype_phenotype_density(mut_peaks, x)
+end
+
+# Initialize figure
+fig = Figure(size=(600, 300))
+
+# Add axis for fitness
+ax1 = Axis(
+    fig[1, 1],
+    xlabel="step",
+    ylabel="fitness",
+    yticklabelsvisible=false,
+)
+
+# Add axis for genotype-phenotype density
+ax2 = Axis(
+    fig[1, 2],
+    xlabel="step",
+    ylabel="genotype-phenotype density",
+    yticklabelsvisible=false,
+)
+
+# Plot fitness
+lines!(ax1, F_traj, color=ColorSchemes.seaborn_colorblind[1])
+
+# Plot genotype-phenotype density
+lines!(ax2, M_traj, color=ColorSchemes.seaborn_colorblind[2])
+
+fig
+```
+
+Let's now repeat the simulation multiple times and plot all different 
+trajectories.
+
+```{julia}
+Random.seed!(42)
+
+# Define number of simulations
+n_sim = 5
+
+# Run simulations
+x_traj_list = [
+    evo_metropolis_kimura(x0, fit_peak, mut_peaks, N, β, µ, n_steps)
+    for _ in 1:n_sim
+]
+
+# Initialize figure
+fig = Figure(size=(600, 300))
+
+# Add axis for fitness landscape
+ax1 = Axis(
+    fig[1, 1],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    title="Fitness",
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+# Add axis for genotype-phenotype density
+ax2 = Axis(
+    fig[1, 2],
+    xlabel="phenotype 1",
+    ylabel="phenotype 2",
+    aspect=AxisAspect(1),
+    title="Genotype-phenotype\nDensity",
+    yticklabelsvisible=false,
+    xticklabelsvisible=false,
+)
+
+# Plot fitness landscape
+heatmap!(ax1, x, y, F, colormap=:algae)
+# Plot heatmap of genotype-phenotype density
+heatmap!(ax2, x, y, M, colormap=Reverse(ColorSchemes.Purples_9))
+
+# Plot contour plot
+contour!(ax1, x, y, F, color=:white)
+contour!(ax2, x, y, M, color=:white)
+
+# Loop over simulations
+for (i, x_traj) in enumerate(x_traj_list)
+    # Plot trajectory
+    scatterlines!.(
+        [ax1, ax2],
+        Ref(x_traj[1, :]),
+        Ref(x_traj[2, :]),
+        color=ColorSchemes.seaborn_colorblind[i],
+        markersize=3
+    )
+end
+
+# Set limits
+xlims!(ax1, -4, 4)
+ylims!(ax1, -4, 4)
+xlims!(ax2, -4, 4)
+ylims!(ax2, -4, 4)
+
+fig
+```
+
+## Conclusion
+
+In this notebook, we developed a biologically-motivated model for evolutionary
+dynamics that combines elements of the Metropolis-Hastings algorithm with
+classic population genetics theory. This model implements a two-step process
+that separately accounts for:
+
+1. The probability of mutation occurring (based on genotype-phenotype density)
+2. The probability of fixation within a population (based on Kimura's fixation probability)
+
+By separating these processes, our *Metropolis-Kimura* algorithm provides a
+plausible model of evolutionary dynamics, where mutational constraints and
+selection pressures interact to shape evolutionary trajectories. This approach
+allows us to explore how both the accessibility of phenotypic space and the
+fitness landscape influence the paths taken by evolving populations.
+
