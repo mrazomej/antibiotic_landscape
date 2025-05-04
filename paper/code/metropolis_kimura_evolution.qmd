@@ -17,7 +17,7 @@ keywords:
   - fitness landscape
   - genotype-phenotype density
   - Metropolis-Hastings
-  - Population genetics
+  - population genetics
 format:
   html:
     code-fold: false
@@ -26,7 +26,6 @@ engine: julia
 julia:
   exeflags:
     - '--project=../../Antibiotic'
-jupyter: julia-1.11
 ---
 
 ```{julia}
