@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Manuel Razo-Mejia">
+<meta name="author" content="Madhav Mani">
+<meta name="author" content="Dmitri Petrov">
+<meta name="keywords" content="variational autoencoders, evolutionary dynamics, antibiotic resistance">
+
+<title>Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3f13cc09417cf69baaf74afa0e2e3cf6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./paper.html" aria-current="page"> 
+<span class="menu-text">Main Text</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./supplementary.html"> 
+<span class="menu-text">Supplementary Material</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-code" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Code</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-code">    
+        <li>
+    <a class="dropdown-item" href="./code.html">
+ <span class="dropdown-text">Overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./code/metropolis_hastings_evolution.html">
+ <span class="dropdown-text">Metropolis-Hastings Evolution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./code/evolutionary_dynamics.html">
+ <span class="dropdown-text">Evolutionary Dynamics Simulation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./code/rhvae_sim.html">
+ <span class="dropdown-text">RHVAE training on Simulated Data</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./code/iwasawa_bayesian_inference.html">
+ <span class="dropdown-text">Bayesian Inference of <span class="math inline">\(IC_{50}\)</span> Values</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./code/metropolis_kimura_evolution.html">
+ <span class="dropdown-text">Metropolis-Kimura Evolution</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mrazomej/antibiotic_landscape"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mrazomej"> <i class="bi bi-twitter-x" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#simple-phenotype-fitness-model" id="toc-simple-phenotype-fitness-model" class="nav-link" data-scroll-target="#simple-phenotype-fitness-model">Simple Phenotype-Fitness Model</a></li>
+  <li><a href="#evolutionary-dynamics-on-phenotype-space" id="toc-evolutionary-dynamics-on-phenotype-space" class="nav-link" data-scroll-target="#evolutionary-dynamics-on-phenotype-space">Evolutionary Dynamics on Phenotype Space</a></li>
+  <li><a href="#data-driven-dimensionality-reduction-via-geometric-variational-autoencoders" id="toc-data-driven-dimensionality-reduction-via-geometric-variational-autoencoders" class="nav-link" data-scroll-target="#data-driven-dimensionality-reduction-via-geometric-variational-autoencoders">Data-Driven Dimensionality Reduction via Geometric Variational Autoencoders</a></li>
+  <li><a href="#geometry-informed-latent-space-captures-the-underlying-phenotypic-space" id="toc-geometry-informed-latent-space-captures-the-underlying-phenotypic-space" class="nav-link" data-scroll-target="#geometry-informed-latent-space-captures-the-underlying-phenotypic-space">Geometry-Informed Latent Space Captures the Underlying Phenotypic Space</a></li>
+  <li><a href="#sec-fitness-landscapes" id="toc-sec-fitness-landscapes" class="nav-link" data-scroll-target="#sec-fitness-landscapes">Geometry-Informed Latent Space Reconstruction of Fitness Landscapes</a></li>
+  <li><a href="#evolutionary-dynamics-of-antibiotic-resistance-in-latent-space" id="toc-evolutionary-dynamics-of-antibiotic-resistance-in-latent-space" class="nav-link" data-scroll-target="#evolutionary-dynamics-of-antibiotic-resistance-in-latent-space">Evolutionary Dynamics of Antibiotic Resistance in Latent Space</a></li>
+  <li><a href="#non-linear-latent-space-coordinates-are-more-predictive-of-out-of-sample-data" id="toc-non-linear-latent-space-coordinates-are-more-predictive-of-out-of-sample-data" class="nav-link" data-scroll-target="#non-linear-latent-space-coordinates-are-more-predictive-of-out-of-sample-data">Non-Linear Latent Space Coordinates are more Predictive of Out of Sample Data</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
+  <li><a href="#data-and-code-availability" id="toc-data-and-code-availability" class="nav-link" data-scroll-target="#data-and-code-availability">Data and code availability</a></li>
+  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements">Acknowledgements</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="paper.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliations</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Manuel Razo-Mejia <a href="https://orcid.org/0000-0002-9510-0527" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Department of Biology, Stanford University
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Madhav Mani <a href="mailto:madhav.mani@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-5812-4167" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            NSF-Simons Center for Quantitative Biology, Northwestern University
+          </p>
+        <p class="affiliation">
+            Department of Engineering Sciences and Applied Mathematics, Northwestern University
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Dmitri Petrov <a href="mailto:dpetrov@stanford.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-3664-9130" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Department of Biology, Stanford University
+          </p>
+        <p class="affiliation">
+            Stanford Cancer Institute, Stanford University School of Medicine
+          </p>
+        <p class="affiliation">
+            Chan Zuckerberg Biohub
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>variational autoencoders, evolutionary dynamics, antibiotic resistance</p>
+  </div>
+</div>
+
+</header>
+
+
+<div class="abstract">
+<div class="block-title">
+Abstract
+</div>
+<p>Elucidating the complex relationships between genotypes, phenotypes, and fitness remains one of the fundamental challenges in evolutionary biology. Part of the difficulty arises from the enormous number of possible genotypes and the lack of understanding of the underlying phenotypic differences driving adaptation. Here, we present a computational method that takes advantage of modern high-throughput fitness measurements to learn a map from high-dimensional fitness profiles to a low-dimensional latent space in a geometry-informed manner. We demonstrate that our approach using a Riemannian Hamiltonian Variational Autoencoder (RHVAE) outperforms traditional linear dimensionality reduction techniques by capturing the nonlinear structure of the phenotype-fitness map. When applied to simulated adaptive dynamics, we show that the learned latent space retains information about the underlying adaptive phenotypic space and accurately reconstructs complex fitness landscapes. We then apply this method to a dataset of high-throughput fitness measurements of <em>E. coli</em> under different antibiotic pressures and demonstrate superior predictive power for out-of-sample data compared to linear approaches. Our work provides a data-driven implementation of Fisher’s geometric model of adaptation, transforming it from a theoretical framework into an empirically grounded approach for understanding evolutionary dynamics using modern deep learning methods.</p>
+</div>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Understanding how genotypes encode phenotypes that allow organisms to survive and reproduce in different environments is one of the central challenges for modern evolutionary biology <span class="citation" data-cites="Lassig2017 manrubia2021"><a href="#ref-Lassig2017" role="doc-biblioref">[1]</a>, <a href="#ref-manrubia2021" role="doc-biblioref">[2]</a></span>. Although the field has seen a surge in predictive modeling being deployed in real-world applications ranging from viral dynamics <span class="citation" data-cites="uksza2014"><a href="#ref-uksza2014" role="doc-biblioref">[3]</a></span> to cancer immunotherapy <span class="citation" data-cites="luksza2017"><a href="#ref-luksza2017" role="doc-biblioref">[4]</a></span>, it is still unclear to what extent evolutionary trajectories under different environmental pressures can be predicted. Multiple challenges make this question difficult to answer. Among these, the vast number of genetic changes available to a population makes it impossible to exhaustively sample and measure the phenotypic consequences of each mutation <span class="citation" data-cites="louis2016"><a href="#ref-louis2016" role="doc-biblioref">[5]</a></span>. Additionally, for most but a few simple model systems, it is unknown what the phenotypic changes driving adaptation are <span class="citation" data-cites="shoval2012"><a href="#ref-shoval2012" role="doc-biblioref">[6]</a></span>.</p>
+<p>Nevertheless, advances in modern high-throughput technologies have made it possible to measure the fitness of multiple genotypes, opening up the possibility of extracting valuable information about the genotype-phenotype-fitness map from these datasets <span class="citation" data-cites="kinsler2020 maeda2020 iwasawa2022 ascensao2023"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-maeda2020" role="doc-biblioref">[8]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ascensao2023" role="doc-biblioref">[10]</a></span>. Moreover, an extensive body of empirical studies and theoretical work has suggested that the dynamics of adaptation are highly constrained, making them potentially predictable <span class="citation" data-cites="weinreich2006 wagner2008 louis2016 furusawa2018"><a href="#ref-louis2016" role="doc-biblioref">[5]</a>, <a href="#ref-weinreich2006" role="doc-biblioref">[11]</a>, <a href="#ref-wagner2008" role="doc-biblioref">[12]</a>, <a href="#ref-furusawa2018" role="doc-biblioref">[13]</a></span>.</p>
+<p>Inspired by this body of work and the impressive results that the deep-learning revolution are starting to yield in the life sciences <span class="citation" data-cites="martin2024"><a href="#ref-martin2024" role="doc-biblioref">[14]</a></span>, we set out to develop a data-driven framework to uncover the underlying structure of the phenotype-fitness map from high-throughput fitness data. We consider three main ingredients for a computational method to tackle this challenge:</p>
+<ol type="1">
+<li><p>The method should be able to take advantage of the data-rich landscape of modern biology, where high-throughput fitness measurements are increasingly common <span class="citation" data-cites="kinsler2020 maeda2020 iwasawa2022 ascensao2023"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-maeda2020" role="doc-biblioref">[8]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ascensao2023" role="doc-biblioref">[10]</a></span>.</p></li>
+<li><p>It should be able to uncover the potentially hidden simplicity in the structure of the high-dimensional datasets generated by these experiments by projecting them into a lower-dimensional space in a principled way visualizable.</p></li>
+<li><p>The generated low-dimensional map should be accompanied by the corresponding geometric information on how the high-dimensional space is folded into the map, making the distances on the map meaningful in the high-dimensional space.</p></li>
+</ol>
+<p>Here, we propose the use of a geometry-informed variational autoencoder—a neural network architecture that embeds high-dimensional data into a low-dimensional space while simultaneously learning the geometric transformations that map the learned low-dimensional space back into the high-dimensional space via a metric tensor <span class="citation" data-cites="chadebec2020"><a href="#ref-chadebec2020" role="doc-biblioref">[15]</a></span>. To validate the applicability of this method to high-dimensional fitness data, we develop a simple model of adaptive dynamics that captures the main qualitative features of the data generated by high-throughput fitness assays. In this model, multiple lineages perform a biased random walk on a low-dimensional phenotypic space towards regions of higher fitness, defined by the environment-specific topography of the fitness landscape. Changing the environment, therefore, amounts to changing the landscape topography while keeping the phenotypic coordinates of the lineages constant. We show that the geometry-informed variational autoencoder (hereafter <em>RHVAE</em> for Riemannian Hamiltonian Variational Autoencoder <span class="citation" data-cites="chadebec2020"><a href="#ref-chadebec2020" role="doc-biblioref">[15]</a></span>) is able to learn a low-dimensional embedding that retains information about the relative positions of the simulated lineages in the original phenotypic space.</p>
+<p>We then apply this method to a dataset of high-throughput fitness measurements of <em>E. coli</em> under different antibiotic pressures <span class="citation" data-cites="iwasawa2022"><a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a></span>. Using <span class="math inline">\(IC_{50}\)</span> values across eight antibiotics for lineages evolved under tetracycline, kanamycin, and norfloxacin, we demonstrate that the RHVAE learns a low-dimensional embedding that effectively separates different evolutionary trajectories. Our analysis reveals that a two-dimensional RHVAE achieves reconstruction accuracy comparable to a five-dimensional PCA model, while providing superior predictive power for out-of-sample antibiotic responses. Through cross-validation, we show that our nonlinear model more accurately predict resistance profiles than any number of linear components. Taken together, our results suggest that high-dimensional fitness data, such as the one studied here in <em>E. coli</em>, can reveal hidden simplicity in evolutionary dynamics when analyzed with the right computational framework, offering new insights into the constraints and predictability of antibiotic resistance evolution.</p>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<!-- Model framework -->
+<section id="simple-phenotype-fitness-model" class="level2">
+<h2 class="anchored" data-anchor-id="simple-phenotype-fitness-model">Simple Phenotype-Fitness Model</h2>
+<p>With the advent of high-throughput fitness assays, determining the fitness of multiple genotypes in a plethora of different environments has become a routine procedure in biology <span class="citation" data-cites="kinsler2020 maeda2020 iwasawa2022 ascensao2023"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-maeda2020" role="doc-biblioref">[8]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ascensao2023" role="doc-biblioref">[10]</a></span>. Nevertheless, we argue that we still lack a simple conceptual framework to guide our interpretation of the patterns observed in these datasets. To that end, we propose a simple model of phenotype-fitness dynamics to serve as a guidepost for our interpretation of the data.</p>
+<p><a href="#fig-01" class="quarto-xref">Figure&nbsp;1</a>(A) shows a schematic of the genotype-phenotype-fitness map. A genotype <span class="math inline">\(g\)</span> produces a set of measurable traits or phenotypes <span class="math inline">\(\underline{p}\)</span>—depicted as two potential molecular phenotypes, such as an efflux pump rate and the sensitivity of a membrane receptor. The fitness of each genotype is determined by the value of these phenotypes and the environment <span class="math inline">\(E\)</span>—depicted as the doubling time of a bacterial population. To formalize this mathematically, we represent genotypes as points in a multi-dimensional phenotypic space, where each dimension is a different trait (<span class="math inline">\(\underline{p} \in \mathbb{R}^P\)</span>, where <span class="math inline">\(P\)</span> is the number of traits). Thus, any genotype <span class="math inline">\(g\)</span> has a unique mapping to a phenotypic coordinate. However, this mapping is not necessarily bijective, i.e., multiple genotypes may map to the same phenotype. To represent the likelihood of sampling some genotype <span class="math inline">\(g\)</span> that maps to some coordinate <span class="math inline">\(\underline{p}\)</span> in phenotype space, we introduce a genotype-to-phenotype density map <span class="math inline">\(GP\)</span> that takes a given phenotypic coordinate <span class="math inline">\(\underline{p}\)</span> and returns a number proportional to the probability of sampling a genotype <span class="math inline">\(g\)</span> that maps to <span class="math inline">\(\underline{p}\)</span>. This function captures the empirical observation that the genotype-to-phenotype map is highly redundant, with many genotypes mapping to equivalent phenotypes and some phenotypes being extremely rare <span class="citation" data-cites="louis2016"><a href="#ref-louis2016" role="doc-biblioref">[5]</a></span>. <a href="#fig-01" class="quarto-xref">Figure&nbsp;1</a>(B, left) shows a schematic of one possible <span class="math inline">\(GP\)</span> map overlaid on a 2D phenotype space. For illustration purposes, we set the <span class="math inline">\(GP\)</span> map to contain four negative Gaussian peaks, representing four regions of the phenotype space that are unlikely to be sampled (see Supplementary Material for a more detailed discussion). The location and size of these peaks are assumed to be fixed by the genotype-to-phenotype map, irrespective of the environment. Finally, we introduce a fitness function <span class="math inline">\(F\)</span> that maps a phenotypic coordinate <span class="math inline">\(\underline{p}\)</span> to a fitness value in a particular environment. We assume the topography of the fitness landscape (the number, size, and position of fitness peaks) is determined by the environment <span class="math inline">\(E\)</span>. <a href="#fig-01" class="quarto-xref">Figure&nbsp;1</a>(B, right) shows a schematic of a simple fitness landscape with a single symmetric Gaussian peak.</p>
+<p>In recent experimental evolution studies, genotypes are evolved under a fixed environment, but the fitness is measured across multiple environments <span class="citation" data-cites="kinsler2020 iwasawa2022"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a></span>. To reflect this, <a href="#fig-01" class="quarto-xref">Figure&nbsp;1</a>(C) shows the effect of changing the environment on the phenotype-fitness map. Even though the mapping from genotype to phenotype (coordinates of the example points) and the genotype-to-phenotype density map (white contours) are invariant to the environment, the fitness landscape (black dashed contours) changes as the environment varies. We model this by changing the topography of the fitness map in terms of the number, position, height, and width of the Gaussian peaks. Therefore, we conceptualize the measured fitness profiles on multiple environments as measuring the heights of a fixed phenotypic coordinate on multiple fitness landscapes. <a href="#fig-01" class="quarto-xref">Figure&nbsp;1</a>(D) shows the equivalent experimental observable—the fitness values of any genotype <span class="math inline">\(g\)</span> on multiple environments, hereafter referred to as a fitness profile. We ask whether extracting information about the latent phenotypic coordinates is possible based only on such high-dimensional fitness profiles. Conceptually, this is equivalent to asking whether it is possible to reverse the mapping from phenotypes to fitness values and predict the phenotypic coordinates of a genotype based only on its fitness values across multiple environments.</p>
+<div id="fig-01" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig01_v06_compiled.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: <strong>Model of phenotype-fitness dynamics</strong>. (A) Schematic of the genotype-phenotype-fitness map. A pair of genotypes <span class="math inline">\(g^{(\text{b})}\)</span> and <span class="math inline">\(g^{(\text{r})}\)</span> are shown. These genotypes map to two relevant phenotypes <span class="math inline">\(p_1\)</span> and <span class="math inline">\(p_2\)</span> via a function <span class="math inline">\(\phi\)</span>. The fitness of each genotype is determined by the value of these phenotypes and their relevance in the environment via a function <span class="math inline">\(F\)</span>. (B) Phenotype space functions. Left: The genotype-to-phenotype density map <span class="math inline">\(GP\)</span> where the probability of observing a phenotype <span class="math inline">\(\underline{p}\)</span> is shown as a function of the phenotype values <span class="math inline">\(p_1\)</span> and <span class="math inline">\(p_2\)</span>. White lines show iso-probability contours. Right: The fitness landscape <span class="math inline">\(F\)</span> as a function of the phenotype values <span class="math inline">\(p_1\)</span> and <span class="math inline">\(p_2\)</span>. White lines show iso-fitness contours. The points show the coordinates of the two genotypes in phenotype space. (C) Examples of the effect of changing the environment on the phenotype-fitness landscape. The phenotypic coordinates of any genotype and the genotype-to-phenotype density map are not affected by changes in the environment. The fitness landscape, however, does change as the environment changes. Green landscape shows the evolution condition where selection happens. Gray landscapes show other environments with different topographies (position, number, and height of fitness peaks). Black dashed lines indicate fitness landscape contours, while white solid lines show genotype-phenotype density contours. (D) Fitness profiles. The fitness values of any genotype measured across multiple environments represent an experimental observable.
+</figcaption>
+</figure>
+</div>
+<!-- Evolutionary dynamics -->
+</section>
+<section id="evolutionary-dynamics-on-phenotype-space" class="level2">
+<h2 class="anchored" data-anchor-id="evolutionary-dynamics-on-phenotype-space">Evolutionary Dynamics on Phenotype Space</h2>
+<p>Having defined a simple phenotype-fitness model, we now instantiate a set of rules for evolutionary dynamics on this phenotypic space. We implement a simple model that captures two key features of evolutionary processes: the tendency of populations to move towards higher fitness and the constraints imposed by the accessibility of different phenotypes. We frame evolution as a biased random walk where each step is influenced by both the fitness landscape <span class="math inline">\(F(\underline{p})\)</span> and the genotype-phenotype density <span class="math inline">\(GP(\underline{p})\)</span>.</p>
+<p>At each time step, the population can transition from its current phenotype <span class="math inline">\(\underline{p}\)</span> to a new phenotype <span class="math inline">\(\underline{p}'\)</span>, where the proposed phenotype <span class="math inline">\(\underline{p}'\)</span> is drawn from a proposal distribution <span class="math inline">\(q(\underline{p}' \mid \underline{p})\)</span>. Whether this transition occurs—equivalent to the mutation being fixed in the population—depends on the relative fitness of the new phenotype and how easily it can be reached through mutations. Specifically, as derived in the Supplementary Materials, the probability of accepting a transition is given by</p>
+<p><span id="eq-acceptance-probability"><span class="math display">\[
+P_{\text{accept}} = \min\left(
+    1,
+    \frac{F(\underline{p}')^\beta GP(\underline{p}')^\beta}
+    {F(\underline{p})^\beta GP(\underline{p})^\beta}
+\right),
+\tag{1}\]</span></span></p>
+<p>where <span class="math inline">\(\beta\)</span> is a parameter that controls the balance between selection and drift. This parameter can be interpreted as the strength of selection—higher values of <span class="math inline">\(\beta\)</span> lead to more deterministic trajectories that closely follow fitness gradients, while lower values allow for more stochastic exploration of the phenotype space. Detailed mathematical derivations and analysis of this algorithm can be found in the Supplementary Materials.</p>
+<p>This formulation represents a simplified model of evolutionary dynamics with specific assumptions: First, transitions to phenotypes with higher fitness are more likely to be fixed, reflecting selection’s influence in our model, though in natural populations even beneficial mutations may be lost due to drift and other factors. Second, transitions to lower fitness phenotypes can occur with some probability, incorporating stochastic elements of evolution. Finally, the <span class="math inline">\(GP(\underline{p})\)</span> term accounts for the mutational accessibility of phenotypes—phenotypes requiring rare genetic variants are less likely to be reached even if highly fit. This approach draws on elements from adaptive dynamics and Metropolis-Hastings algorithms applied to evolutionary processes. <a href="#fig-02" class="quarto-xref">Figure&nbsp;2</a>(A, top) shows example trajectories in phenotypic space of multiple lineages evolving on a simple single-peaked fitness landscape. <a href="#fig-02" class="quarto-xref">Figure&nbsp;2</a>(A, bottom) shows the fitness trajectory of these evolving lineages over time, i.e., the equivalent of the experimental observable we can access in a laboratory setting. When we examine these same phenotypic trajectories under different environmental conditions (<a href="#fig-02" class="quarto-xref">Figure&nbsp;2</a>(B)), we observe that, as expected, while the path through phenotype space remains fixed, the fitness values we measure vary because each environment imposes its unique fitness landscape. The fitness values in all environments for a given lineage at a given time point define one fitness profile, as the ones depicted in <a href="#fig-01" class="quarto-xref">Figure&nbsp;1</a>(D). As shown in the Supplementary Materials, our main results using a more detailed population genetics framework yielded consistent conclusions.</p>
+<p>In what follows, we use synthetic data generated from this model, where ten lineages (initial phenotype coordinates) in two replicates (different instantiations of the random dynamics) evolve for 300 time steps on 50 different fitness landscapes (different topographies, meaning number, position, and relative height of fitness peaks). For each of these conditions, the fitness in all other environments is also determined, giving a high-dimensional dataset analogous to the ones in recent experimental studies <span class="citation" data-cites="kinsler2020 iwasawa2022 ascensao2023 ghosh2025"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ascensao2023" role="doc-biblioref">[10]</a>, <a href="#ref-ghosh2025" role="doc-biblioref">[16]</a></span>. We use this dataset to test whether it is possible to reverse the mapping from phenotypes to fitness values and reconstruct the phenotypic coordinates of a genotype based only on fitness profiles.</p>
+<div id="fig-02" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig02_v05.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: <strong>Evolutionary dynamics on phenotype space</strong>. (A) Top: Metropolis-like evolutionary dynamics on phenotype space. Each line represents the trajectory of a lineage as it evolves over time, with crosses and triangles denoting the initial phenotypic coordinate of a few selected lineages. Note that trajectories tend to move towards higher fitness values, avoiding low genotype-to-phenotype density regions. Bottom: Fitness over time of the same trajectories shown above. (B) The same trajectories shown in (A) overlaid on different fitness maps determined by different environments. Although the phenotypic coordinates of the genotypes remain the same (top panels), the resulting fitness readouts change as the topography of the environment-dependent fitness landscape changes (bottom panels).
+</figcaption>
+</figure>
+</div>
+<!-- Latent space geometry -->
+</section>
+<section id="data-driven-dimensionality-reduction-via-geometric-variational-autoencoders" class="level2">
+<h2 class="anchored" data-anchor-id="data-driven-dimensionality-reduction-via-geometric-variational-autoencoders">Data-Driven Dimensionality Reduction via Geometric Variational Autoencoders</h2>
+<p>Using our simulated fitness profiles that mimic data from modern experimental evolution studies <span class="citation" data-cites="kinsler2020 maeda2020 iwasawa2022 ascensao2023 ghosh2025"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-maeda2020" role="doc-biblioref">[8]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ascensao2023" role="doc-biblioref">[10]</a>, <a href="#ref-ghosh2025" role="doc-biblioref">[16]</a></span>, we now develop a data-driven approach to infer phenotypic coordinates from fitness measurements across different environments. <a href="#fig-03" class="quarto-xref">Figure&nbsp;3</a>(A) shows a schematic depiction of the idea behind dimensionality reduction applied to fitness profiles. With fitness profiles as vectors on a high-dimensional data space, dimensionality reduction techniques implicitly assume that the positions of points in the data space are highly constrained to occupy only a subset of the available volume. More formally, dimensionality reduction techniques assume that the data points lie on a low-dimensional manifold embedded in the high-dimensional data space. Here, low-dimensionality refers to having the effective number of degrees of freedom required to describe the data being lower than the dimension of the data space. The goal of dimensionality reduction is to find such an embedded manifold that captures the underlying structure of the data. When possible, plotting this embedded manifold as a flat space (either two or three dimensions) allows for the visualization of the underlying data structure. Given the conceptual picture we have developed so far, the hope is that the low-dimensional latent space captures features of the structure of the underlying phenotypic space.</p>
+<p>Recently, the field has focused on linear dimensionality reduction techniques such as singular value decomposition <span class="citation" data-cites="kinsler2020"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a></span> or related methods such as sparse structure discovery <span class="citation" data-cites="petti2023"><a href="#ref-petti2023" role="doc-biblioref">[17]</a></span>. Although computationally efficient, these methods are limited by the rigid assumption that fitness is a linear function of some latent phenotypes. To step away from such strong assumptions, we can take advantage of the advances in deep-learning-based dimensionality reduction techniques, such as the variational autoencoder (VAE) <span class="citation" data-cites="kingma2014a"><a href="#ref-kingma2014a" role="doc-biblioref">[18]</a></span>. However, the original VAE framework comes with the limitation that the learned latent representation—built from nonlinear transformations of the input data—does not contain any geometric information about how such nonlinear transformations affect the geometry of the learned space <span class="citation" data-cites="arvanitidis2018"><a href="#ref-arvanitidis2018" role="doc-biblioref">[19]</a></span>. This is analogous to having a 2D map of the surface of the earth (the latent space), where, to know how distances between two points on the map correspond to distances on the surface of the planet (the data space), we need a position-dependent “scale bar”—more formally, a metric tensor—that allows us to convert distances between representations. This metric tensor is not encoded in the original VAE framework, rendering distances between points in the latent space meaningless as they are not directly related to the distances in the data space.</p>
+<p>To address both limitations on the linear and non-geometric nature of popular methods, we propose the use of a recent extension of the VAE framework—the Riemannian Hamiltonian VAE (RHVAE) <span class="citation" data-cites="chadebec2020"><a href="#ref-chadebec2020" role="doc-biblioref">[15]</a></span>—which models the latent space as a Riemannian manifold whose metric tensor is also learned from the data, allowing for the computation of meaningful distances between points. <a href="#fig-03" class="quarto-xref">Figure&nbsp;3</a>(B) shows a schematic depiction of the RHVAE architecture. The network consists of three main components: an encoder network, a decoder network, and a specialized network that learns the metric tensor of the latent space. The numbers below the architecture point to the conceptual steps of the RHVAE workflow shown in <a href="#fig-03" class="quarto-xref">Figure&nbsp;3</a>(C). The RHVAE is conceptually similar to the traditional VAE, taking a high-dimensional fitness input <span class="math inline">\(\underline{f}\)</span> as input into an encoder network. This encoder network outputs a sampled latent coordinate <span class="math inline">\(\underline{z}\)</span> <span class="citation" data-cites="kingma2014a"><a href="#ref-kingma2014a" role="doc-biblioref">[18]</a></span>. However, before passing this sampled coordinate through a decoder network to reconstruct the fitness profile, the RHVAE uses concepts from Riemannian geometry and Hamiltonian mechanics to jointly train a separate network that learns the metric tensor of the latent space. This metric tensor network, thus, contains all the information needed to map distances in the low-dimensional map to distances in the original data space. We consider this feature of the RHVAE to be of utmost importance if the learned latent space is to be taken seriously as a representation of the underlying phenotypic space. Just as a map without a scale bar is not a useful guide to navigate the terrain, a latent space without a metric tensor is an incomplete representation of the underlying phenotypic space. We direct the reader to the Supplementary Material for a mathematically rigorous description of the model.</p>
+<p>Next, we turn our attention to applying the RHVAE to the simulated fitness profiles. It is important to highlight that at no point does the RHVAE obtain any knowledge about the identity of the input data. In other words, the RHVAE has no information about the lineage or time point of the fitness profile that it is processing. The network only uses the unidentified fitness profiles to learn the geometric structure of the latent space.</p>
+<div id="fig-03" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig03_v04.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: <strong>Dimensionality reduction via geometric variational autoencoder</strong>. (A) Schematic of dimensionality reduction applied to fitness profiles. High-dimensional fitness vectors are embedded onto a lower-dimensional manifold that captures the underlying structure of the data. (B) Architecture of the Riemannian Hamiltonian VAE (RHVAE). The network consists of three components: an encoder that maps high-dimensional fitness profiles to latent coordinates, a decoder that reconstructs the original fitness profiles, and a metric tensor network that learns the geometric structure of the latent space. (C) RHVAE workflow. The high-dimensional input is mapped into a low-dimensional latent space coordinate. From there, the network learns the metric tensor of the latent space via a specialized network. The latent coordinate is then decoded into an accurate reconstruction of the original fitness profile input.
+</figcaption>
+</figure>
+</div>
+<!-- Latent space simulation -->
+</section>
+<section id="geometry-informed-latent-space-captures-the-underlying-phenotypic-space" class="level2">
+<h2 class="anchored" data-anchor-id="geometry-informed-latent-space-captures-the-underlying-phenotypic-space">Geometry-Informed Latent Space Captures the Underlying Phenotypic Space</h2>
+<p>As described in the Supplementary Material, we trained three models on the simulated profiles depicted in <a href="#fig-02" class="quarto-xref">Figure&nbsp;2</a> for comparison: A linear model (via PCA), a vanilla VAE, and an RHVAE. Each model allows us to project the high-dimensional fitness profiles into a low-dimensional latent space. Nevertheless, none of the resulting latent spaces need to be aligned with the ground truth phenotype, as they were constructed with no information about the relative coordinates in phenotype space. To visually compare whether the resulting latent coordinates for the simulated data preserve the general structure of the phenotype space, we aligned each latent space to the ground truth phenotype space using Procrustes analysis (see Supplementary Material). <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>(A) shows the resulting latent space coordinates colored by the lineage of the simulated profiles. Qualitatively, we observe that, although all models partially capture the relative positions of each lineage with respect to the others, the RHVAE-derived latent space appears to qualitatively preserve the structure of the phenotype space better than the other two models; for example, the four regions of low genotype-to-phenotype density are clearly visible in the RHVAE-derived latent space, while they are not as pronounced in the other two latent spaces. Moreover, when looking at the commonly used PCA-derived latent space, we might be misled into believing that the two highlighted points (diamond markers) are genotypes with very similar phenotypic effects, when, in fact, they are extremely different, as captured by the nonlinear latent spaces. This point is further highlighted in <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>(B), where we show the comparison of all pairwise distances between genotypes in the ground truth phenotypic space vs.&nbsp;the different latent spaces. Overall, the RHVAE-derived latent space preserves the pairwise distances between the genotypes better than the other two models.</p>
+<p>Having visually confirmed that the RHVAE-derived latent space preserves the structure of the phenotype space better than the other two models, we now investigate whether these latent coordinates also contain enough information to reconstruct the fitness profiles. To this end, we compare the reconstruction accuracy of the RHVAE to that of the PCA and VAE models. <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>(C) shows the reconstruction error, defined as</p>
+<p><span id="eq-04-mse"><span class="math display">\[
+\text{MSE} =
+\frac{1}{N}
+\sum_{n=1}^{N}
+\sum_{e=1}^{E}
+\left( f^{(n)}_e - \hat{f}^{(n)}_e \right)^2,
+\tag{2}\]</span></span></p>
+<p>where <span class="math inline">\(f^{(n)}_e\)</span> and <span class="math inline">\(\hat{f}^{(n)}_e\)</span> are the ground truth and reconstructed fitness values, respectively, for the <span class="math inline">\(n\)</span>-th genotype in the <span class="math inline">\(e\)</span>-th environment. We observe that the vanilla 2D-VAE model achieves a reconstruction error equivalent to that of an eight-dimensional PCA model. In contrast, the 2D-RHVAE consistently outperforms the other two models, achieving a reconstruction error on par with a ten-dimensional PCA model. This further highlights the ability of the RHVAE to capture the underlying nonlinear structure of the phenotype space while maintaining high reconstruction accuracy.</p>
+<p>One of the main advantages of the RHVAE is its ability to learn a metric tensor that captures the local geometry of the latent space. A way to visualize this geometric information is to plot the so-called metric volume, defined as the determinant of the metric tensor at each point in the latent space. Intuitively, the determinant of the metric tensor at a given point can be interpreted as the level of deformation of the latent space at that point. Small values of the metric volume indicate that the latent space is locally flat, while large values suggest significant local curvature. <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>(D, left) shows the metric volume of the latent space derived from the RHVAE model. The lighter the color, the larger the metric volume, and thus the larger the local deformation. When overlaying the points over this metric volume (<a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>(D, right)), we observe that everything outside the data cloud is locally curved. Knowing that neural networks are not able to generalize well outside the data cloud, having this feature is particularly nice because the curvature in the latent space defines the regions where the trained model is able to make accurate predictions. Moreover, we note that regions of high curvature within the data cloud exactly correspond to the regions of low genotype-phenotype density we imposed in the simulation. This suggests that, for a properly sampled phenotypic space, the geometric information learned by the RHVAE is able to capture the non-uniformity of the phenotypic density as variations in the curvature of the latent space, offering a data-driven tool to identify accessible evolutionary paths in phenotype space.</p>
+<div id="fig-04" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig04_v04.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: <strong>Geometry-informed latent space captures phenotypic structure and improves reconstruction accuracy</strong>. (A) Latent space coordinates of simulated fitness profiles colored by lineage, after alignment with the ground truth phenotype space using Procrustes analysis. The RHVAE better preserves phenotypic relationships than PCA or vanilla VAE, as evidenced by the highlighted points (diamond markers). (B) Comparison of all pairwise Euclidean distances between genotypes in the ground truth phenotypic space versus the different latent spaces, showing RHVAE better preserves the original distances. Given the large number of data points and the even larger number of pairwise comparisons, the data are shown as a smear rather than single points. (C) Reconstruction error (MSE) comparison showing 2D-RHVAE achieves accuracy comparable to a 10-dimensional PCA model. (D) Metric volume visualization of the RHVAE latent space (left) and with projected data points (right), revealing regions of high curvature that correspond to areas of low genotype-phenotype density in the simulation.
+</figcaption>
+</figure>
+</div>
+<!-- Fitness landscapes -->
+</section>
+<section id="sec-fitness-landscapes" class="level2">
+<h2 class="anchored" data-anchor-id="sec-fitness-landscapes">Geometry-Informed Latent Space Reconstruction of Fitness Landscapes</h2>
+<p>With the ability to capture the underlying structure of the phenotypic space as shown in <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>, we can investigate whether the RHVAE can be used to reconstruct the underlying fitness landscapes. For this, we take advantage of the fact that the RHVAE decoder represents a continuous function from latent coordinates to fitness values in different environments. Scanning a grid of latent coordinates allows us to evaluate the fitness landscape at any point in the latent space for all three models shown in <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>. <a href="#fig-05" class="quarto-xref">Figure&nbsp;5</a> shows examples of ground truth fitness landscapes, used to generate the data (first row), and the resulting inferred fitness landscapes for the RHVAE, VAE, and PCA models (second, third, and fourth rows, respectively). Qualitatively, we see that the RHVAE is able to capture the underlying topography of the fitness landscapes, where the number of peaks and their relative positions are similar to the ground truth landscapes. Although the VAE model can also capture the general shape of the fitness landscapes, the lack of a metric in this space—limiting the predictions to the local neighborhood of the training data—makes it difficult to define where to trust the predictions of the model. The PCA model, on the other hand, is not able to capture the underlying structure of the fitness landscapes as there is a nonlinear structure that cannot be captured by a linear transformation.</p>
+<div id="fig-05" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig05_v03.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: <strong>Geometry-informed latent space enables accurate reconstruction of complex fitness landscapes</strong>. Comparison of ground truth and reconstructed fitness landscapes across multiple environments. The first row shows examples of the original simulated fitness landscapes used to generate the data. Subsequent rows show reconstructions using the RHVAE (second row), VAE (third row), and PCA (fourth row) models. The RHVAE accurately captures the underlying topography, including the number and relative positions of fitness peaks. While the VAE captures general landscape shapes, it lacks a geometric metric to define prediction reliability regions. PCA fails to represent the nonlinear structure of the landscapes, demonstrating the limitations of linear dimensionality reduction for complex fitness landscape reconstruction.
+</figcaption>
+</figure>
+</div>
+<!-- Antibiotic data -->
+</section>
+<section id="evolutionary-dynamics-of-antibiotic-resistance-in-latent-space" class="level2">
+<h2 class="anchored" data-anchor-id="evolutionary-dynamics-of-antibiotic-resistance-in-latent-space">Evolutionary Dynamics of Antibiotic Resistance in Latent Space</h2>
+<p>Having shown how the RHVAE can capture the underlying structure of the phenotypic space, we now turn to the application of the model to the analysis of antibiotic adaptation dynamics. We use the data from <span class="citation" data-cites="iwasawa2022"><a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a></span> where the authors evolved different <em>E. coli</em> strains on three different antibiotics: kanamycin (KM), norfloxacin (NFLX), and tetracycline (TET). For this, they used a multi-well plate format where the rows contained a gradient of different antibiotic concentrations, as depicted in <a href="#fig-06" class="quarto-xref">Figure&nbsp;6</a>(A). Every day, a fresh plate with the same arrangement of antibiotics was inoculated with cells from the well in the evolving condition with the highest concentration of antibiotic that still allowed growth. This process was repeated every day for 27 days. <a href="#fig-06" class="quarto-xref">Figure&nbsp;6</a>(B) shows the raw data output from one of the experiments. The optical density is plotted as a function of the antibiotic concentration, obtaining the expected sigmoidal curve. Since this particular example shows data from evolution in the antibiotic being used as the <span class="math inline">\(x\)</span>-axis, we can see how, as expected, the sigmoidal curve shifts to the right as the population evolves increasing resistance to the antibiotic over time. From these titration curves, we can use Bayesian inference to extract the value of the antibiotic concentration at which the optical density is 50% of the maximum value. This value—known as the <em>antibiotic <span class="math inline">\(IC_{50}\)</span></em>—is a measure of the antibiotic resistance of the evolved strains (see Supplementary Material for more details).</p>
+<p><a href="#fig-06" class="quarto-xref">Figure&nbsp;6</a>(C) shows the time trajectories of the <span class="math inline">\(IC_{50}\)</span> in all eight antibiotics for all cultures evolved in TET. Over time, all lineages increase their <span class="math inline">\(IC_{50}\)</span> in TET; however, the trend for all other antibiotics is more complex. Following the same approach as in <a href="#fig-04" class="quarto-xref">Figure&nbsp;4</a>, <a href="#fig-06" class="quarto-xref">Figure&nbsp;6</a>(D) shows the resulting latent spaces for PCA, VAE, and RHVAE trained on the <span class="math inline">\(IC_{50}\)</span> values for all eight antibiotics. Each color represents a lineage evolved on a different antibiotic. These projections show that the latent coordinates for different lineages are more disentangled in the nonlinear latent spaces than in PCA. Moreover, the rightmost panel shows that in terms of reconstruction error, RHVAE shows the lowest error—comparable to that of a 5-dimensional PCA.</p>
+<div id="fig-06" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig06_v02_compiled.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: <strong>Evolutionary dynamics of antibiotic resistance captured in latent space reveals complex adaptation patterns</strong>. (A) Experimental setup using multi-well plates with antibiotic concentration gradients for evolution experiments. (B) Optical density measurements as a function of antibiotic concentration, showing rightward shifts of sigmoidal curves as resistance evolves over time. (C) Time trajectories of <span class="math inline">\(IC_{50}\)</span> values across all eight antibiotics (tetracycline (TET), kanamycin (KM), mitomycin C (MMC), norfloxacin (NFLX), 4-nitroquinoline 1-oxide (NQO), phleomycin (PLM), sodium dichromate dihydrate (SDC), and sodium salicylate (SS)) for lineages evolved in tetracycline, demonstrating direct resistance increase in the selection antibiotic and complex collateral effects in other antibiotics. Error bars represent the 95% credible region as obtained via Bayesian inference (see Supplementary Material) (D) Latent space projections using PCA, VAE, and RHVAE (first three panels) trained on <span class="math inline">\(IC_{50}\)</span> values, with colors representing different evolution conditions, showing improved disentanglement of lineages in nonlinear latent spaces and superior reconstruction accuracy of RHVAE compared to other dimensionality reduction methods. Different colors represent different lineages evolved in different antibiotics. The rightmost panel shows the reconstruction error of the three methods as a function of the number of PCs used for dimensionality reduction.
+</figcaption>
+</figure>
+</div>
+<!-- Cross-validation -->
+</section>
+<section id="non-linear-latent-space-coordinates-are-more-predictive-of-out-of-sample-data" class="level2">
+<h2 class="anchored" data-anchor-id="non-linear-latent-space-coordinates-are-more-predictive-of-out-of-sample-data">Non-Linear Latent Space Coordinates are more Predictive of Out of Sample Data</h2>
+<p>In our simulations, we designed abstract phenotypic coordinates that determined fitness across environments. Applying our proposed method demonstrated that the nonlinear latent space can recover the relative positions in this abstract phenotypic space using fitness data only. While these latent coordinates don’t necessarily represent interpretable biological traits, they effectively capture the underlying structure of the space that determines the genotype fitness in different environments. This success in recovering structural relationships from simulated data encouraged us to test whether the equivalent latent coordinates recovered from experimental data can be used to make more accurate predictions of out-of-sample data.</p>
+<p>To test this hypothesis, we adapted the cross-validation approach developed by <span class="citation" data-cites="kinsler2020"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a></span>. Their original method assesses how linear components predict out-of-sample data by dividing the data matrix into quadrants based on genotypes and antibiotics. We modified this approach for our nonlinear models as shown in <a href="#fig-07" class="quarto-xref">Figure&nbsp;7</a>(A). First, we train our models (VAE and RHVAE) on fitness profiles from all but one antibiotic to generate latent space coordinates. Then, we freeze these coordinates and train only the decoder part to predict responses to the missing antibiotic. This approach allows us to directly compare how well different dimensionality reduction methods capture information needed for prediction. In essence, we use seven antibiotics to place each genotype in latent space, then test how accurately these coordinates predict resistance to the eighth antibiotic. We direct interested readers to the Supplementary Material for a detailed description of the of both approaches.</p>
+<p><a href="#fig-07" class="quarto-xref">Figure&nbsp;7</a>(B) compares the predictive power of the three models across different numbers of linear latent space dimensions in terms of reconstruction error. For each panel, the accuracy of the predicted <span class="math inline">\(IC_{50}\)</span> value on the missing antibiotic over the validation set is plotted as a function of the number of linear dimensions used in the SVD bi-cross validation approach. The horizontal dashed lines represent the accuracy of the predicted <span class="math inline">\(IC_{50}\)</span> value for the 2D-VAE (dark blue) and 2D-RHVAE (dark red) models. For all antibiotics, the 2D nonlinear latent space coordinates are more predictive of the missing antibiotic <span class="math inline">\(IC_{50}\)</span> values than any number of possible linear dimensions. This result is consistent with the hypothesis that the nonlinear latent space coordinates capture more information about the phenotypic state of the system under study, allowing for more accurate predictions of out-of-sample data. Furthermore, increasing the dimensionality of the nonlinear latent space from two to three dimensions only marginally improves the predictive power of the model, suggesting that the 2D nonlinear latent space captures most of the information about the phenotypic state of the system (see Supplementary Material for a detailed discussion).</p>
+<div id="fig-07" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-07-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="./fig/main/fig07_v01_compiled.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-07-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: <strong>Nonlinear latent space models demonstrate superior predictive power for out-of-sample antibiotic data</strong>. (A) Schematic representation of the cross-validation approach used to test predictive power: training a full model on all but one antibiotic to generate latent space coordinates (left), then freezing the encoder parameters and training a decoder-only model on the missing antibiotic data (right). (B) Comparison of predictive accuracy across models, showing reconstruction error for the missing antibiotic as a function of linear dimensions used in SVD bi-cross validation. Horizontal dashed lines represent the accuracy of 2D-VAE (dark blue) and 2D-RHVAE (dark red) models. For all antibiotics, the 2D nonlinear latent space coordinates provide more accurate predictions than any number of linear dimensions, demonstrating that nonlinear latent space representations capture more meaningful biological information about the underlying phenotypic state.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>Our ability to experimentally track evolving microbial populations presents an unprecedented opportunity to better understand the complexity of the space in which evolutionary dynamics take place. The recent wave of work following the strategy of determining the fitness of multiple genotypes, not in one, but multiple environments <span class="citation" data-cites="kinsler2020 iwasawa2022 ascensao2023 ghosh2025"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ascensao2023" role="doc-biblioref">[10]</a>, <a href="#ref-ghosh2025" role="doc-biblioref">[16]</a></span> suggests that this is a powerful approach to try to uncover the underlying structure of the genotype-phenotype-fitness map. Combined with the body of theoretical work suggesting that the genotype-phenotype map is low-dimensional—meaning that a large number of genotypes result in a small number of distinct phenotypes <span class="citation" data-cites="kaneko2015 louis2016 furusawa2018 russo2025b"><a href="#ref-louis2016" role="doc-biblioref">[5]</a>, <a href="#ref-furusawa2018" role="doc-biblioref">[13]</a>, <a href="#ref-kaneko2015" role="doc-biblioref">[20]</a>, <a href="#ref-russo2025b" role="doc-biblioref">[21]</a></span>—there is hope that we can leverage these large-scale datasets to uncover features of the phenotypic space underlying adaptation in a data-driven way.</p>
+<p>The main approach taken so far towards this goal has been to use linear decompositions of the fitness data to identify the principal components of phenotypic variation <span class="citation" data-cites="kinsler2020 iwasawa2022 petti2023 ghosh2025"><a href="#ref-kinsler2020" role="doc-biblioref">[7]</a>, <a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a>, <a href="#ref-ghosh2025" role="doc-biblioref">[16]</a>, <a href="#ref-petti2023" role="doc-biblioref">[17]</a></span>. The simplicity of these linear models comes at the cost of ignoring potentially important nonlinearities in the genotype-phenotype-fitness map. Applying these linear models to data generated from highly nonlinear processes can lead to misleading interpretations of the underlying dimensionality and structure of the phenotypic space, as revealed by embedding theorems from differential geometry (see Supplementary Material for a detailed discussion). In this work, we take a step towards removing this limitation by proposing a nonlinear dimensionality reduction method that can capture the underlying nonlinear structure of the phenotype-fitness map. We take advantage of recent advances in geometry-informed variational autoencoders <span class="citation" data-cites="arvanitidis2018 hauberg2019 chadebec2020"><a href="#ref-chadebec2020" role="doc-biblioref">[15]</a>, <a href="#ref-arvanitidis2018" role="doc-biblioref">[19]</a>, <a href="#ref-hauberg2019" role="doc-biblioref">[22]</a></span> to learn a low-dimensional latent space built from high-dimensional fitness measurements. We demonstrate the ability of our method to recover the underlying nonlinear structure of the phenotype-fitness map on synthetic data generated from evolutionary dynamics on a simple phenotypic space with nonlinear mapping to fitness. The geometry-informed latent space not only recovers the relative position of genotypes in the phenotypic space, but also the learned function mapping from latent coordinates to fitness is able to reconstruct the topography of the underlying fitness landscape.</p>
+<p>We then apply our method to a dataset of <em>E. coli</em> strains evolving in different antibiotics, where a set of cross-resistance values to seven other antibiotics was determined for each lineage at each time point of the adaptation process <span class="citation" data-cites="iwasawa2022"><a href="#ref-iwasawa2022" role="doc-biblioref">[9]</a></span>. When comparing our method to a linear model based on principal components, we find that the different evolved lineages separate much more clearly in the geometry-informed latent space. Furthermore, in terms of reconstruction accuracy, our two-dimensional nonlinear latent space is equivalent to a five-dimensional linear latent space based on principal components. Finally, to show that the information captured by the learned nonlinear latent space is more predictive of the cross-resistance values, we leave one of the eight antibiotics out during the construction of the latent space, and then use these latent coordinates to predict the cross-resistance values of the left-out antibiotic. Our analysis demonstrates that these nonlinear latent coordinates provide superior predictive power compared to linear approaches. Moreover, increasing the dimensionality of the latent space from two to three dimensions only marginally improves the predictive power of the model, suggesting that only two degrees of freedom are needed to capture the changes in the phenotypic state of the evolving lineages (see Supplementary Material for a detailed discussion). The results show that the geometry-informed latent space outperforms the linear model based on principal components by a significant margin.</p>
+<p>Our work can be viewed as a modern, data-driven implementation of Fisher’s geometric model of adaptation <span class="citation" data-cites="orr2005"><a href="#ref-orr2005" role="doc-biblioref">[23]</a></span>. While Fisher conceptualized adaptation as movement in a multidimensional phenotypic space, this framework has largely remained theoretical due to the challenges of empirically reconstructing such spaces. By leveraging geometry-informed variational autoencoders, we demonstrate that it is possible to reconstruct the underlying phenotypic manifold directly from fitness measurements across multiple environments. This approach suggests it is possible to transform Fisher’s geometric intuition from a conceptual tool into an empirically grounded framework, where the dimensionality, density, and metric properties of the phenotypic space can be inferred from experimental data rather than assumed a priori. The geometry-informed latent space we recover provides a picture of the adaptive landscape as originally envisioned by Fisher but with the mathematical sophistication afforded by modern deep learning methods.</p>
+<p>One unique affordance of latent spaces endowed with a Riemannian metric is that distances in latent space can be related to the resulting distances in fitness space. Furthermore, as suggested by our results on the synthetic data, the curvature of the resulting latent space can be related to the underlying density of genotypes mapping to regions of phenotype space, revealing the accessibility of different regions. Moreover, the metric tensor allows for the identification of the shortest path between two points in latent space. This property begs the question of whether evolutionary trajectories in latent space follow the shortest path between pre- and post-evolved genotypes. Although not fully conclusive, when comparing the shortest path in latent space between the initial and final latent coordinates, some <em>E. coli</em> lineages seem to follow the predicted shortest path (See Supplementary Material for a detailed discussion). It is tempting to speculate about the biological significance of this observation and whether it is a more general property of the evolutionary process, as it suggests a potential analogous least-action principle of evolution in phenotypic space. Nevertheless, more work is needed to explore this hypothesis further with a larger number of genotypes and environments.</p>
+<p>Moreover, it remains an open question as to what is the biological meaning of the learned latent coordinates. Complementing these fitness measurements with high-dimensional phenotypic characterizations—such as RNA-sequencing data—could provide additional insights into the biological nature of the latent dimensions. For example, following a similar approach to the cross-validation analysis presented in the main text, where the latent space was learned using only fitness information, one could then fix the encoder (effectively fixing the latent coordinates based only on fitness profiles) and then train a decoder that maps the latent coordinates to the high-dimensional phenotypic data. This approach could provide information to constrain the biological functions enriched on the latent dimensions, effectively determining the name of the axes in the latent space. We see this as an exciting direction for future work, where the combination of high-dimensional fitness and phenotypic data, guided by theoretical understanding of evolutionary dynamics, could shed light on the nature of biological adaptation.</p>
+<p>In our study, we employed two variants of variational autoencoders: one incorporating a Riemannian metric and one without this geometric constraint. While the geometry-informed model demonstrated marginally enhanced performance in capturing the underlying structure of the fitness data, it incurs a significant computational cost during training. Nevertheless, we consider the geometric information about the latent space essential for meaningful interpretation of the distances between evolved lineages. Just as a geographical map without a scale bar provides incomplete spatial information, a latent representation without metric properties offers limited insight into the relationships between data points. If these learned latent spaces are to be considered faithful representations of biological reality rather than mere computational abstractions, the geometric structure becomes critically important. We acknowledge recent proposals by <span class="citation" data-cites="chadebec2022"><a href="#ref-chadebec2022" role="doc-biblioref">[24]</a></span> that aim to approximate the metric tensor of standard variational autoencoders post-training. Investigating the efficacy of these more computationally efficient alternatives compared to explicitly geometry-informed models represents an important direction for future research.</p>
+</section>
+<section id="data-and-code-availability" class="level1 unnumbered">
+<h1 class="unnumbered">Data and code availability</h1>
+<p>All data and custom scripts were collected and stored using Git version control. Code for raw data processing, theoretical analysis, and figure generation is available on the <a href="https://github.com/mrazomej/antibiotic_landscape">GitHub repository</a></p>
+</section>
+<section id="acknowledgements" class="level1 unnumbered">
+<h1 class="unnumbered">Acknowledgements</h1>
+<p>We would like to thank David Larios, Enrique Amaya, and especially Griffin Chure for their helpful advice and discussion. We are also grateful to Jose Aguilar-Rodriguez, Stefan Bassler, Benjamin Good, Shreyas Gopalakrishnan, Olivia Ghosh, Shaili Mathur, and Anastasia Lyulina for their helpful feedback on the manuscript. We are extremely grateful to Junichiro Iwasawa for sharing the raw data from his study; his openness and willingness to share data and the immediate response are examples of the best practices in open science.</p>
+<p>This work was supported by the NIH/NIGMS, Genomics of rapid adaptation in the lab and in the wild R35GM11816506 (MIRA grant), the NIH, Unravelling mechanisms of tumor suppression in lung cancer R01CA23434903, the NIH (PQ4), Quantitative and multiplexed analysis of gene function in cancer in vivo R01CA23125303, the NIH, Genetic Determinants of Tumor Growth and Drug Sensitivity in EGFR Mutant Lung Cancer R01CA263715, the NIH, Dissecting the interplay between aging, genotype, and the microenvironment in lung cancer U01AG077922, the NIH, Genetic dissection of oncogenic Kras signaling R01CA230025, and the CZ Biohub investigator program. MRM was partially supported by the Schmidt Science Fellowship. MM was supported by The National Science Foundation-Simons Center for Quantitative Biology at Northwestern University and the Simons Foundation grant 597491. MM is a Simons Investigator. DP is a CZ Biohub investigator.</p>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-Lassig2017" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">M. Lässig, V. Mustonen, and A. M. Walczak, <span>“Predicting evolution,”</span> <em>Nature Ecology &amp; Evolution</em>, vol. 1, no. 3, p. 0077, Feb. 2017, doi: <a href="https://doi.org/10.1038/s41559-017-0077">10.1038/s41559-017-0077</a>.</div>
+</div>
+<div id="ref-manrubia2021" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">S. Manrubia <em>et al.</em>, <span>“From genotypes to organisms: <span class="nocase">State-of-the-art</span> and perspectives of a cornerstone in evolutionary dynamics,”</span> <em>Physics of Life Reviews</em>, vol. 38, pp. 55–106, Sep. 2021, doi: <a href="https://doi.org/10.1016/j.plrev.2021.03.004">10.1016/j.plrev.2021.03.004</a>.</div>
+</div>
+<div id="ref-uksza2014" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">M. Łuksza and M. Lässig, <span>“A predictive fitness model for influenza,”</span> <em>Nature</em>, vol. 507, no. 7490, pp. 57–61, Mar. 2014, doi: <a href="https://doi.org/10.1038/nature13087">10.1038/nature13087</a>.</div>
+</div>
+<div id="ref-luksza2017" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">M. Łuksza <em>et al.</em>, <span>“A neoantigen fitness model predicts tumour response to checkpoint blockade immunotherapy,”</span> <em>Nature</em>, vol. 551, no. 7681, pp. 517–520, Nov. 2017, doi: <a href="https://doi.org/10.1038/nature24473">10.1038/nature24473</a>.</div>
+</div>
+<div id="ref-louis2016" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">A. A. Louis, <span>“Contingency, convergence and hyper-astronomical numbers in biological evolution,”</span> <em>Studies in History and Philosophy of Science Part C: Studies in History and Philosophy of Biological and Biomedical Sciences</em>, vol. 58, pp. 107–116, Aug. 2016, doi: <a href="https://doi.org/10.1016/j.shpsc.2015.12.014">10.1016/j.shpsc.2015.12.014</a>.</div>
+</div>
+<div id="ref-shoval2012" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">O. Shoval <em>et al.</em>, <span>“Evolutionary <span>Trade-Offs</span>, <span>Pareto Optimality</span>, and the <span>Geometry</span> of <span>Phenotype Space</span>,”</span> <em>Science</em>, vol. 336, no. 6085, pp. 1157–1160, Jun. 2012, doi: <a href="https://doi.org/10.1126/science.1217405">10.1126/science.1217405</a>.</div>
+</div>
+<div id="ref-kinsler2020" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">G. Kinsler, K. Geiler-Samerotte, and D. A. Petrov, <span>“Fitness variation across subtle environmental perturbations reveals local modularity and global pleiotropy of adaptation,”</span> <em>eLife</em>, vol. 9, pp. 1–52, Dec. 2020, doi: <a href="https://doi.org/10.7554/eLife.61271">10.7554/eLife.61271</a>.</div>
+</div>
+<div id="ref-maeda2020" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">T. Maeda <em>et al.</em>, <span>“High-throughput laboratory evolution reveals evolutionary constraints in <span>Escherichia</span> coli,”</span> <em>Nature Communications</em>, vol. 11, no. 1, p. 5970, Dec. 2020, doi: <a href="https://doi.org/10.1038/s41467-020-19713-w">10.1038/s41467-020-19713-w</a>.</div>
+</div>
+<div id="ref-iwasawa2022" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">J. Iwasawa, T. Maeda, A. Shibai, H. Kotani, M. Kawada, and C. Furusawa, <span>“Analysis of the evolution of resistance to multiple antibiotics enables prediction of the <span>Escherichia</span> coli phenotype-based fitness landscape,”</span> <em>PLOS Biology</em>, vol. 20, no. 12, p. e3001920, Dec. 2022, doi: <a href="https://doi.org/10.1371/journal.pbio.3001920">10.1371/journal.pbio.3001920</a>.</div>
+</div>
+<div id="ref-ascensao2023" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">J. A. Ascensao, K. M. Wetmore, B. H. Good, A. P. Arkin, and O. Hallatschek, <span>“Quantifying the local adaptive landscape of a nascent bacterial community,”</span> <em>Nature Communications</em>, vol. 14, no. 1, p. 248, Jan. 2023, doi: <a href="https://doi.org/10.1038/s41467-022-35677-5">10.1038/s41467-022-35677-5</a>.</div>
+</div>
+<div id="ref-weinreich2006" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[11] </div><div class="csl-right-inline">D. M. Weinreich, N. F. Delaney, M. A. DePristo, and D. L. Hartl, <span>“Darwinian <span>Evolution Can Follow Only Very Few Mutational Paths</span> to <span>Fitter Proteins</span>,”</span> <em>Science</em>, 2006, doi: <a href="https://doi.org/10.1126/science.1123633">10.1126/science.1123633</a>.</div>
+</div>
+<div id="ref-wagner2008" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[12] </div><div class="csl-right-inline">A. Wagner, <span>“Robustness and evolvability: A paradox resolved,”</span> <em>Proceedings of the Royal Society B: Biological Sciences</em>, vol. 275, no. 1630, pp. 91–100, Jan. 2008, doi: <a href="https://doi.org/10.1098/rspb.2007.1137">10.1098/rspb.2007.1137</a>.</div>
+</div>
+<div id="ref-furusawa2018" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[13] </div><div class="csl-right-inline">C. Furusawa and K. Kaneko, <span>“Formation of dominant mode by evolution in biological systems,”</span> <em>Physical Review E</em>, vol. 97, no. 4, p. 042410, Apr. 2018, doi: <a href="https://doi.org/10.1103/PhysRevE.97.042410">10.1103/PhysRevE.97.042410</a>.</div>
+</div>
+<div id="ref-martin2024" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[14] </div><div class="csl-right-inline">J. Martin, M. Lequerica Mateos, J. N. Onuchic, I. Coluzza, and F. Morcos, <span>“Machine learning in biological physics: <span>From</span> biomolecular prediction to design,”</span> <em>Proceedings of the National Academy of Sciences</em>, vol. 121, no. 27, p. e2311807121, Jul. 2024, doi: <a href="https://doi.org/10.1073/pnas.2311807121">10.1073/pnas.2311807121</a>.</div>
+</div>
+<div id="ref-chadebec2020" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[15] </div><div class="csl-right-inline">C. Chadebec, C. Mantoux, and S. Allassonnière, <span>“Geometry-<span>Aware Hamiltonian Variational Auto-Encoder</span>.”</span> arXiv, Oct. 2020. doi: <a href="https://doi.org/10.48550/arXiv.2010.11518">10.48550/arXiv.2010.11518</a>.</div>
+</div>
+<div id="ref-ghosh2025" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[16] </div><div class="csl-right-inline">O. M. Ghosh, G. Kinsler, B. H. Good, and D. A. Petrov, <span>“Low-dimensional genotype-fitness mapping across divergent environments suggests a limiting functions model of fitness,”</span> <em>bioRxiv</em>, 2025, doi: <a href="https://doi.org/10.1101/2025.04.05.647371">10.1101/2025.04.05.647371</a>.</div>
+</div>
+<div id="ref-petti2023" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[17] </div><div class="csl-right-inline">S. Petti, G. Reddy, and M. M. Desai, <span>“Inferring sparse structure in genotype-phenotype maps,”</span> <em>Genetics</em>, 2023, doi: <a href="https://doi.org/10.1093/genetics/iyad127">10.1093/genetics/iyad127</a>.</div>
+</div>
+<div id="ref-kingma2014a" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[18] </div><div class="csl-right-inline">D. P. Kingma and M. Welling, <span>“Auto-<span>Encoding Variational Bayes</span>.”</span> arXiv, May 2014. doi: <a href="https://doi.org/10.48550/arXiv.1312.6114">10.48550/arXiv.1312.6114</a>.</div>
+</div>
+<div id="ref-arvanitidis2018" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[19] </div><div class="csl-right-inline">G. Arvanitidis, L. K. Hansen, and S. Hauberg, <span>“Latent <span>Space Oddity</span>: On the <span>Curvature</span> of <span>Deep Generative Models</span>.”</span> arXiv, 2018. doi: <a href="https://doi.org/10.48550/arXiv.1710.11379">10.48550/arXiv.1710.11379</a>.</div>
+</div>
+<div id="ref-kaneko2015" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[20] </div><div class="csl-right-inline">K. Kaneko, C. Furusawa, and T. Yomo, <span>“Universal <span>Relationship</span> in <span>Gene-Expression Changes</span> for <span>Cells</span> in <span>Steady-Growth State</span>,”</span> <em>Physical Review X</em>, vol. 5, no. 1, p. 011014, 2015, doi: <a href="https://doi.org/10.1103/PhysRevX.5.011014">10.1103/PhysRevX.5.011014</a>.</div>
+</div>
+<div id="ref-russo2025b" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[21] </div><div class="csl-right-inline">C. J. Russo, K. Husain, and A. Murugan, <span>“Soft <span>Modes</span> as a <span>Predictive Framework</span> for <span>Low Dimensional Biological Systems</span> across <span>Scales</span>,”</span> <em>Annual Review of Biophysics</em>, Feb. 2025, doi: <a href="https://doi.org/10.1146/annurev-biophys-081624-030543">10.1146/annurev-biophys-081624-030543</a>.</div>
+</div>
+<div id="ref-hauberg2019" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[22] </div><div class="csl-right-inline">S. Hauberg, <span>“Only <span>Bayes</span> should learn a manifold (on the estimation of differential geometric structure from data).”</span> arXiv, Sep. 2019. Accessed: Apr. 21, 2023. [Online]. Available: <a href="https://arxiv.org/abs/1806.04994">https://arxiv.org/abs/1806.04994</a></div>
+</div>
+<div id="ref-orr2005" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[23] </div><div class="csl-right-inline">H. A. Orr, <span>“The genetic theory of adaptation: A brief history,”</span> <em>Nature Reviews Genetics</em>, vol. 6, no. 2, pp. 119–127, Feb. 2005, doi: <a href="https://doi.org/10.1038/nrg1523">10.1038/nrg1523</a>.</div>
+</div>
+<div id="ref-chadebec2022" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[24] </div><div class="csl-right-inline">C. Chadebec and S. Allassonnière, <span>“A <span>Geometric Perspective</span> on <span>Variational Autoencoders</span>.”</span> arXiv, Nov. 2022. doi: <a href="https://doi.org/10.48550/arXiv.2209.07370">10.48550/arXiv.2209.07370</a>.</div>
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
