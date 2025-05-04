@@ -111,3 +111,21 @@ the name of the axes in the latent space. We see this as an exciting direction
 for future work, where the combination of high-dimensional fitness and
 phenotypic data, guided by theoretical understanding of evolutionary dynamics,
 could shed light on the nature of biological adaptation.
+
+In our study, we employed two variants of variational autoencoders: one
+incorporating a Riemannian metric and one without this geometric constraint.
+While the geometry-informed model demonstrated marginally enhanced performance
+in capturing the underlying structure of the fitness data, it incurs a
+significant computational cost during training. Nevertheless, we consider the
+geometric information about the latent space essential for meaningful
+interpretation of the distances between evolved lineages. Just as a geographical
+map without a scale bar provides incomplete spatial information, a latent
+representation without metric properties offers limited insight into the
+relationships between data points. If these learned latent spaces are to be
+considered faithful representations of biological reality rather than mere
+computational abstractions, the geometric structure becomes critically
+important. We acknowledge recent proposals by @chadebec2022 that aim to
+approximate the metric tensor of standard variational autoencoders
+post-training. Investigating the efficacy of these more computationally
+efficient alternatives compared to explicitly geometry-informed models
+represents an important direction for future research.
