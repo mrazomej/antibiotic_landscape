@@ -98,5 +98,8 @@ repository](https://github.com/mrazomej/antibiotic_landscape)
 
 <!-- notes on latent space alignment -->
 {{< include _latent_align.qmd >}}
+
+<!-- notes on Metropolis-Kimura -->
+{{< include _metropolis_kimura.qmd >}}
 :::
 :::
