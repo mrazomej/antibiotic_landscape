@@ -42,7 +42,7 @@ println("Defining directories...")
 version_dir = "$(git_root())/output/metropolis-kimura_sim/v05"
 
 # Define output directory
-fig_dir = "$(git_root())/fig/main"
+fig_dir = "$(git_root())/fig/supplementary"
 
 # Generate output directory if it doesn't exist
 if !isdir(fig_dir)

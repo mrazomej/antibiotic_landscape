@@ -59,7 +59,7 @@ vae_dir = "$(version_dir)/vae"
 rhvae_state_dir = "$(vae_dir)/rhvae_model_state"
 vae_state_dir = "$(vae_dir)/vae_model_state"
 # Define output directory
-fig_dir = "$(git_root())/fig/main"
+fig_dir = "$(git_root())/fig/supplementary"
 
 # Generate output directory if it doesn't exist
 if !isdir(fig_dir)
@@ -651,7 +651,7 @@ end
 
 println("Saving figure...")
 
-# save("$(fig_dir)/fig05_v03.pdf", fig)
-# save("$(fig_dir)/fig05_v03.png", fig)
+# save("$(fig_dir)/figSI_05_kimura.pdf", fig)
+# save("$(fig_dir)/figSI_05_kimura.png", fig)
 
 fig
