@@ -651,7 +651,7 @@ end
 
 println("Saving figure...")
 
-# save("$(fig_dir)/figSI_05_kimura.pdf", fig)
-# save("$(fig_dir)/figSI_05_kimura.png", fig)
+save("$(fig_dir)/figSI_05_kimura.pdf", fig)
+save("$(fig_dir)/figSI_05_kimura.png", fig)
 
 fig
