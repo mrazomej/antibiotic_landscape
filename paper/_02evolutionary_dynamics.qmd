@@ -8,8 +8,8 @@ csl: ieee.csl
 ## Evolutionary Dynamics on Phenotype Space
 
 Having defined a simple phenotype-fitness model, we now instantiate a set of
-rules for evolutionary dynamics on this phenotypic space. We implement a model
-that captures two key features of evolutionary processes: the tendency of
+rules for evolutionary dynamics on this phenotypic space. We implement a simple
+model that captures two key features of evolutionary processes: the tendency of
 populations to move towards higher fitness and the constraints imposed by the
 accessibility of different phenotypes. We frame evolution as a biased random
 walk where each step is influenced by both the fitness landscape
@@ -39,23 +39,28 @@ fitness gradients, while lower values allow for more stochastic exploration of
 the phenotype space. Detailed mathematical derivations and analysis of this
 algorithm can be found in the Supplementary Materials.
 
-This formulation captures several key aspects of evolution. First, transitions
-to phenotypes with higher fitness are always accepted, reflecting the power of
-natural selection. Second, even transitions to lower fitness phenotypes can
-occur with some probability, capturing the role of genetic drift. Finally, the
-$GP(\underline{p})$ term ensures that transitions are influenced by the
-accessibility of phenotype---even a high-fitness phenotype is unlikely to be
-reached if it requires extremely rare genetic variants. @fig-02(A, top) shows
-some example trajectories in phenotypic space of multiple lineages evolving on a
-simple single-peaked fitness landscape. @fig-02(A, bottom) shows the fitness
-trajectory of these evolving lineages over time, i.e., the equivalent of the
-experimental observable we can access in a laboratory setting. When we examine
-these same phenotypic trajectories under different environmental conditions
-(@fig-02(B)), we observe that, as expected, while the path through phenotype
-space remains fixed, the fitness values we measure vary because each environment
-imposes its unique fitness landscape. The fitness values in all environments for
-a given lineage at a given time point define one fitness profile, as the ones
-depicted in @fig-01(D).
+This formulation represents a simplified model of evolutionary dynamics with
+specific assumptions: First, transitions to phenotypes with higher fitness are
+more likely to be fixed, reflecting selection's influence in our model, though
+in natural populations even beneficial mutations may be lost due to drift and
+other factors. Second, transitions to lower fitness phenotypes can occur with
+some probability, incorporating stochastic elements of evolution. Finally, the
+$GP(\underline{p})$ term accounts for the mutational accessibility of
+phenotypes—phenotypes requiring rare genetic variants are less likely to be
+reached even if highly fit. This approach draws on elements from adaptive
+dynamics and Metropolis-Hastings algorithms applied to evolutionary processes.
+@fig-02(A, top) shows example trajectories in phenotypic space of multiple
+lineages evolving on a simple single-peaked fitness landscape. @fig-02(A,
+bottom) shows the fitness trajectory of these evolving lineages over time, i.e.,
+the equivalent of the experimental observable we can access in a laboratory
+setting. When we examine these same phenotypic trajectories under different
+environmental conditions (@fig-02(B)), we observe that, as expected, while the
+path through phenotype space remains fixed, the fitness values we measure vary
+because each environment imposes its unique fitness landscape. The fitness
+values in all environments for a given lineage at a given time point define one
+fitness profile, as the ones depicted in @fig-01(D). As shown in the
+Supplementary Materials, our main results using a more detailed population
+genetics framework yielded consistent conclusions. 
 
 In what follows, we use synthetic data generated from this model, where ten
 lineages (initial phenotype coordinates) in two replicates (different

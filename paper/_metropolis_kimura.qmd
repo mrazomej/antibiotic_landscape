@@ -5,82 +5,22 @@ bibliography: references.bib
 csl: ieee.csl
 ---
 
-## Metropolis-Kimura Evolutionary Dynamics {#sec-metropolis}
+## Alternative Metropolis-Kimura Evolutionary Dynamics {#sec-metropolis-kimura}
 
-In the main text, we describe a simple algorithm for evolving a population as a
+In the main text, we described a simple algorithm for evolving a population as a
 biased random walk on a phenotypic space controlled by both a fitness function
-and a genotype-phenotype density function. Here, we provide a more detailed
-description of the algorithm and its implementation. 
-
-### Landscape Description
-
-We assume that phenotypes driving adaptation can be described by real-valued
-numbers. Let $\underline{x}(t) = (x_1(t), x_2(t), \cdots, x_N(t))$ be an $N$
-dimensional vector describing the phenotype of a population at time $t$. The
-fitness for a given environment $E$ is a scalar function $F_E(\underline{x})$
-such that
-
-$$
-F_E: \mathbb{R}^N \to \mathbb{R},
-$${#eq-fitnes}
-
-i.e, the coordinates in phenotype space map to a fitness value. Throughout this
-work, we consider a series of Gaussian fitness peaks, i.e.,
-
-$$
-F_E(\underline{x}) = 
-\sum_{p=1}^P A_p 
-\exp\left(
-    -\frac{1}{2}
-    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
-    \Sigma_p^{-1} 
-    (\underline{x} - \underline{\hat{x}}^{(p)})
-\right),
-$${#eq-fitness-peaks}
-
-where $P$ is the number of peaks, $A_p$ is the amplitude of the $p$-th peak,
-$\underline{\hat{x}}^{(p)}$ is the $N$-dimensional vector of optimal phenotypes
-for the $p$-th peak, and $\Sigma_p$ is the $N \times N$ covariance matrix for
-the $p$-th peak. This formulation allows for multiple peaks in the fitness
-landscape, each potentially having different heights, widths, and covariance
-structures between dimensions. The covariance matrix $\Sigma_p$ captures
-potential interactions between different phenotypic dimensions, allowing for
-more complex and realistic fitness landscapes.
-
-In the same vein, we define a genotype-phenotype density function
-$GP(\underline{x})$ as a scalar function that maps a phenotype to a mutational
-effect, i.e.,
-
-$$
-GP: \mathbb{R}^N \to \mathbb{R},
-$${#eq-genotype-phenotype-density}
-
-where $GP(\underline{x})$ is related to the probability of a genotype mapping to
-a phenotype $\underline{x}$. As a particular density function we will consider a
-set of negative Gaussian peaks that will serve as "mutational barriers" that
-limit the range of phenotypes that can be reached. The deeper the peak, the less
-probable it is that a genotype will map to a phenotype within the peak. This
-idea captured by the following mutational landscape
-
-$$
-GP(\underline{x}) = 
-\sum_{p=1}^P -B_p 
-\exp\left(
-    -\frac{1}{2}
-    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
-    \Sigma_p^{-1} 
-    (\underline{x} - \underline{\hat{x}}^{(p)})
-\right),
-$${#eq-genotype-phenotype-density-peaks}
-
-where $B_p$ is the depth of the $p$-th peak, and $\underline{\hat{x}}^{(p)}$ is
-the $N$-dimensional vector of optimal phenotypes for the $p$-th peak.
+and a genotype-phenotype density function. Here, we propose an alternative
+algorithm that combines elements of the Metropolis-Hastings algorithm with
+Kimura's classical population genetics theory.
 
 ### Metropolis-Kimura Algorithm
 
-We introduce a biologically motivated algorithm that combines elements of the
-Metropolis-Hastings algorithm with Kimura's classical population genetics
-theory. This approach implements a two-step process that separately models:
+In @sec-metropolis, we described a simple framework with a fitness function and
+a genotype-phenotype density function. Here, we use the same framework but
+introduce a biologically motivated algorithm for the evolutionary dynamics that
+combines elements of the Metropolis-Hastings algorithm with Kimura's classical
+population genetics theory. This approach implements a two-step process that
+separately models:
 
 1. The probability of mutation occurring (mutation accessibility) as governed by the genotype-phenotype density.
 2. The probability of fixation within a population (selection) determined by the fitness effect of such mutation and the effective population size.
@@ -165,3 +105,58 @@ positions (crosses) and final positions (triangles). Lower panels: Temporal
 evolution of population fitness. Panels from left to right show increasing
 values of population size ($N$), demonstrating increasingly
 deterministic adaptive trajectories.](./fig/supplementary/figSI_sim_population_effect){#fig-metropolis-population-effect}
+
+### Main Text Results
+
+Having developed this alternative algorithm for the population dynamics, we
+reproduce the results from the main text using this new algorithm. In
+particular, Figure 2, 4, and 5 in the main text used synthetic data generated
+by the algorithm described in @sec-metropolis. We now show that the same results
+can be obtained using the Metropolis-Kimura algorithm.
+
+#### Figure 2 Main Text
+
+![**Evolutionary dynamics on phenotype space with Metropolis-Kimura dynamics**.
+(A) Top: Metropolis-like evolutionary dynamics on phenotype space. Each line
+represents the trajectory of a lineage as it evolves over time, with crosses and
+triangles denoting the initial phenotypic coordinate of a few selected lineages.
+Note that trajectories tend to move towards higher fitness values, avoiding low
+genotype-to-phenotype density regions. Bottom: Fitness over time of the same
+trajectories shown above. (B) The same trajectories shown in (A) overlaid on
+different fitness maps determined by different environments. Although the
+phenotypic coordinates of the genotypes remain the same (top panels), the
+resulting fitness readouts change as the topography of the environment-dependent
+fitness landscape changes (bottom panels).](./fig/supplementary/figSI_02_kimura){#fig-02-kimura}
+
+#### Figure 4 Main Text
+
+![**Geometry-informed latent space captures phenotypic structure and improves
+reconstruction accuracy**. (A) Latent space coordinates of simulated fitness
+profiles colored by lineage, after alignment with the ground truth phenotype
+space using Procrustes analysis. The RHVAE better preserves phenotypic
+relationships than PCA or vanilla VAE, as evidenced by the highlighted points
+(diamond markers). (B) Comparison of all pairwise Euclidean distances between
+genotypes in the ground truth phenotypic space versus the different latent
+spaces, showing RHVAE better preserves the original distances. Given the large
+number of data points and the even larger number of pairwise comparisons, the
+data are shown as a smear rather than single points. (C) Reconstruction error
+(MSE) comparison showing 2D-RHVAE achieves accuracy comparable to a
+10-dimensional PCA model. (D) Metric volume visualization of the RHVAE latent
+space (left) and with projected data points (right), revealing regions of high
+curvature that correspond to areas of low genotype-phenotype density in the
+simulation.](./fig/supplementary/figSI_04_kimura){#fig-04-kimura}
+
+#### Figure 5 Main Text
+
+![**Geometry-informed latent space enables accurate reconstruction of complex
+fitness landscapes**. Comparison of ground truth and reconstructed fitness
+landscapes across multiple environments. The first row shows examples of the
+original simulated fitness landscapes used to generate the data. Subsequent rows
+show reconstructions using the RHVAE (second row), VAE (third row), and PCA
+(fourth row) models. The RHVAE accurately captures the underlying topography,
+including the number and relative positions of fitness peaks. While the VAE
+captures general landscape shapes, it lacks a geometric metric to define
+prediction reliability regions. PCA fails to represent the nonlinear structure
+of the landscapes, demonstrating the limitations of linear dimensionality
+reduction for complex fitness landscape
+reconstruction.](./fig/supplementary/figSI_05_kimura){#fig-05-kimura}
