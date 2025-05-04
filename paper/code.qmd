@@ -1,33 +1,77 @@
 ---
 title: "Code Overview"
-author: "Manuel Razo-Mejia"
+author:
+  - name: Manuel Razo-Mejia
+    orcid: 0000-0002-9510-0527
+    affiliations: 
+      - ref: stanfordbio
+affiliations:
+  - id: stanfordbio
+    number: 1
+    name: Department of Biology, Stanford University
+    city: Stanford
+    state: California
+    country: United States of America
 format:
   html:
     toc: true
 ---
 
+
 # Code Documentation
 
-This section provides interactive code examples and demonstrations of the computational methods used in our research on evolutionary landscapes.
+This section provides interactive code examples and demonstrations of the
+computational methods used in our research on evolutionary landscapes and
+phenotype-to-fitness maps.
 
 ## Available Notebooks
 
-We've provided several Jupyter notebooks to help you understand our analysis workflow:
+We provide several computational notebooks that showcase different aspects of
+our methodology and analysis:
 
-1. [Evolutionary Dynamics](code/evolutionary_dynamics.qmd) - Simulating evolutionary dynamics in a 2D phenotypic space.
-2. [RHVAE on Simulated Data](code/rhvae_sim.qmd) - Training a Riemannian Hamiltonian Variational Autoencoder (RHVAE) on simulated data.
+1. **[Evolutionary Dynamics Simulation](code/evolutionary_dynamics.qmd)** 
+- Simulates the dynamics of populations evolving in a 2-dimensional phenotypic
+space under various fitness landscapes and fixed mutational constraints. This
+notebook demonstrates how populations navigate phenotypic space influenced by
+both fitness gradients and genotype-phenotype density.
+
+2. **[RHVAE on Simulated Data](code/rhvae_sim.qmd)** 
+- Implements a Riemannian Hamiltonian Variational Autoencoder (RHVAE) to analyze
+fitness profiles generated from evolutionary simulations. This notebook shows
+how we can learn low-dimensional representations of high-dimensional fitness
+data while preserving the geometric structure of the underlying phenotypic
+space.
+
+3. **[Bayesian Inference of IC₅₀ Values](code/iwasawa_bayesian_inference.qmd)**
+- Performs Bayesian inference on the IC₅₀ values of antibiotic resistance
+landscapes using experimental data. This notebook demonstrates model fitting of
+dose-response curves using different parameterizations and implements outlier
+detection techniques.
+
+4. **[Metropolis-Kimura Evolution](code/metropolis_kimura_evolution.qmd)** 
+- Explores a biologically motivated model of evolution combining elements of the
+Metropolis-Hastings algorithm with Motoo Kimura's population genetics theory.
+This model accounts separately for mutation accessibility and selection via
+fixation probability.
+
+5. **[Metropolis-Hastings Evolution](code/metropolis_hastings_evolution.qmd)** 
+- Implements the Metropolis-Hastings algorithm for simulating evolutionary
+dynamics on fitness landscapes with mutational constraints.
 
 ## Running the Code
 
-All notebooks can be run interactively if you have Julia installed with the required packages. Each notebook is self-contained with the necessary package imports.
+All notebooks can be run interactively if you have Julia installed with the
+required packages. Each notebook is self-contained with detailed explanations,
+mathematical background, and visualization of results.
 
 ### Required Packages
 
-- CairoMakie
-- DataFrames
-- CSV
-- Statistics
-- StatsBase
-- Other specialized packages as needed
+To run these notebooks, you'll need:
 
-Click on any of the notebooks in the sidebar to explore the code in detail. 
+- **Data Processing**: `DataFrames`, `CSV`, `DimensionalData`
+- **Scientific Computing**: `LinearAlgebra`, `StatsBase`, `Distributions`, `LsqFit`
+- **Bayesian Inference**: `Turing`
+- **Deep Learning**: `Flux`, `AutoEncoderToolkit`
+- **Visualization**: `CairoMakie`, `ColorSchemes`
+
+Click on any of the notebooks in the sidebar to explore the code in detail.
