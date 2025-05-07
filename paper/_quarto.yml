@@ -29,7 +29,7 @@ author:
       - ref: nwqbio
       - ref: nweng
     corresponding: true
-  - name: Dmitri Petrov
+  - name: Dmitri A. Petrov
     orcid: 0000-0002-3664-9130
     email: dpetrov@stanford.edu
     affiliations:
