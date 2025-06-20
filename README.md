@@ -1,76 +1,209 @@
-# Git + GitHub As A Platform For Reproducible Research 
+# Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps
 
-## Overview
-This repository sets out the skeleton of an organizational structure used for scientific research. It loosely follows what I have used for several of my research projects and I hope it inspires you to conduct your research in an open, reproducible, and honest manner.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Julia](https://img.shields.io/badge/Julia-1.9+-blue.svg)](https://julialang.org/)
 
-## How to Use
-To use this template for your research, fork this repository, change the name
-to something descriptive for your project, and adjust the licensing as you
-see fit.
+This repository contains the code and data for the research project on learning
+evolutionary landscapes using geometric deep learning methods. The project
+demonstrates how Riemannian Hamiltonian Variational Autoencoders (RHVAE) can
+uncover hidden structure in high-dimensional fitness data and provide insights
+into evolutionary dynamics.
 
-To use this repository for your own research, simply click "Use this template" 
-at the top of this page
+## 📖 Publication
 
-> :warning: :warning: :warning: I wouldn't advise forking this repository. As you can only fork a given repository once, there is little utility in forking this repo if you hope to use it again in your future projects :warning: :warning: :warning:
+- **Paper**: [Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps](https://mrazomej.github.io/antibiotic_landscape/paper.html)
+- **Preprint**: [bioRxiv](https://www.biorxiv.org/content/10.1101/2025.05.07.652616v1)
 
-Alternatively, you can clone the repository and restructure as necessary. Via 
-the command line,
+## 🎯 Overview
+
+This project addresses the fundamental challenge in evolutionary biology of
+understanding the complex relationships between genotypes, phenotypes, and
+fitness. We present a computational framework that:
+
+1. **Learns low-dimensional representations** of high-dimensional fitness
+   profiles using geometry-informed variational autoencoders
+2. **Captures nonlinear structure** in phenotype-fitness maps that linear
+   methods miss
+3. **Provides geometric information** about the learned latent space for
+   meaningful interpretation
+4. **Demonstrates superior predictive power** for out-of-sample data compared to
+   traditional approaches
+
+The method is validated on simulated adaptive dynamics and applied to real
+antibiotic resistance data from *E. coli*.
+
+## 🏗️ Repository Structure
 
 ```
-> git clone git@github.com:gchure/reproducible_research
+antibiotic_landscape/
+├── Antibiotic/                    # Main Julia module
+│   ├── src/
+│   │   ├── Antibiotic.jl         # Module entry point
+│   │   ├── geometry.jl           # Geometric analysis functions
+│   │   ├── metropolis.jl         # Metropolis-Hastings evolution
+│   │   ├── stats.jl              # Statistical utilities
+│   │   └── viz.jl                # Visualization functions
+│   └── docs/                     # Documentation
+├── code/                         # Analysis and processing code
+│   ├── analysis/                 # Data analysis scripts
+│   ├── exploratory/              # Exploratory notebooks
+│   ├── fig/                      # Figure generation scripts
+│   └── processing/               # Data processing pipelines
+│       ├── beta-rhvae_*/         # RHVAE training and analysis
+│       ├── kinsler_2020/         # Kinsler dataset processing
+│       └── mcmc_iwasawa_logistic/ # MCMC analysis
+├── data/                         # Raw and processed data
+├── paper/                        # Manuscript and figures
+│   ├── fig/                      # Generated figures
+│   ├── code/                     # Paper-specific code
+│   └── *.qmd                     # Quarto manuscript files
+└── docs/                         # Documentation website
 ```
-## Layout
 
-The repository is split into seven main directories, many of which have subdirectories. This structure has been designed to be easily navigable by humans and computers alike, allowing for rapid location of specific files and instructions. Within each directory is a `README.md` file which summarizes the purpose of that directory as well as some examples where necessary. This structure may not be perfect for your intended us and may need to be modified. Each section is briefly described below. 
+## 🚀 Quick Start
 
-### **`experiments`** 
-Where all of the experimental information lives, including any *executed* code. lives. This includes pipelines, scripts, and figure files. 
- * **`processing`**: Any code used to *transform* the data into another type should live here. This can include everything from parsing of text data, image segmentation/filtering, or simulations.
- * **`analysis`**: Any code to to *draw conclusions* from an experiment or data set. This may include regression, dimensionality reduction, or calculation of various quantities.
- * **`exploratory`**: A sandbox where you keep a record of your different approaches to transformation, interpretation, cleaning, or generation of data.
- * **`figures`**: Any code used to generate figures for your finished work, presentations, or for any other use.
+### Prerequisites
 
-### **`data`** 
-All raw data collected from your experiments as well as copies of the transformed data from your processing code. 
+- Julia 1.9 or higher
+- Required Julia packages (see `Antibiotic/Project.toml`)
 
-### **`miscellaneous`** 
-Files that may not be code, but are important for reproducibility of your findings.
-* **`protocols`**: A well annotated and general description of your experiments. These protocols should be descriptive enough for someone to follow your experiments independently 
-* **`materials`**: Information regarding the materials used in your experiments or data generation. This could include manufacturer information, records of purity, and/or lot and catalog numbers.
-* **`software details`**: Information about your computational environment that are necessary for others to execute your code. This includes details about your operating system, software version and required packages.
+### Installation
 
-### **`tests`** 
-All test suites for your code. *Any custom code you've written should be thoroughly and adequately tested to make sure you know how it is working.*
+1. Clone the repository:
+```bash
+git clone https://github.com/mrazomej/antibiotic_landscape.git
+cd antibiotic_landscape
+```
 
-### **`software_module`** 
-Custom code you've written that is *not* executed directly, but is called from files in the `code` directory. If you've written your code in Python, for example, this can be the root folder for your custom software module or simply house a file with all of your functions. 
+2. Install Julia dependencies:
+```bash
+cd Antibiotic
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+```
 
-### **`templates`** 
-Files that serve as blank templates that document the procedures taken for each experiment, simulation, or analysis routine. 
+3. Activate the environment and run examples:
+```julia
+using Pkg
+Pkg.activate("Antibiotic")
+using Antibiotic
+```
 
-### Required Files
-There are some files which I consider to be mandatory for any project.
+## 📊 Key Components
 
-1. **`LICENSE`**: A legal protection of your work. *It is important to think deeply about the licensing of your work, and is not a decision to be made lightly. See [this useful site](https://choosealicense.com/) for more information about licensing and choosing the correct license for your project.*
+### 1. Antibiotic Module (`Antibiotic/`)
 
-2. **`README.md`**: A descriptive yet succinct description of your research project and information regarding the structure outlined below.
+The main Julia module providing core functionality:
 
-# License Information
+- **`geometry.jl`**: Procrustes analysis, Fréchet distance calculations, and
+  geometric transformations
+- **`metropolis.jl`**: Metropolis-Hastings evolutionary dynamics simulation with
+  Gaussian fitness landscapes
+- **`stats.jl`**: Statistical utilities for data analysis
+- **`viz.jl`**: Visualization functions for results
 
-<p xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#">
-  <a rel="license"
-     href="http://creativecommons.org/publicdomain/zero/1.0/">
-    <img src="http://i.creativecommons.org/p/zero/1.0/88x31.png" style="border-style: none;" alt="CC0" />
-  </a>
-  <br />
-  To the extent possible under law,
-  <a rel="dct:publisher"
-     href="github.com/gchure/reproducible_research">
-    <span property="dct:title">Griffin Chure</span></a>
-  has waived all copyright and related or neighboring rights to
-  <span property="dct:title">A template for using git as a platform for reproducible scientific research</span>.
-This work is published from:
-<span property="vcard:Country" datatype="dct:ISO3166"
-      content="US" about="github.com/gchure/reproducible_research">
-  United States</span>.
-</p>
+### 2. Processing Pipelines (`code/processing/`)
+
+Organized by model type and version:
+
+- **`beta-rhvae_jointlogencoder_simpledecoder_iwasawa_mcmc/`**: RHVAE training
+  and analysis on Iwasawa dataset
+- **`kinsler_2020/`**: Processing for Kinsler et al. fitness data
+- **`mcmc_iwasawa_logistic/`**: MCMC analysis of IC₅₀ values
+
+### 3. Analysis Scripts (`code/analysis/`)
+
+- **`geodesic_plots.jl`**: Visualization of geodesic paths in latent space
+- **`pca_vs_geodesics_plots.jl`**: Comparison of PCA vs. geometric methods
+
+### 4. Exploratory Notebooks (`code/exploratory/`)
+
+Jupyter notebooks for:
+- Gradient ascent analysis
+- Bayesian inference
+- Differential geometry exploration
+- Legacy experiments
+
+## 🔬 Core Methods
+
+### Riemannian Hamiltonian Variational Autoencoder (RHVAE)
+
+The main innovation of this work is the use of geometry-informed variational
+autoencoders that:
+
+- Learn a low-dimensional latent representation of high-dimensional fitness data
+- Preserve geometric structure through a learned metric tensor
+- Enable meaningful distance calculations in the latent space
+- Provide superior reconstruction and prediction compared to linear methods
+
+### Metropolis-Hastings Evolution
+
+Simulated evolutionary dynamics using:
+- Gaussian fitness landscapes with multiple peaks
+- Metropolis-Hastings sampling for population evolution
+- Environment-specific fitness landscapes
+- Trajectory analysis and comparison
+
+### Geometric Analysis
+
+Tools for analyzing the learned latent space:
+- Procrustes analysis for alignment
+- Fréchet distance for trajectory comparison
+- Geodesic path calculation
+- Metric tensor visualization
+
+## 📈 Results
+
+The project demonstrates:
+
+1. **Superior dimensionality reduction**: 2D RHVAE achieves reconstruction
+   accuracy comparable to 5D PCA
+2. **Better out-of-sample prediction**: Nonlinear latent space more accurately
+   predicts antibiotic resistance profiles
+3. **Geometric interpretability**: Learned metric provides meaningful distance
+   measures
+4. **Evolutionary insights**: Captures constraints and predictability in
+   antibiotic resistance evolution
+
+## 🧪 Data
+
+The analysis uses:
+- **Iwasawa et al. (2022)**: High-throughput fitness measurements of *E. coli*
+  under different antibiotic pressures
+- **Simulated data**: Metropolis-Hastings evolution on Gaussian fitness
+  landscapes
+- **Cross-validation**: Out-of-sample prediction testing
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
+
+## 🙏 Acknowledgments
+
+We thank:
+- David Larios, Enrique Amaya, and Griffin Chure for helpful discussions
+- Jose Aguilar-Rodriguez, Stefan Bassler, Benjamin Good, and others for
+  manuscript feedback
+- Junichiro Iwasawa for sharing the raw data from his study
+
+## 📚 References
+
+1. Iwasawa, J., et al. (2022). Analysis of the evolution of resistance to
+   multiple antibiotics enables prediction of the Escherichia coli
+   phenotype-based fitness landscape. *PLOS Biology*, 20(12), e3001920.
+
+2. Chadebec, C., Mantoux, C., & Allassonnière, S. (2020). Geometry-Aware
+   Hamiltonian Variational Auto-Encoder. *arXiv preprint* arXiv:2010.11518.
+
+3. Kinsler, G., Geiler-Samerotte, K., & Petrov, D. A. (2020). Fitness variation
+   across subtle environmental perturbations reveals local modularity and global
+   pleiotropy of adaptation. *eLife*, 9, e61271.
+
+## 📞 Contact
+
+- **Manuel Razo-Mejia**: Department of Biology, Stanford University
+- **Madhav Mani**: NSF-Simons Center for Quantitative Biology, Northwestern
+  University
+- **Dmitri A. Petrov**: Department of Biology, Stanford University
+
+For questions about the code or methodology, please open an issue on GitHub.
