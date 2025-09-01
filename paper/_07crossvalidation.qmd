@@ -29,8 +29,15 @@ missing antibiotic. This approach allows us to directly compare how well
 different dimensionality reduction methods capture information needed for
 prediction. In essence, we use seven antibiotics to place each genotype in
 latent space, then test how accurately these coordinates predict resistance to
-the eighth antibiotic. We direct interested readers to the Supplementary
-Material section E for a detailed description of the of both approaches.
+the eighth antibiotic. 
+<span style="color: #912E27;"> 
+We emphasize that this prediction is not parameter-free:
+the model must first be calibrated on the available environments. What is novel
+is that the latent structure inferred without access to the missing antibiotic
+nevertheless generalizes well, allowing us to reconstruct its response profile
+post hoc. We direct interested readers to the Supplementary Material section E
+for a detailed description of the of both approaches.
+</span>
 
 @fig-07(B) compares the predictive power of the three models across different
 numbers of linear latent space dimensions in terms of reconstruction error. For

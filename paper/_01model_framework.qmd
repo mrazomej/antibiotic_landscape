@@ -78,6 +78,15 @@ asking whether it is possible to reverse the mapping from phenotypes to fitness
 values and predict the phenotypic coordinates of a genotype based only on its
 fitness values across multiple environments.
 
+<span style="color: #912E27;"> 
+We stress that the latent space inferred by our framework should not be
+interpreted as a one-to-one reconstruction of the full phenotypic space.
+Rather, it captures effective structural features of the phenotype–fitness
+relationship given the data available. The fidelity of this representation will
+depend on experimental design, data quantity, and dimensionality, all of which
+we only begin to explore here.
+</span>
+
 ![**Model of phenotype-fitness dynamics**. (A) Schematic of the
 genotype-phenotype-fitness map. A pair of genotypes $g^{(\text{b})}$ and
 $g^{(\text{r})}$ are shown. These genotypes map to two relevant phenotypes $p_1$

@@ -17,7 +17,14 @@ low-dimensional---meaning that a large number of genotypes result in a small
 number of distinct phenotypes [@kaneko2015; @louis2016; @furusawa2018;
 @russo2025b]---there is hope that we can leverage these large-scale datasets to
 uncover features of the phenotypic space underlying adaptation in a data-driven
-way.
+way. 
+<span style="color: #912E27;"> 
+These studies support a view where, although cellular phenotype is
+intrinsically high-dimensional, adaptation is constrained by a few effective
+degrees of freedom. This distinction between mechanistic high dimensionality and
+effective low dimensionality helps reconcile our assumption with the underlying
+biological complexity.
+</span>
 
 The main approach taken so far towards this goal has been to use linear
 decompositions of the fitness data to identify the principal components of
@@ -62,6 +69,26 @@ changes in the phenotypic state of the evolving lineages (see Supplementary
 Material section E for a detailed discussion). The results show that the geometry-informed
 latent space outperforms the linear model based on principal components by a
 significant margin.
+
+<span style="color: #912E27;"> 
+Our approach does not yet allow prediction of responses to completely unseen
+antibiotics without calibration data. Rather, its contribution lies in
+demonstrating that nonlinear latent variable models can capture the effective
+structure of high-dimensional fitness profiles and generalize across held-out
+environments. This shows that the low-dimensional manifold underlying adaptation
+is robust enough to be recovered even when parts of the data are missing, a
+point that was not guaranteed from prior linear approaches.
+</span>
+
+<span style="color: #912E27;"> 
+Our interpretation of latent space as a proxy for phenotypic space comes with
+limitations. The degree to which this mapping is faithful depends on factors
+such as data richness, experimental design, and the intrinsic dimensionality of
+the underlying traits. A full sensitivity analysis will require larger and more
+varied datasets, which is beyond the scope of the present work. Thus, our
+results should be viewed as proof of principle rather than a definitive
+characterization.
+</span>
 
 Our work can be viewed as a modern, data-driven implementation of Fisher's
 geometric model of adaptation [@orr2005]. While Fisher conceptualized adaptation
