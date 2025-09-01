@@ -27,7 +27,7 @@ important nonlinearities in the genotype-phenotype-fitness map. Applying these
 linear models to data generated from highly nonlinear processes can lead to
 misleading interpretations of the underlying dimensionality and structure of the
 phenotypic space, as revealed by embedding theorems from differential geometry
-(see Supplementary Material for a detailed discussion). In this work, we take a
+(see Supplementary Material section D for a detailed discussion). In this work, we take a
 step towards removing this limitation by proposing a nonlinear dimensionality
 reduction method that can capture the underlying nonlinear structure of the
 phenotype-fitness map. We take advantage of recent advances in geometry-informed
@@ -59,7 +59,7 @@ linear approaches. Moreover, increasing the dimensionality of the latent space
 from two to three dimensions only marginally improves the predictive power of
 the model, suggesting that only two degrees of freedom are needed to capture the
 changes in the phenotypic state of the evolving lineages (see Supplementary
-Material for a detailed discussion). The results show that the geometry-informed
+Material section E for a detailed discussion). The results show that the geometry-informed
 latent space outperforms the linear model based on principal components by a
 significant margin.
 
@@ -89,7 +89,7 @@ question of whether evolutionary trajectories in latent space follow the
 shortest path between pre- and post-evolved genotypes. Although not fully
 conclusive, when comparing the shortest path in latent space between the initial
 and final latent coordinates, some *E. coli* lineages seem to follow the
-predicted shortest path (See Supplementary Material for a detailed discussion).
+predicted shortest path (See Supplementary Material section F for a detailed discussion).
 It is tempting to speculate about the biological significance of this
 observation and whether it is a more general property of the evolutionary
 process, as it suggests a potential analogous least-action principle of

@@ -30,7 +30,7 @@ different dimensionality reduction methods capture information needed for
 prediction. In essence, we use seven antibiotics to place each genotype in
 latent space, then test how accurately these coordinates predict resistance to
 the eighth antibiotic. We direct interested readers to the Supplementary
-Material for a detailed description of the of both approaches.
+Material section E for a detailed description of the of both approaches.
 
 @fig-07(B) compares the predictive power of the three models across different
 numbers of linear latent space dimensions in terms of reconstruction error. For
@@ -47,7 +47,7 @@ under study, allowing for more accurate predictions of out-of-sample data.
 Furthermore, increasing the dimensionality of the nonlinear latent space from
 two to three dimensions only marginally improves the predictive power of the
 model, suggesting that the 2D nonlinear latent space captures most of the
-information about the phenotypic state of the system (see Supplementary Material
+information about the phenotypic state of the system (see Supplementary Material section E
 for a detailed discussion).
 
 ![**Nonlinear latent space models demonstrate superior predictive power for

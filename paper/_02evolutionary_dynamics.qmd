@@ -21,23 +21,33 @@ phenotype $\underline{p}'$ is drawn from a proposal distribution
 $q(\underline{p}' \mid \underline{p})$. Whether this transition
 occurs---equivalent to the mutation being fixed in the population---depends on
 the relative fitness of the new phenotype and how easily it can be reached
-through mutations. Specifically, as derived in the Supplementary Materials, the
+through mutations. Specifically, as derived in the Supplementary Materials section B, the
 probability of accepting a transition is given by
 
 $$
+\textcolor{#912E27}{
 P_{\text{accept}} = \min\left(
     1,
-    \frac{F(\underline{p}')^\beta GP(\underline{p}')^\beta}
-    {F(\underline{p})^\beta GP(\underline{p})^\beta}
+    \frac{F(\underline{p}')^{\beta_F} GP(\underline{p}')^{\beta_{GP}}}
+    {F(\underline{p})^{\beta_F} GP(\underline{p})^{\beta_{GP}}}
 \right),
+}
 $${#eq-acceptance-probability}
 
-where $\beta$ is a parameter that controls the balance between selection and
-drift. This parameter can be interpreted as the strength of selection---higher
-values of $\beta$ lead to more deterministic trajectories that closely follow
-fitness gradients, while lower values allow for more stochastic exploration of
-the phenotype space. Detailed mathematical derivations and analysis of this
-algorithm can be found in the Supplementary Materials.
+<span style="color: #912E27;">
+where $\beta_F$ and $\beta_{GP}$ are parameters that separately control the
+balance between selection and drift. These parameters can be interpreted as the
+strength of selection and the inaccessibility of certain phenotypes,
+respectively---higher values of $\beta_F$ lead to more deterministic
+trajectories that closely follow fitness gradients, while lower values allow for
+more stochastic exploration of the phenotype space. In a similar fashion, higher
+values of $\beta_{GP}$ lead to trajectories that avoid low genotype-to-phenotype
+density regions with higher probability. Detailed mathematical derivations and
+analysis of this algorithm can be found in the Supplementary Materials section
+B. For simplicity, in this work we make the simplifying assumption that $\beta_F
+= \beta_{GP} = \beta$, as this was sufficient to explore the effects of varying
+evolutionary stochasticity on the overall landscape.
+</span>
 
 This formulation represents a simplified model of evolutionary dynamics with
 specific assumptions: First, transitions to phenotypes with higher fitness are
@@ -59,7 +69,7 @@ path through phenotype space remains fixed, the fitness values we measure vary
 because each environment imposes its unique fitness landscape. The fitness
 values in all environments for a given lineage at a given time point define one
 fitness profile, as the ones depicted in @fig-01(D). As shown in the
-Supplementary Materials, our main results using a more detailed population
+Supplementary Materials section K, our main results using a more detailed population
 genetics framework yielded consistent conclusions. 
 
 In what follows, we use synthetic data generated from this model, where ten

@@ -63,8 +63,8 @@ probable it is that a genotype will map to a phenotype within the peak. This
 idea captured by the following mutational landscape
 
 $$
-GP(\underline{x}) = 
-\sum_{p=1}^P -B_p 
+GP(\underline{x}) = C -
+\sum_{p=1}^P B_p
 \exp\left(
     -\frac{1}{2}
     (\underline{x} - \underline{\hat{x}}^{(p)})^T 
@@ -73,8 +73,10 @@ GP(\underline{x}) =
 \right),
 $${#eq-genotype-phenotype-density-peaks}
 
-where $B_p$ is the depth of the $p$-th peak, and $\underline{\hat{x}}^{(p)}$ is
-the $N$-dimensional vector of optimal phenotypes for the $p$-th peak.
+where $C$ is a constant offset---set to be the negative of the lowest peak
+value to have the maximum value of 1, and $B_p$ is the depth of the $p$-th peak, and
+$\underline{\hat{x}}^{(p)}$ is the $N$-dimensional vector of optimal phenotypes
+for the $p$-th peak.
 
 ### Metropolis-Hastings Algorithm
 
@@ -82,29 +84,31 @@ The Metropolis-Hastings algorithm is a Markov Chain Monte Carlo (MCMC) method
 used to sample from a target probability distribution $\pi(\underline{x})$. In
 our evolutionary context, $\pi(\underline{x})$ can be thought of as the
 steady-state distribution of phenotypes under the combined influence of
-selection and mutation. We can define this distribution as
-
+selection and mutation.
+<span style="color: #912E27;">
+We can define this distribution as
+</span>
 $$
-\pi(\underline{x}) \propto \exp\left(
-    -\beta U(\underline{x})
-\right),
+\textcolor{#912E27}{
+\pi(\underline{x}) \propto 
+F_E(\underline{x})^{\beta_F} GP(\underline{x})^{\beta_{GP}},
+}
 $${#eq-metropolis-hastings-target-distribution}
 
-where $U(\underline{x})$ is the potential function defined as
-
-$$
-U(\underline{x}) = \ln F_E(\underline{x}) + \ln GP(\underline{x}).
-$${#eq-metropolis-hastings-potential-function}
-
-This functional form of the potential function is motivated by the desired
-property of the potential function being a sum of the fitness and
-genotype-phenotype density functions. $\beta$ in
-@eq-metropolis-hastings-target-distribution is an inverse temperature parameter
-(from statistical mechanics) that controls the level of stochasticity in the
-system. A higher $\beta$ means the system is more likely to move towards higher
-fitness and genotype-phenotype density. In a sense, $\beta$ can be related to
-the effective population size, controlling the directness of the evolutionary
-dynamics.
+<span style="color: #912E27;">
+where $\beta_F$ and $\beta_{GP}$ are parameters that separately control the
+influence of fitness and genotype-phenotype density, respectively. $\beta_F$ can
+be interpreted as a parameter controlling the strength of selection, akin to an
+effective population size, while $\beta_{GP}$ controls the ruggedness of the
+mutational landscape. For the purposes of this study, we made the simplifying
+assumption that $\beta_F = \beta_{GP} = \beta$, as this was sufficient to explore
+the effects of varying evolutionary stochasticity on the overall landscape. This
+parameter $\beta$ can be seen as an inverse temperature parameter (from
+statistical mechanics) that controls the level of stochasticity in the system. A
+higher $\beta$ means the system is more likely to move towards higher fitness and
+genotype-phenotype density. In a sense, $\beta$ can be related to the effective
+population size, controlling the directness of the evolutionary dynamics.
+</span>
 
 At each step, we propose a new phenotype $\underline{x}{\prime}$ from a proposal
 distribution $q(\underline{x}{\prime} | \underline{x})$. For simplicity, we can
@@ -141,26 +145,36 @@ P_{\text{accept}} = \min\left(
     \right).
 $${#eq-metropolis-hastings-acceptance-probability-simplified}
 
-Substituting @eq-metropolis-hastings-target-distribution and
-@eq-metropolis-hastings-potential-function into
-@eq-metropolis-hastings-acceptance-probability-simplified, we get:
-
+<span style="color: #912E27;">
+Substituting @eq-metropolis-hastings-target-distribution into
+@eq-metropolis-hastings-acceptance-probability-simplified, we get the general
+acceptance probability as
+<span style="color: #912E27;">
 $$
-P_{\text{accept}} = \min\left(
-    1, 
-    e^{\beta [\ln F_E(\underline{x}{\prime}) + \ln M(\underline{x}{\prime})] - 
-    \beta [\ln F_E(\underline{x}) + \ln M(\underline{x})]}
-    \right).
-$${#eq-metropolis-hastings-acceptance-probability-simplified-2}
-
-This can be rewritten as
-
-$$
+\textcolor{#912E27}{
 P_{\text{accept}} = \min\left(
     1,
-    \frac{F_E(\underline{x}{\prime})^β GP(\underline{x}{\prime})^β}
-    {F_E(\underline{x})^β GP(\underline{x})^β}
+    \frac{
+        F_E(\underline{x}{\prime})^{\beta_F} GP(\underline{x}{\prime})^{\beta_{GP}}
+    }{
+        F_E(\underline{x})^{\beta_F} GP(\underline{x})^{\beta_{GP}}
+    }
+\right).
+}
+$${#eq-acceptance-general}
+
+<span style="color: #912E27;">
+Given our simplifying assumption that $\beta_F = \beta_{GP} = \beta$, this can
+be rewritten as
+</span>
+$$
+\textcolor{#912E27}{
+P_{\text{accept}} = \min\left(
+    1,
+    \frac{F_E(\underline{x}{\prime})^\beta GP(\underline{x}{\prime})^\beta}
+    {F_E(\underline{x})^\beta GP(\underline{x})^\beta}
 \right),
+}
 $${#eq-acceptance}
 
 This expression shows that the acceptance probability depends on the difference

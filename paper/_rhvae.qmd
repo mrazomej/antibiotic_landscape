@@ -22,16 +22,10 @@ variational inference framework.
 
 ### Variational Autoencoder Model Setting
 
-Given a data set $\underline{x}^{1:N} \in \mathcal{X} \subseteq \mathbb{R}^D$,
-where the superscript denotes a set of $N$ observations, i.e.,
-$$
-\underline{x}^{1:N} = 
-\left\{
-    \underline{x}_1, \underline{x}_2, \ldots, \underline{x}_N
-\right\},
-$${#eq-data-set}
-where $\underline{x}_i \in \mathbb{R}^D$ for $i = 1, 2, \ldots, N$, the
-variational autoencoder aims to fit a joint distribution
+Given a dataset $\underline{x}^{1:N} = \{\underline{x}_1, \underline{x}_2,
+\ldots, \underline{x}_N\}$, where each individual observation $\underline{x}_i
+\in \mathcal{X} \subseteq \mathbb{R}^D$, where the superscript denotes a set of
+$N$ observations, the variational autoencoder aims to fit a joint distribution
 $π_\theta(\underline{x}, \underline{z})$ where the data generative process is
 assumed to involve a set of latent---unobserved---continuous variables
 $\underline{z} \in \mathcal{Z} \subseteq \mathbb{R}^d$, where usually $d \ll D$.
@@ -1118,7 +1112,7 @@ $$
 q_{\phi}(\underline{z}_K, \underline{\rho}_K \mid \underline{x}) = 
 q_{\phi}(\underline{z}_0 \mid \underline{x}) 
 q_{\phi}(\underline{\rho}_0 \mid \underline{z}_0) 
-\beta_0^{d / 2},
+\beta_0^{- d / 2},
 $${#eq-rhvae-variational-distribution-expanded}
 
 where $d$ is the dimension of the latent space. The main difference from the

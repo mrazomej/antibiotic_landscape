@@ -7,7 +7,7 @@ csl: ieee.csl
 
 ## Geometry-Informed Latent Space Captures the Underlying Phenotypic Space
 
-As described in the Supplementary Material, we trained three models on the
+As described in the Supplementary Material section H, we trained three models on the
 simulated profiles depicted in [@fig-02] for comparison: A linear model (via
 PCA), a vanilla VAE, and an RHVAE. Each model allows us to project the
 high-dimensional fitness profiles into a low-dimensional latent space.
@@ -16,7 +16,7 @@ ground truth phenotype, as they were constructed with no information about the
 relative coordinates in phenotype space. To visually compare whether the
 resulting latent coordinates for the simulated data preserve the general
 structure of the phenotype space, we aligned each latent space to the ground
-truth phenotype space using Procrustes analysis (see Supplementary Material).
+truth phenotype space using Procrustes analysis (see Supplementary Material section J).
 @fig-04(A) shows the resulting latent space coordinates colored by the lineage
 of the simulated profiles. Qualitatively, we observe that, although all models
 partially capture the relative positions of each lineage with respect to the

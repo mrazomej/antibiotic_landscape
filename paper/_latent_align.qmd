@@ -28,7 +28,7 @@ The Procrustes problem can be formulated as:
 $$
 \min_{R, s} \|
     \underline{\underline{Y}} - 
-    s\underline{\underline{X}}\,\underline{\underline{R}}
+    s\underline{\underline{R}}\,\underline{\underline{X}}
 \|_F^2
 $${#eq-procrustes}
 
