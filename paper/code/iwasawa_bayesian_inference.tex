@@ -1,0 +1,1772 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Lower the position of page numbers
+\usepackage{fancyhdr}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{100pt} % Increase this value to lower the page numbers
+
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+% Change font size
+\usepackage[font={footnotesize, sf}, labelfont=bf, margin=0.05\linewidth]{caption}
+\renewcommand{\familydefault}{\sfdefault}
+% Bold the 'Figure #' in the caption and separate it from the title/caption
+% with a period
+% Captions will be left justified
+\usepackage[
+	aboveskip=1pt,
+	labelfont=bf,
+	labelsep=period,
+	justification=raggedright,
+	singlelinecheck=off
+]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Add numbered lines
+\usepackage{lineno}
+% \linenumbers
+
+% Package to include multiple title pages
+% This will allow me to add a tile to the main text and to the SI
+\usepackage{titling}
+
+% Define command to begin the supplementary section
+\newcommand{\beginsupplement}{
+\setcounter{page}{1} % Restart page counter
+\setcounter{section}{0} % Restart section counter
+% \renewcommand{\thesection}{\Alph{section}}%
+\renewcommand{\thesection}{}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\setcounter{table}{0} % Restart table counter
+\renewcommand{\thetable}{\Alph{table}}
+\setcounter{figure}{0} % Restart figure counter
+\renewcommand{\thefigure}{\Alph{figure}}%
+\setcounter{equation}{0} % Restart equation counter
+\renewcommand{\theequation}{S\arabic{equation}}%
+}
+
+% Add author affiliations
+\usepackage{authblk}
+
+% Allow to define personalized colors
+\usepackage{xcolor}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[
+    style=vancouver,
+    sorting=none,				% Do not sort bibliography
+	url=false, 					% Do not show url in reference
+	doi=false, 					% Do not show doi in reference
+	isbn=false, 				% Do not show isbn link in reference
+	eprint=false, 			    % Do not show eprint link in reference
+	maxbibnames=9, 			    % Include up to 9 names in citation
+	firstinits=true,
+]{biblatex}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addbibresource{../references.bib}
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Bayesian Inference of IC\_\{50\} Values},
+  pdfauthor={Manuel Razo-Mejia},
+  pdfkeywords={Bayesian inference, Antibiotic resistance, \(IC_{50}\)},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add title
+\title{Bayesian Inference of \(IC_{50}\) Values}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add list of authors
+
+% Loop through authors
+\author[1]{Manuel Razo-Mejia}
+
+% Loop through affiliations
+\affil[1]{Department of Biology, Stanford University}
+
+% Add corresponding author
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set affiliations in small font
+\renewcommand\Affilfont{\itshape\small}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Remove date
+\date{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Add package for line numbering
+\usepackage{lineno}
+
+\begin{document}
+\linenumbers
+\maketitle
+(c) This work is licensed under a
+\href{https://creativecommons.org/licenses/by/4.0/}{Creative Commons
+Attribution License CC-BY 4.0}. All code contained herein is licensed
+under an \href{https://opensource.org/licenses/MIT}{MIT license}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Import project package}
+\ImportTok{import} \BuiltInTok{Antibiotic}
+
+\CommentTok{\# Import package to handle DataFrames}
+\ImportTok{import} \BuiltInTok{DataFrames}\NormalTok{ as DF}
+\ImportTok{import} \BuiltInTok{CSV}
+
+\CommentTok{\# Import library for Bayesian inference}
+\ImportTok{import} \BuiltInTok{Turing}
+
+\CommentTok{\# Import library to list files}
+\ImportTok{import} \BuiltInTok{Glob}
+
+\CommentTok{\# Import packages to work with data}
+\ImportTok{import} \BuiltInTok{DataFrames}\NormalTok{ as DF}
+
+\CommentTok{\# Load CairoMakie for plotting}
+\ImportTok{using} \BuiltInTok{CairoMakie}
+\ImportTok{import} \BuiltInTok{ColorSchemes}
+
+\CommentTok{\# Import packages for posterior sampling}
+\ImportTok{import} \BuiltInTok{PairPlots}
+
+\CommentTok{\# Import basic math libraries}
+\ImportTok{import} \BuiltInTok{LsqFit}
+\ImportTok{import} \BuiltInTok{StatsBase}
+\ImportTok{import} \BuiltInTok{LinearAlgebra}
+\ImportTok{import} \BuiltInTok{Random}
+
+\CommentTok{\# Activate backend}
+\NormalTok{CairoMakie.}\FunctionTok{activate!}\NormalTok{()}
+
+\CommentTok{\# Set custom plotting style}
+\NormalTok{Antibiotic.viz.}\FunctionTok{theme\_makie!}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+(c) This work is licensed under a
+\href{https://creativecommons.org/licenses/by/4.0/}{Creative Commons
+Attribution License CC-BY 4.0}. All code contained herein is licensed
+under an \href{https://opensource.org/licenses/MIT}{MIT license}.
+
+\section{\texorpdfstring{Bayesian Inference of \(IC_{50}\)
+values}{Bayesian Inference of IC\_\{50\} values}}\label{bayesian-inference-of-ic_50-values}
+
+In this notebook, we will perform Bayesian inference on the \(IC_{50}\)
+values of the antibiotic resistance landscape. For this, we will use the
+raw \texttt{OD620} measurements provided by \textcite{iwasawa2022}.
+
+Let's begin by loading the data into a DataFrame.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load data into a DataFrame}
+\NormalTok{df }\OperatorTok{=}\NormalTok{ CSV.}\FunctionTok{read}\NormalTok{(}\StringTok{"./iwasawa\_data/iwasawa\_tidy.csv"}\NormalTok{, DF.DataFrame)}
+
+\FunctionTok{first}\NormalTok{(df, }\FloatTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|ccccccccc}
+    & antibiotic & col & OD & design & concentration\_ugmL & day & strain\_num & env & \\
+    \hline
+    & String7 & String7 & Float64 & Int64 & Float64 & Int64 & Int64 & String15 & \\
+    \hline
+    1 & TET & col1 & 0.0464 & 3 & 0.0 & 1 & 19 & TETE4\_in\_KM & $\dots$ \\
+    2 & KM & col1 & 0.0432 & 3 & 0.0 & 1 & 19 & TETE4\_in\_KM & $\dots$ \\
+    3 & NFLX & col1 & 0.0414 & 3 & 0.0 & 1 & 19 & TETE4\_in\_KM & $\dots$ \\
+    4 & SS & col1 & 0.0415 & 3 & 0.0 & 1 & 19 & TETE4\_in\_KM & $\dots$ \\
+    5 & PLM & col1 & 0.0427 & 3 & 0.0 & 1 & 19 & TETE4\_in\_KM & $\dots$ \\
+\end{tabular}
+
+To double-check that the structure of the table makes sense, let's plot
+the time series for one example to see if the sequence agrees with the
+expectation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define data to use}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ df[}
+\NormalTok{    (df.antibiotic}\OperatorTok{.==}\StringTok{"KM"}\NormalTok{)}\OperatorTok{.\&}\NormalTok{(df.env}\OperatorTok{.==}\StringTok{"Parent\_in\_KM"}\NormalTok{)}\OperatorTok{.\&}\NormalTok{(df.strain\_num}\OperatorTok{.==}\FloatTok{13}\NormalTok{)}\OperatorTok{.\&}\NormalTok{.!(df.blank)}\OperatorTok{.\&}\NormalTok{(df.concentration\_ugmL}\OperatorTok{.\textgreater{}}\FloatTok{0}\NormalTok{),}
+    \OperatorTok{:}\NormalTok{]}
+\CommentTok{\# Remove blank measurement}
+\CommentTok{\# Group data by day}
+\NormalTok{df\_group }\OperatorTok{=}\NormalTok{ DF.}\FunctionTok{groupby}\NormalTok{(data, }\OperatorTok{:}\NormalTok{day)}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{500}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"OD₆₂₀"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+
+\CommentTok{\# Define colors for plot}
+\NormalTok{colors }\OperatorTok{=} \FunctionTok{get}\NormalTok{(ColorSchemes.Blues\_9, }\FunctionTok{LinRange}\NormalTok{(}\FloatTok{0.25}\NormalTok{, }\FloatTok{1}\NormalTok{, }\FunctionTok{length}\NormalTok{(df\_group)))}
+
+\CommentTok{\# Loop through days}
+\ControlFlowTok{for}\NormalTok{ (i, d) }\KeywordTok{in} \FunctionTok{enumerate}\NormalTok{(df\_group)}
+    \CommentTok{\# Sort data by concentration}
+\NormalTok{    DF.}\FunctionTok{sort!}\NormalTok{(d, }\OperatorTok{:}\NormalTok{concentration\_ugmL)}
+    \CommentTok{\# Plot scatter line}
+    \FunctionTok{scatterlines!}\NormalTok{(}
+\NormalTok{        ax, d.concentration\_ugmL, d.OD, color}\OperatorTok{=}\NormalTok{colors[i], label}\OperatorTok{=}\StringTok{"}\SpecialCharTok{$}\NormalTok{(}\FunctionTok{first}\NormalTok{(d.day))}\StringTok{"}
+\NormalTok{    )}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Add legend to plot}
+\NormalTok{fig[}\FloatTok{1}\NormalTok{, }\FloatTok{2}\NormalTok{] }\OperatorTok{=} \FunctionTok{Legend}\NormalTok{(}
+\NormalTok{    fig, ax, }\StringTok{"day"}\NormalTok{, framevisible}\OperatorTok{=}\ConstantTok{false}\NormalTok{, nbanks}\OperatorTok{=}\FloatTok{3}\NormalTok{, labelsize}\OperatorTok{=}\FloatTok{10}
+\NormalTok{)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=10.41667in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-4-output-1.png}
+
+The functional form used by the authors to fit the data is
+\begin{equation}\phantomsection\label{eq-iwasawa-model}{
+f(x) = \frac{a}
+{1+\exp \left[b\left(\log _2 x-\log _2 IC_{50}\right)\right]} + c
+}\end{equation}
+
+where \(a\), \(b\), and \(c\) are nuisance parameters of the model,
+\(IC_{50}\) is the parameter of interest, and \(x\) is the antibiotic
+concentration. We can define a function to compute this model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\PreprocessorTok{@doc} \StringTok{raw"""}
+\StringTok{    logistic(x, a, b, c, ic50)}
+
+\StringTok{Compute the logistic function used to model the relationship between antibiotic}
+\StringTok{concentration and bacterial growth.}
+
+\StringTok{This function implements the following equation:}
+
+\StringTok{f(x) = a / (1 + exp(b * (log₂(x) {-} log₂(IC₅₀)))) + c}
+
+\StringTok{\# Arguments}
+\StringTok{{-} \textasciigrave{}x\textasciigrave{}: Antibiotic concentration (input variable)}
+\StringTok{{-} \textasciigrave{}a\textasciigrave{}: Maximum effect parameter (difference between upper and lower asymptotes)}
+\StringTok{{-} \textasciigrave{}b\textasciigrave{}: Slope parameter (steepness of the curve)}
+\StringTok{{-} \textasciigrave{}c\textasciigrave{}: Minimum effect parameter (lower asymptote)}
+\StringTok{{-} \textasciigrave{}ic50\textasciigrave{}: IC₅₀ parameter (concentration at which the effect is halfway between}
+\StringTok{  the minimum and maximum)}
+
+\StringTok{\# Returns}
+\StringTok{The computed effect (e.g., optical density) for the given antibiotic}
+\StringTok{concentration and parameters.}
+
+\StringTok{Note: This function is vectorized and can handle array inputs for \textasciigrave{}x\textasciigrave{}.}
+\StringTok{"""}
+\KeywordTok{function} \FunctionTok{logistic}\NormalTok{(x, a, b, c, ic50)}
+    \ControlFlowTok{return}\NormalTok{ @. a }\OperatorTok{/}\NormalTok{ (}\FloatTok{1.0} \OperatorTok{+} \FunctionTok{exp}\NormalTok{(b }\OperatorTok{*}\NormalTok{ (}\FunctionTok{log2}\NormalTok{(x) }\OperatorTok{{-}} \FunctionTok{log2}\NormalTok{(ic50)))) }\OperatorTok{+}\NormalTok{ c}
+\KeywordTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+To test the function, let's plot the model for a set of parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define parameters}
+\NormalTok{a }\OperatorTok{=} \FloatTok{1.0}
+\NormalTok{b }\OperatorTok{=} \FloatTok{1.0}
+\NormalTok{c }\OperatorTok{=} \FloatTok{0.0}
+\NormalTok{ic50 }\OperatorTok{=} \FloatTok{1.0}
+
+\CommentTok{\# Define concentration range}
+\NormalTok{x }\OperatorTok{=} \FloatTok{10} \OperatorTok{.\^{}} \FunctionTok{LinRange}\NormalTok{(}\OperatorTok{{-}}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{50}\NormalTok{)}
+
+\CommentTok{\# Compute model}
+\NormalTok{y }\OperatorTok{=} \FunctionTok{logistic}\NormalTok{(x, a, b, c, ic50)}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration (a.u.)"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log10}
+\NormalTok{)}
+\CommentTok{\# Plot model}
+\FunctionTok{lines!}\NormalTok{(ax, x, y)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-6-output-1.png}
+
+The function seems to work as expected. However, notice that in Eq. (1),
+the \(\mathrm{IC}_{50}\) goes into the logarithm. This is the parameter
+we will fit for. Thus, let's define a function that takes
+\(\log_2(\mathrm{IC}_{50})\) and \(\log_2(x)\) as input instead.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\PreprocessorTok{@doc} \StringTok{raw"""}
+\StringTok{    logistic\_log2(log2x, a, b, c, log2ic50)}
+
+\StringTok{Compute the logistic function used to model the relationship between antibiotic}
+\StringTok{concentration and bacterial growth, using log2 inputs for concentration and}
+\StringTok{IC₅₀.}
+
+\StringTok{This function implements the following equation:}
+
+\StringTok{f(x) = a / (1 + exp(b * (log₂(x) {-} log₂(IC₅₀)))) + c}
+
+\StringTok{\# Arguments}
+\StringTok{{-} \textasciigrave{}log2x\textasciigrave{}: log₂ of the antibiotic concentration (input variable)}
+\StringTok{{-} \textasciigrave{}a\textasciigrave{}: Maximum effect parameter (difference between upper and lower asymptotes)}
+\StringTok{{-} \textasciigrave{}b\textasciigrave{}: Slope parameter (steepness of the curve)}
+\StringTok{{-} \textasciigrave{}c\textasciigrave{}: Minimum effect parameter (lower asymptote)}
+\StringTok{{-} \textasciigrave{}log2ic50\textasciigrave{}: log₂ of the IC₅₀ parameter}
+
+\StringTok{\# Returns}
+\StringTok{The computed effect (e.g., optical density) for the given log₂ antibiotic}
+\StringTok{concentration and parameters.}
+
+\StringTok{Note: This function is vectorized and can handle array inputs for \textasciigrave{}log2x\textasciigrave{}.}
+\StringTok{"""}
+\KeywordTok{function} \FunctionTok{logistic\_log2}\NormalTok{(log2x, a, b, c, log2ic50)}
+    \ControlFlowTok{return}\NormalTok{ @. a }\OperatorTok{/}\NormalTok{ (}\FloatTok{1.0} \OperatorTok{+} \FunctionTok{exp}\NormalTok{(b }\OperatorTok{*}\NormalTok{ (log2x }\OperatorTok{{-}}\NormalTok{ log2ic50))) }\OperatorTok{+}\NormalTok{ c}
+\KeywordTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Bayesian model}\label{bayesian-model}
+
+Given the model presented in Eq. (1), and the data, our objective is to
+infer the value of all parameters. By Bayes theorem, we write
+
+\begin{equation}\phantomsection\label{eq-iwasawa-bayesian-model}{
+\pi(IC_{50}, a, b, c \mid \text{data}) = 
+\frac{\pi(\text{data} \mid IC_{50}, a, b, c) 
+\pi(IC_{50}, a, b, c)}
+{\pi(\text{data})},
+}\end{equation}
+
+where \(\text{data}\) consists of the pairs of antibiotic concentration
+and optical density.
+
+\subsubsection{\texorpdfstring{Likelihood
+\(\pi(\text{data} \mid IC_{50}, a, b, c)\)}{Likelihood \textbackslash pi(\textbackslash text\{data\} \textbackslash mid IC\_\{50\}, a, b, c)}}\label{likelihood-pitextdata-mid-ic_50-a-b-c}
+
+Let's begin by defining the likelihood function. For simplicity, we
+assume each datum is independent and identically distributed (i.i.d.)
+and write
+
+\begin{equation}\phantomsection\label{eq-iwasawa-likelihood}{
+\pi(\text{data} \mid IC_{50}, a, b, c) = 
+\prod_{i=1}^n \pi(d_i \mid IC_{50}, a, b, c),
+}\end{equation}
+
+where \(d_i = (x_i, y_i)\) is the \(i\)-th pair of antibiotic
+concentration and optical density, respectively, and \(n\) is the total
+number of data points. As a first pass, we assume that our experimental
+measurements can be expressed as
+
+\begin{equation}\phantomsection\label{eq-iwasawa-likelihood-model}{
+y_i = f(x_i, IC_{50}, a, b, c) + \epsilon_i,
+}\end{equation}
+
+where \(\epsilon_i\) is the experimental error. Furthermore, we assume
+that the experimental error is normally distributed, i.e.,
+
+\begin{equation}\phantomsection\label{eq-iwasawa-likelihood-error}{
+\epsilon_i \sim \mathcal{N}(0, \sigma^2),
+}\end{equation}
+
+where \(\sigma^2\) is an unknown variance parameter that must be
+included in our inference. Notice that we assume the same variance
+parameter for all data points since \(\sigma^2\) is not indexed by
+\(i\).
+
+Given this likelihood function, we must update our inference on the
+parameters as
+
+\begin{equation}\phantomsection\label{eq-iwasawa-likelihood-error-model}{
+\pi(IC_{50}, a, b, c, \sigma^2 \mid \text{data}) = 
+\frac{\pi(\text{data} \mid IC_{50}, a, b, c, \sigma^2) 
+\pi(IC_{50}, a, b, c, \sigma^2)}
+{\pi(\text{data})},
+}\end{equation}
+
+to include the new parameter \(\sigma^2\).
+
+Our likelihood function is then of the form
+\begin{equation}\phantomsection\label{eq-iwasawa-likelihood-error-model}{
+y_i \mid IC_{50}, a, b, c, \sigma^2 \sim 
+\mathcal{N}(f(x_i, IC_{50}, a, b, c), \sigma^2).
+}\end{equation}
+
+\subsubsection{\texorpdfstring{Prior
+\(\pi(IC_{50}, a, b, c, \sigma^2)\)}{Prior \textbackslash pi(IC\_\{50\}, a, b, c, \textbackslash sigma\^{}2)}}\label{prior-piic_50-a-b-c-sigma2}
+
+For the prior, we assume that all parameters are independent and write
+\begin{equation}\phantomsection\label{eq-iwasawa-prior}{
+\pi(IC_{50}, a, b, c, \sigma^2) = 
+\pi(IC_{50}) \pi(a) \pi(b) \pi(c) \pi(\sigma^2).
+}\end{equation}
+
+Let's detail each prior.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(IC_{50}\): The \(IC_{50}\) is a strictly positive parameter.
+  However, we will fit for \(\log_2(IC_{50})\). Thus, we will use a
+  normal prior for \(\log_2(IC_{50})\). This means we have
+\end{enumerate}
+
+\begin{equation}\phantomsection\label{eq-iwasawa-prior-ic50}{
+\log_2(IC_{50}) \sim 
+\mathcal{N}(
+    \mu_{\log_2(IC_{50})}, \sigma_{\log_2(IC_{50})}^2
+).
+}\end{equation}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  \(a\): This nuisance parameter scales the logistic function. Again,
+  the natural scale for this parameter is a strictly positive real
+  number. Thus, we will use a lognormal prior for \(a\). This means we
+  have
+\end{enumerate}
+
+\begin{equation}\phantomsection\label{eq-iwasawa-prior-a}{
+a \sim \text{LogNormal}(\mu_a, \sigma_a^2).
+}\end{equation}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  \(b\): This parameter controls the steepness of the logistic function.
+  Again, the natural scale for this parameter is a strictly positive
+  real number. Thus, we will use a lognormal prior for \(b\). This means
+  we have
+\end{enumerate}
+
+\begin{equation}\phantomsection\label{eq-iwasawa-prior-b}{
+b \sim \text{LogNormal}(\mu_b, \sigma_b^2).
+}\end{equation}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \(c\): This parameter controls the minimum value of the logistic
+  function. Since this is a strictly positive real number that does not
+  necessarily scale with the data, we will use a half-normal prior for
+  \(c\). This means we have
+\end{enumerate}
+
+\begin{equation}\phantomsection\label{eq-iwasawa-prior-c}{
+c \sim \text{Half-}\mathcal{N}(0, \sigma_c^2).
+}\end{equation}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  \(\sigma^2\): This parameter controls the variance of the experimental
+  error. Since this is a strictly positive real number that does not
+  necessarily scale with the data, we will use a half-normal prior for
+  \(\sigma^2\). This means we have
+\end{enumerate}
+
+\begin{equation}\phantomsection\label{eq-iwasawa-prior-sigma2}{
+\sigma^2 \sim \text{Half-}\mathcal{N}(0, \sigma_{\sigma^2}^2).
+}\end{equation}
+
+With all of this in place, we are ready to define a \texttt{Turing}
+model to perform Bayesian inference on the parameters of the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Turing.}\PreprocessorTok{@model} \KeywordTok{function} \FunctionTok{logistic\_model}\NormalTok{(}
+\NormalTok{    log2x, y, prior\_params}\OperatorTok{::}\DataTypeTok{NamedTuple}\NormalTok{=}\FunctionTok{NamedTuple}\NormalTok{()}
+\NormalTok{)}
+    \CommentTok{\# Define default prior parameters}
+\NormalTok{    default\_params }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{        log2ic50}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        a}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        b}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        c}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        σ²}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{)}
+\NormalTok{    )}
+
+    \CommentTok{\# Merge default parameters with provided parameters}
+\NormalTok{    params }\OperatorTok{=} \FunctionTok{merge}\NormalTok{(default\_params, prior\_params)}
+
+    \CommentTok{\# Define priors}
+\NormalTok{    log2ic50 }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{Normal}\NormalTok{(params.log2ic50}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    a }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{LogNormal}\NormalTok{(params.a}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    b }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{LogNormal}\NormalTok{(params.b}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    c }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{truncated}\NormalTok{(Turing.}\FunctionTok{Normal}\NormalTok{(params.c}\OperatorTok{...}\NormalTok{), }\FloatTok{0}\NormalTok{, }\ConstantTok{Inf}\NormalTok{)}
+\NormalTok{    σ² }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{truncated}\NormalTok{(Turing.}\FunctionTok{Normal}\NormalTok{(params.σ²}\OperatorTok{...}\NormalTok{), }\FloatTok{0}\NormalTok{, }\ConstantTok{Inf}\NormalTok{)}
+
+    \CommentTok{\# Define likelihood}
+\NormalTok{    y }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{MvNormal}\NormalTok{(}
+        \FunctionTok{logistic\_log2}\NormalTok{(log2x, a, b, c, log2ic50),}
+        \BuiltInTok{LinearAlgebra}\NormalTok{.}\FunctionTok{Diagonal}\NormalTok{(}\FunctionTok{fill}\NormalTok{(σ², }\FunctionTok{length}\NormalTok{(y)))}
+\NormalTok{    )}
+\KeywordTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+Having defined the model, we can now perform inference. First, let's
+perform inference on simulated data. For this, we first simulate a
+single titration curve with known parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Define ground truth parameters}
+\NormalTok{log2ic50\_true }\OperatorTok{=} \FloatTok{0.5}
+\NormalTok{a\_true }\OperatorTok{=} \FloatTok{1.0}
+\NormalTok{b\_true }\OperatorTok{=} \FloatTok{10.0}
+\NormalTok{σ²\_true }\OperatorTok{=} \FloatTok{0.01}
+\NormalTok{c\_true }\OperatorTok{=} \FloatTok{0.1}
+
+\CommentTok{\# Simulate data}
+\NormalTok{log2x }\OperatorTok{=} \FunctionTok{LinRange}\NormalTok{(}\OperatorTok{{-}}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{15}\NormalTok{)}
+\CommentTok{\# Define mean of data}
+\NormalTok{ŷ }\OperatorTok{=} \FunctionTok{logistic\_log2}\NormalTok{(log2x, a\_true, b\_true, c\_true, log2ic50\_true)}
+\CommentTok{\# Add noise}
+\NormalTok{y }\OperatorTok{=}\NormalTok{ ŷ }\OperatorTok{.+} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(log2x)) }\OperatorTok{*} \FunctionTok{√}\NormalTok{(σ²\_true)}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+\CommentTok{\# Plot data}
+\FunctionTok{scatterlines!}\NormalTok{(ax, }\FloatTok{2.0} \OperatorTok{.\^{}}\NormalTok{ log2x, y)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-9-output-1.png}
+
+With the data simulated, let's perform inference on the data. For this,
+we will use the NUTS sampler. To run multiple chains in parallel, we
+will use the \texttt{MCMCThreads} option.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Perform inference}
+\NormalTok{model }\OperatorTok{=} \FunctionTok{logistic\_model}\NormalTok{(log2x, y)}
+
+\CommentTok{\# Define number of steps}
+\NormalTok{n\_burnin }\OperatorTok{=} \FloatTok{10\_000}
+\NormalTok{n\_samples }\OperatorTok{=} \FloatTok{1\_000}
+
+\CommentTok{\# Run sampler using}
+\NormalTok{chain }\OperatorTok{=}\NormalTok{ Turing.}\FunctionTok{sample}\NormalTok{(}
+\NormalTok{    model, Turing.}\FunctionTok{NUTS}\NormalTok{(), Turing.}\FunctionTok{MCMCThreads}\NormalTok{(), n\_burnin }\OperatorTok{+}\NormalTok{ n\_samples, }\FloatTok{4}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Sampling (4 threads)   0%|                              |  ETA: N/A
+┌ Info: Found initial step size
+└   ϵ = 0.8
+┌ Info: Found initial step size
+└   ϵ = 0.8
+┌ Info: Found initial step size
+└   ϵ = 0.8
+┌ Info: Found initial step size
+└   ϵ = 0.4
+Sampling (4 threads)  25%|███████▌                      |  ETA: 0:00:45
+Sampling (4 threads)  50%|███████████████               |  ETA: 0:00:15
+Sampling (4 threads)  75%|██████████████████████▌       |  ETA: 0:00:05
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:14
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:15
+\end{verbatim}
+
+\begin{verbatim}
+Chains MCMC chain (11000×17×4 Array{Float64, 3}):
+
+Iterations        = 1001:1:12000
+Number of chains  = 4
+Samples per chain = 11000
+Wall duration     = 10.67 seconds
+Compute duration  = 41.09 seconds
+parameters        = log2ic50, a, b, c, σ²
+internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
+
+Summary Statistics
+  parameters      mean       std      mcse     ess_bulk     ess_tail      rhat ⋯
+      Symbol   Float64   Float64   Float64      Float64      Float64   Float64 ⋯
+
+    log2ic50    0.4723    0.0718    0.0005   23407.8672   14077.0993    1.0003 ⋯
+           a    0.9668    0.0621    0.0005   16034.1809   16294.6985    1.0006 ⋯
+           b    8.7902    4.6027    0.0449   13409.6206   13035.6999    1.0003 ⋯
+           c    0.1192    0.0449    0.0004   15396.5130   11022.7335    1.0004 ⋯
+          σ²    0.0111    0.0076    0.0001   12720.8496   16686.4143    1.0005 ⋯
+                                                                1 column omitted
+
+Quantiles
+  parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+      Symbol   Float64   Float64   Float64   Float64   Float64
+
+    log2ic50    0.3173    0.4352    0.4745    0.5141    0.6048
+           a    0.8482    0.9279    0.9649    1.0042    1.0961
+           b    3.0834    5.7843    7.9162   10.6434   20.2429
+           c    0.0294    0.0902    0.1194    0.1475    0.2093
+          σ²    0.0038    0.0065    0.0091    0.0132    0.0302
+\end{verbatim}
+
+Let's look at the posterior distribution of the parameters. For this, we
+will use the \texttt{PairPlots.jl} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot corner plot for chains}
+\NormalTok{PairPlots.}\FunctionTok{pairplot}\NormalTok{(}
+\NormalTok{    chain[n\_burnin}\OperatorTok{+}\FloatTok{1}\OperatorTok{:}\KeywordTok{end}\NormalTok{, }\OperatorTok{:}\NormalTok{, }\OperatorTok{:}\NormalTok{],}
+\NormalTok{    PairPlots.}\FunctionTok{Truth}\NormalTok{(}
+\NormalTok{        (;}
+\NormalTok{        log2ic50}\OperatorTok{=}\NormalTok{log2ic50\_true,}
+\NormalTok{        a}\OperatorTok{=}\NormalTok{a\_true,}
+\NormalTok{        b}\OperatorTok{=}\NormalTok{b\_true,}
+\NormalTok{        c}\OperatorTok{=}\NormalTok{c\_true,}
+\NormalTok{        σ²}\OperatorTok{=}\NormalTok{σ²\_true}
+\NormalTok{    )}
+\NormalTok{    )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=19.20833in,height=19.60417in]{iwasawa_bayesian_inference_files/figure-pdf/cell-11-output-1.png}
+
+All parameters are well-constrained by the data, and we are able to
+recover the ground truth values.
+
+Let's plot the posterior predictive checks with the data to see how the
+model performs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+
+\CommentTok{\# Initialize matrix to store samples}
+\NormalTok{y\_samples }\OperatorTok{=} \FunctionTok{Array}\DataTypeTok{\{Float64\}}\NormalTok{(}\ConstantTok{undef}\NormalTok{, }\FunctionTok{length}\NormalTok{(log2x), n\_samples)}
+
+\CommentTok{\# Loop through samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \CommentTok{\# Generate mean for sample}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{=} \FunctionTok{logistic\_log2}\NormalTok{(}
+\NormalTok{        log2x,}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{a][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{b][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{c][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{log2ic50][i]}
+\NormalTok{    )}
+    \CommentTok{\# Add noise}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{.+=} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(log2x)) }\OperatorTok{*} \FunctionTok{sqrt}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    title}\OperatorTok{=}\StringTok{"Posterior Predictive Check"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+
+\CommentTok{\# Plot samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \FunctionTok{lines!}\NormalTok{(ax, }\FloatTok{2.0} \OperatorTok{.\^{}}\NormalTok{ log2x, y\_samples[}\OperatorTok{:}\NormalTok{, i], color}\OperatorTok{=}\NormalTok{(}\OperatorTok{:}\NormalTok{gray, }\FloatTok{0.05}\NormalTok{))}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Plot data}
+\FunctionTok{scatterlines!}\NormalTok{(ax, }\FloatTok{2.0} \OperatorTok{.\^{}}\NormalTok{ log2x, y)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-12-output-1.png}
+
+The fit looks excellent. Let's now perform inference on the Iwasawa
+data. We will use one example dataset. Moreover, we will set informative
+priors for the parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Group data by antibiotic, environment, and day}
+\NormalTok{df\_group }\OperatorTok{=}\NormalTok{ DF.}\FunctionTok{groupby}\NormalTok{(}
+\NormalTok{    df[(.!df.blank)}\OperatorTok{.\&}\NormalTok{(df.concentration\_ugmL}\OperatorTok{.\textgreater{}}\FloatTok{0}\NormalTok{), }\OperatorTok{:}\NormalTok{],}
+\NormalTok{    [}\OperatorTok{:}\NormalTok{antibiotic, }\OperatorTok{:}\NormalTok{env, }\OperatorTok{:}\NormalTok{day]}
+\NormalTok{)}
+
+\CommentTok{\# Extract data}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ df\_group[}\FloatTok{2}\NormalTok{]}
+
+\CommentTok{\# Define prior parameters}
+\NormalTok{prior\_params }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{    a}\OperatorTok{=}\NormalTok{(}\FunctionTok{log}\NormalTok{(}\FloatTok{0.1}\NormalTok{), }\FloatTok{0.1}\NormalTok{),}
+\NormalTok{    b}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{    c}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{    σ²}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{)}
+\CommentTok{\# Perform inference}
+\NormalTok{model }\OperatorTok{=} \FunctionTok{logistic\_model}\NormalTok{(}
+    \FunctionTok{log2}\NormalTok{.(data.concentration\_ugmL),}
+\NormalTok{    data.OD,}
+\NormalTok{    prior\_params}
+\NormalTok{)}
+
+\CommentTok{\# Define number of steps}
+\NormalTok{n\_burnin }\OperatorTok{=} \FloatTok{10\_000}
+\NormalTok{n\_samples }\OperatorTok{=} \FloatTok{1\_000}
+
+\NormalTok{chain }\OperatorTok{=}\NormalTok{ Turing.}\FunctionTok{sample}\NormalTok{(}
+\NormalTok{    model, Turing.}\FunctionTok{NUTS}\NormalTok{(), Turing.}\FunctionTok{MCMCThreads}\NormalTok{(), n\_burnin }\OperatorTok{+}\NormalTok{ n\_samples, }\FloatTok{4}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Sampling (4 threads)   0%|                              |  ETA: N/A
+┌ Info: Found initial step size
+└   ϵ = 0.2
+┌ Info: Found initial step size
+└   ϵ = 0.05
+┌ Info: Found initial step size
+└   ϵ = 0.2
+┌ Info: Found initial step size
+└   ϵ = 0.05
+Sampling (4 threads)  25%|███████▌                      |  ETA: 0:00:17
+Sampling (4 threads)  50%|███████████████               |  ETA: 0:00:06
+Sampling (4 threads)  75%|██████████████████████▌       |  ETA: 0:00:02
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:05
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:05
+\end{verbatim}
+
+\begin{verbatim}
+Chains MCMC chain (11000×17×4 Array{Float64, 3}):
+
+Iterations        = 1001:1:12000
+Number of chains  = 4
+Samples per chain = 11000
+Wall duration     = 5.05 seconds
+Compute duration  = 19.36 seconds
+parameters        = log2ic50, a, b, c, σ²
+internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
+
+Summary Statistics
+  parameters      mean       std      mcse     ess_bulk     ess_tail      rhat ⋯
+      Symbol   Float64   Float64   Float64      Float64      Float64   Float64 ⋯
+
+    log2ic50    3.1585    0.0611    0.0004   32325.5670   25247.0891    1.0001 ⋯
+           a    0.1013    0.0074    0.0000   28541.0328   27631.5354    1.0001 ⋯
+           b   15.8931   10.4326    0.0655   31581.5518   26387.0900    1.0000 ⋯
+           c    0.0873    0.0073    0.0000   27591.1350   24819.1854    1.0002 ⋯
+          σ²    0.0015    0.0002    0.0000   37231.0264   30213.0584    1.0000 ⋯
+                                                                1 column omitted
+
+Quantiles
+  parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+      Symbol   Float64   Float64   Float64   Float64   Float64
+
+    log2ic50    3.0427    3.1192    3.1589    3.1963    3.2817
+           a    0.0872    0.0962    0.1012    0.1063    0.1162
+           b    4.6324    9.2475   13.4282   19.5750   41.4435
+           c    0.0726    0.0824    0.0874    0.0923    0.1013
+          σ²    0.0011    0.0013    0.0014    0.0016    0.0020
+\end{verbatim}
+
+Let's look at the corner plot for the chains.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot corner plot for chains}
+\NormalTok{PairPlots.}\FunctionTok{pairplot}\NormalTok{(chain[n\_burnin}\OperatorTok{+}\FloatTok{1}\OperatorTok{:}\KeywordTok{end}\NormalTok{, }\OperatorTok{:}\NormalTok{, }\OperatorTok{:}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=19.4375in,height=19.83333in]{iwasawa_bayesian_inference_files/figure-pdf/cell-14-output-1.png}
+
+This looks good. Let's now plot the posterior predictive check.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+
+\CommentTok{\# Define unique concentrations}
+\NormalTok{unique\_concentrations }\OperatorTok{=} \FunctionTok{sort}\NormalTok{(}\FunctionTok{unique}\NormalTok{(data.concentration\_ugmL))}
+
+\CommentTok{\# Initialize matrix to store samples}
+\NormalTok{y\_samples }\OperatorTok{=} \FunctionTok{Array}\DataTypeTok{\{Float64\}}\NormalTok{(}
+    \ConstantTok{undef}\NormalTok{, }\FunctionTok{length}\NormalTok{(unique\_concentrations), n\_samples}
+\NormalTok{)}
+
+\CommentTok{\# Loop through samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \CommentTok{\# Generate mean for sample}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{=} \FunctionTok{logistic\_log2}\NormalTok{(}
+        \FunctionTok{log2}\NormalTok{.(unique\_concentrations),}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{a][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{b][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{c][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{log2ic50][i]}
+\NormalTok{    )}
+    \CommentTok{\# Add noise}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{.+=} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(unique\_concentrations)) }\OperatorTok{*} \FunctionTok{√}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+    \FunctionTok{√}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    title}\OperatorTok{=}\StringTok{"Posterior Predictive Check"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+
+\CommentTok{\# Plot samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \FunctionTok{lines!}\NormalTok{(}
+\NormalTok{        ax,}
+\NormalTok{        unique\_concentrations,}
+\NormalTok{        y\_samples[}\OperatorTok{:}\NormalTok{, i],}
+\NormalTok{        color}\OperatorTok{=}\NormalTok{(ColorSchemes.Paired\_12[}\FloatTok{1}\NormalTok{], }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{    )}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Plot data}
+\FunctionTok{scatter!}\NormalTok{(ax, data.concentration\_ugmL, data.OD)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-15-output-1.png}
+
+The presence of the outlier measurements expands the posterior
+predictive checks uncertainty.
+
+Let's look into how to detect outliers in the data.
+
+\subsection{Residual-based outlier
+detection}\label{residual-based-outlier-detection}
+
+Our naive approach to detect outliers is to fit the logistic model
+deterministically and then identify points that are more than 3 standard
+deviations from the mean. This is known as ``residual-based outlier
+detection''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{logistic\_log2}\NormalTok{(log2x, params)}
+    \ControlFlowTok{return} \FunctionTok{logistic\_log2}\NormalTok{(log2x, params}\OperatorTok{...}\NormalTok{)}
+\KeywordTok{end}
+
+\StringTok{"""}
+\StringTok{    fit\_logistic\_and\_detect\_outliers(log2x, y; threshold=3)}
+
+\StringTok{Fit a logistic model to the given data and detect outliers based on residuals.}
+
+\StringTok{This function performs the following steps:}
+\StringTok{1. Fits a logistic model to the log2{-}transformed x{-}values and y{-}values.}
+\StringTok{2. Calculates residuals between the fitted model and actual y{-}values.}
+\StringTok{3. Identifies outliers as points with residuals exceeding a specified threshold.}
+
+\StringTok{\# Arguments}
+\StringTok{{-} \textasciigrave{}log2x\textasciigrave{}: Array of log2{-}transformed x{-}values (typically concentrations).}
+\StringTok{{-} \textasciigrave{}y\textasciigrave{}: Array of y{-}values (typically optical density measurements).}
+\StringTok{{-} \textasciigrave{}threshold\textasciigrave{}: Number of standard deviations beyond which a point is considered an outlier. Default is 3.}
+
+\StringTok{\# Returns}
+\StringTok{{-} A boolean array indicating which points are outliers (true for outliers).}
+
+\StringTok{\# Notes}
+\StringTok{{-} The function uses a logistic model of the form: }
+\StringTok{    y = a / (1 + exp(b * (log2x {-} log2ic50))) + c}
+\StringTok{{-} Initial parameter guesses are made based on the input data.}
+\StringTok{{-} The LsqFit package is used for curve fitting.}
+\StringTok{{-} Outliers are determined by comparing the absolute residuals to the threshold * standard deviation of residuals.}
+\StringTok{"""}
+\KeywordTok{function} \FunctionTok{fit\_logistic\_and\_detect\_outliers}\NormalTok{(log2x, y; threshold}\OperatorTok{=}\FloatTok{3}\NormalTok{)}
+    \CommentTok{\# Initial parameter guess}
+\NormalTok{    p0 }\OperatorTok{=}\NormalTok{ [}\FloatTok{0.1}\NormalTok{, }\FloatTok{1.0}\NormalTok{, }\FunctionTok{maximum}\NormalTok{(y) }\OperatorTok{{-}} \FunctionTok{minimum}\NormalTok{(y), StatsBase.}\FunctionTok{median}\NormalTok{(log2x)]}
+
+    \CommentTok{\# Fit the logistic model}
+\NormalTok{    fit }\OperatorTok{=}\NormalTok{ LsqFit.}\FunctionTok{curve\_fit}\NormalTok{(logistic\_log2, log2x, y, p0)}
+
+    \CommentTok{\# Calculate residuals}
+\NormalTok{    residuals }\OperatorTok{=}\NormalTok{ y }\OperatorTok{{-}} \FunctionTok{logistic\_log2}\NormalTok{(log2x, fit.param)}
+
+    \CommentTok{\# Calculate standard deviation of residuals}
+\NormalTok{    σ }\OperatorTok{=}\NormalTok{ StatsBase.}\FunctionTok{std}\NormalTok{(residuals)}
+
+    \CommentTok{\# Identify outliers}
+\NormalTok{    outliers\_idx }\OperatorTok{=} \FunctionTok{abs}\NormalTok{.(residuals) }\OperatorTok{.\textgreater{}}\NormalTok{ threshold }\OperatorTok{*}\NormalTok{ σ}
+
+    \CommentTok{\# Return outlier indices}
+    \ControlFlowTok{return}\NormalTok{ outliers\_idx}
+\KeywordTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+Let's test this function by trying to remove the outliers from the data
+we used in the previous section.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Locate outliers}
+\NormalTok{outliers\_idx }\OperatorTok{=} \FunctionTok{fit\_logistic\_and\_detect\_outliers}\NormalTok{(}
+    \FunctionTok{log2}\NormalTok{.(data.concentration\_ugmL), data.OD, threshold}\OperatorTok{=}\FloatTok{2}
+\NormalTok{)}
+
+\CommentTok{\# Plot the results}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{450}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+    \CommentTok{\# xscale=log2}
+\NormalTok{)}
+
+\CommentTok{\# Plot the original data}
+\FunctionTok{scatter!}\NormalTok{(}
+\NormalTok{    ax,}
+\NormalTok{    data.concentration\_ugmL,}
+\NormalTok{    data.OD,}
+\NormalTok{    color}\OperatorTok{=}\NormalTok{ColorSchemes.Paired\_12[}\FloatTok{1}\NormalTok{],}
+\NormalTok{    label}\OperatorTok{=}\StringTok{"data"}
+\NormalTok{)}
+
+\CommentTok{\# Plot the cleaned data}
+\FunctionTok{scatter!}\NormalTok{(}
+\NormalTok{    ax,}
+\NormalTok{    data.concentration\_ugmL[.!outliers\_idx] }\OperatorTok{.+} \FloatTok{0.5}\NormalTok{,}
+\NormalTok{    data.OD[.!outliers\_idx], color}\OperatorTok{=}\NormalTok{ColorSchemes.Paired\_12[}\FloatTok{2}\NormalTok{],}
+\NormalTok{    label}\OperatorTok{=}\StringTok{"cleaned data"}
+\NormalTok{)}
+
+\CommentTok{\# Add legend}
+\FunctionTok{Legend}\NormalTok{(fig[}\FloatTok{1}\NormalTok{, }\FloatTok{2}\NormalTok{], ax)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=9.375in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-17-output-1.png}
+
+The detection of outliers worked really well. Let's now perform
+inference on the cleaned data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Group data by antibiotic, environment, and day}
+\NormalTok{df\_group }\OperatorTok{=}\NormalTok{ DF.}\FunctionTok{groupby}\NormalTok{(}
+\NormalTok{    df[(.!df.blank)}\OperatorTok{.\&}\NormalTok{(df.concentration\_ugmL}\OperatorTok{.\textgreater{}}\FloatTok{0}\NormalTok{), }\OperatorTok{:}\NormalTok{],}
+\NormalTok{    [}\OperatorTok{:}\NormalTok{antibiotic, }\OperatorTok{:}\NormalTok{env, }\OperatorTok{:}\NormalTok{day]}
+\NormalTok{)}
+
+\CommentTok{\# Extract data}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ df\_group[}\FloatTok{2}\NormalTok{]}
+
+\CommentTok{\# Find outliers}
+\NormalTok{outliers\_idx }\OperatorTok{=} \FunctionTok{fit\_logistic\_and\_detect\_outliers}\NormalTok{(}
+    \FunctionTok{log2}\NormalTok{.(data.concentration\_ugmL), data.OD, threshold}\OperatorTok{=}\FloatTok{2}
+\NormalTok{)}
+\CommentTok{\# Remove outliers}
+\NormalTok{data\_clean }\OperatorTok{=}\NormalTok{ data[.!outliers\_idx, }\OperatorTok{:}\NormalTok{]}
+
+\CommentTok{\# Define prior parameters}
+\NormalTok{prior\_params }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{    a}\OperatorTok{=}\NormalTok{(}\FunctionTok{log}\NormalTok{(}\FloatTok{0.1}\NormalTok{), }\FloatTok{0.1}\NormalTok{),}
+\NormalTok{    b}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{    c}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{    σ²}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Perform inference}
+\NormalTok{model }\OperatorTok{=} \FunctionTok{logistic\_model}\NormalTok{(}
+    \FunctionTok{log2}\NormalTok{.(data\_clean.concentration\_ugmL),}
+\NormalTok{    data\_clean.OD,}
+\NormalTok{    prior\_params}
+\NormalTok{)}
+
+\CommentTok{\# Define number of steps}
+\NormalTok{n\_burnin }\OperatorTok{=} \FloatTok{10\_000}
+\NormalTok{n\_samples }\OperatorTok{=} \FloatTok{1\_000}
+
+\NormalTok{chain }\OperatorTok{=}\NormalTok{ Turing.}\FunctionTok{sample}\NormalTok{(}
+\NormalTok{    model, Turing.}\FunctionTok{NUTS}\NormalTok{(), Turing.}\FunctionTok{MCMCThreads}\NormalTok{(), n\_burnin }\OperatorTok{+}\NormalTok{ n\_samples, }\FloatTok{4}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Sampling (4 threads)   0%|                              |  ETA: N/A
+┌ Info: Found initial step size
+└   ϵ = 0.05
+┌ Info: Found initial step size
+└   ϵ = 0.2
+┌ Info: Found initial step size
+└   ϵ = 0.2
+┌ Info: Found initial step size
+└   ϵ = 0.05
+Sampling (4 threads)  25%|███████▌                      |  ETA: 0:00:18
+Sampling (4 threads)  50%|███████████████               |  ETA: 0:00:06
+Sampling (4 threads)  75%|██████████████████████▌       |  ETA: 0:00:02
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:06
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:06
+\end{verbatim}
+
+\begin{verbatim}
+Chains MCMC chain (11000×17×4 Array{Float64, 3}):
+
+Iterations        = 1001:1:12000
+Number of chains  = 4
+Samples per chain = 11000
+Wall duration     = 5.38 seconds
+Compute duration  = 20.29 seconds
+parameters        = log2ic50, a, b, c, σ²
+internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
+
+Summary Statistics
+  parameters      mean       std      mcse     ess_bulk     ess_tail      rhat ⋯
+      Symbol   Float64   Float64   Float64      Float64      Float64   Float64 ⋯
+
+    log2ic50    3.1001    0.0297    0.0002   25150.3685   27935.5938    1.0002 ⋯
+           a    0.1163    0.0038    0.0000   16860.1510   22570.9089    1.0001 ⋯
+           b    6.7350    1.0786    0.0069   26759.0743   25218.0167    1.0001 ⋯
+           c    0.0712    0.0034    0.0000   16323.0552   21352.9296    1.0001 ⋯
+          σ²    0.0001    0.0000    0.0000   32838.7703   28866.3125    1.0001 ⋯
+                                                                1 column omitted
+
+Quantiles
+  parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+      Symbol   Float64   Float64   Float64   Float64   Float64
+
+    log2ic50    3.0410    3.0804    3.1004    3.1202    3.1580
+           a    0.1089    0.1138    0.1163    0.1188    0.1238
+           b    5.0241    5.9818    6.5979    7.3261    9.2492
+           c    0.0643    0.0689    0.0712    0.0735    0.0778
+          σ²    0.0001    0.0001    0.0001    0.0001    0.0002
+\end{verbatim}
+
+Let's look again at the corner plot for the chains.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot corner plot for chains}
+\NormalTok{PairPlots.}\FunctionTok{pairplot}\NormalTok{(chain[n\_burnin}\OperatorTok{+}\FloatTok{1}\OperatorTok{:}\KeywordTok{end}\NormalTok{, }\OperatorTok{:}\NormalTok{, }\OperatorTok{:}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=19.5625in,height=20.02083in]{iwasawa_bayesian_inference_files/figure-pdf/cell-19-output-1.png}
+
+Compared to the previous example where we didn't remove the outliers,
+the posterior distributions are more concentrated, especially for the
+\(b\) parameter.
+
+Let's now plot the posterior predictive check.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+
+\CommentTok{\# Define unique concentrations}
+\NormalTok{unique\_concentrations }\OperatorTok{=} \FunctionTok{sort}\NormalTok{(}\FunctionTok{unique}\NormalTok{(data\_clean.concentration\_ugmL))}
+
+\CommentTok{\# Initialize matrix to store samples}
+\NormalTok{y\_samples }\OperatorTok{=} \FunctionTok{Array}\DataTypeTok{\{Float64\}}\NormalTok{(}
+    \ConstantTok{undef}\NormalTok{, }\FunctionTok{length}\NormalTok{(unique\_concentrations), n\_samples}
+\NormalTok{)}
+
+\CommentTok{\# Loop through samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \CommentTok{\# Generate mean for sample}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{=} \FunctionTok{logistic\_log2}\NormalTok{(}
+        \FunctionTok{log2}\NormalTok{.(unique\_concentrations),}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{a][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{b][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{c][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{log2ic50][i]}
+\NormalTok{    )}
+    \CommentTok{\# Add noise}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{.+=} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(unique\_concentrations)) }\OperatorTok{*} \FunctionTok{√}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+    \FunctionTok{√}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    title}\OperatorTok{=}\StringTok{"Posterior Predictive Check"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+
+\CommentTok{\# Plot samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \FunctionTok{lines!}\NormalTok{(}
+\NormalTok{        ax,}
+\NormalTok{        unique\_concentrations,}
+\NormalTok{        y\_samples[}\OperatorTok{:}\NormalTok{, i],}
+\NormalTok{        color}\OperatorTok{=}\NormalTok{(ColorSchemes.Paired\_12[}\FloatTok{1}\NormalTok{], }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{    )}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Plot data}
+\FunctionTok{scatter!}\NormalTok{(ax, data\_clean.concentration\_ugmL, data\_clean.OD)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-20-output-1.png}
+
+This look much better. Removing the outliers improved the fit
+significantly.
+
+\subsection{Alternative
+parameterization}\label{alternative-parameterization}
+
+In the data, there are several concentrations at zero, which is not
+compatible with the log-scale model. However, we can rewrite
+Equation~\ref{eq-iwasawa-model} without using the exponent as
+
+\begin{equation}\phantomsection\label{eq-iwasawa-model-no-exponent}{
+f(x) = \frac{a}
+{1+ \left(\frac{x}{\mathrm{IC}_{50}}\right)^b} + c
+}\end{equation}
+
+Let's define a new model using this parameterization.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\PreprocessorTok{@doc} \StringTok{raw"""}
+\StringTok{    logistic\_alt(x, a, b, c, ic50)}
+
+\StringTok{Compute the logistic function used to model the relationship between antibiotic}
+\StringTok{concentration and bacterial growth.}
+
+\StringTok{This function implements the following equation:}
+
+\StringTok{f(x) = a / (1 + (x / IC₅₀) \^{} b) + c}
+
+\StringTok{\# Arguments}
+\StringTok{{-} \textasciigrave{}x\textasciigrave{}: Antibiotic concentration (input variable)}
+\StringTok{{-} \textasciigrave{}a\textasciigrave{}: Maximum effect parameter (difference between upper and lower asymptotes)}
+\StringTok{{-} \textasciigrave{}b\textasciigrave{}: Slope parameter (steepness of the curve)}
+\StringTok{{-} \textasciigrave{}c\textasciigrave{}: Minimum effect parameter (lower asymptote)}
+\StringTok{{-} \textasciigrave{}ic50\textasciigrave{}: IC₅₀ parameter (concentration at which the effect is halfway between}
+\StringTok{  the minimum and maximum)}
+
+\StringTok{\# Returns}
+\StringTok{The computed effect (e.g., optical density) for the given antibiotic}
+\StringTok{concentration and parameters.}
+
+\StringTok{Note: This function is vectorized and can handle array inputs for \textasciigrave{}x\textasciigrave{}.}
+\StringTok{"""}
+\KeywordTok{function} \FunctionTok{logistic\_alt}\NormalTok{(x, a, b, c, ic50)}
+    \ControlFlowTok{return}\NormalTok{ @. a }\OperatorTok{/}\NormalTok{ (}\FloatTok{1.0} \OperatorTok{+}\NormalTok{ (x }\OperatorTok{/}\NormalTok{ ic50)}\OperatorTok{\^{}}\NormalTok{b) }\OperatorTok{+}\NormalTok{ c}
+\KeywordTok{end}
+
+\KeywordTok{function} \FunctionTok{logistic\_alt}\NormalTok{(x, params)}
+    \ControlFlowTok{return} \FunctionTok{logistic\_alt}\NormalTok{(x, params}\OperatorTok{...}\NormalTok{)}
+\KeywordTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+We will use the previous function to detect outliers in the data. Now,
+we re-define the Bayesian model using this parameterization.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Turing.}\PreprocessorTok{@model} \KeywordTok{function} \FunctionTok{logistic\_alt\_model}\NormalTok{(}
+\NormalTok{    x, y, prior\_params}\OperatorTok{::}\DataTypeTok{NamedTuple}\NormalTok{=}\FunctionTok{NamedTuple}\NormalTok{()}
+\NormalTok{)}
+    \CommentTok{\# Define default prior parameters}
+\NormalTok{    default\_params }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{        ic50}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        a}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        b}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        c}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{        σ²}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{)}
+\NormalTok{    )}
+
+    \CommentTok{\# Merge default parameters with provided parameters}
+\NormalTok{    params }\OperatorTok{=} \FunctionTok{merge}\NormalTok{(default\_params, prior\_params)}
+
+    \CommentTok{\# Define priors}
+\NormalTok{    ic50 }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{LogNormal}\NormalTok{(params.ic50}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    a }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{LogNormal}\NormalTok{(params.a}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    b }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{LogNormal}\NormalTok{(params.b}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    c }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{truncated}\NormalTok{(Turing.}\FunctionTok{Normal}\NormalTok{(params.c}\OperatorTok{...}\NormalTok{), }\FloatTok{0}\NormalTok{, }\ConstantTok{Inf}\NormalTok{)}
+\NormalTok{    σ² }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{truncated}\NormalTok{(Turing.}\FunctionTok{Normal}\NormalTok{(params.σ²}\OperatorTok{...}\NormalTok{), }\FloatTok{0}\NormalTok{, }\ConstantTok{Inf}\NormalTok{)}
+
+    \CommentTok{\# Define likelihood}
+\NormalTok{    y }\OperatorTok{\textasciitilde{}}\NormalTok{ Turing.}\FunctionTok{MvNormal}\NormalTok{(}
+        \FunctionTok{logistic\_alt}\NormalTok{(x, a, b, c, ic50),}
+        \BuiltInTok{LinearAlgebra}\NormalTok{.}\FunctionTok{Diagonal}\NormalTok{(}\FunctionTok{fill}\NormalTok{(σ², }\FunctionTok{length}\NormalTok{(y)))}
+\NormalTok{    )}
+\KeywordTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+Let's now perform inference on synthetic data using this new
+parameterization.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Define ground truth parameters}
+\NormalTok{ic50\_true }\OperatorTok{=} \FloatTok{2}\OperatorTok{\^{}}\FloatTok{0.5}
+\NormalTok{a\_true }\OperatorTok{=} \FloatTok{1.0}
+\NormalTok{b\_true }\OperatorTok{=} \FloatTok{10.0}
+\NormalTok{σ²\_true }\OperatorTok{=} \FloatTok{0.01}
+\NormalTok{c\_true }\OperatorTok{=} \FloatTok{0.1}
+
+\CommentTok{\# Simulate data}
+\NormalTok{x }\OperatorTok{=} \FloatTok{2} \OperatorTok{.\^{}} \FunctionTok{LinRange}\NormalTok{(}\OperatorTok{{-}}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{15}\NormalTok{)}
+\CommentTok{\# Define mean of data}
+\NormalTok{ŷ }\OperatorTok{=} \FunctionTok{logistic\_alt}\NormalTok{(x, a\_true, b\_true, c\_true, ic50\_true)}
+\CommentTok{\# Add noise}
+\NormalTok{y }\OperatorTok{=}\NormalTok{ ŷ }\OperatorTok{+} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(x)) }\OperatorTok{*} \FunctionTok{sqrt}\NormalTok{(σ²\_true)}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+\CommentTok{\# Plot data}
+\FunctionTok{scatterlines!}\NormalTok{(ax, x, y)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-23-output-1.png}
+
+With the data simulated, let's perform inference on the data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Perform inference}
+\NormalTok{model }\OperatorTok{=} \FunctionTok{logistic\_alt\_model}\NormalTok{(x, y)}
+
+\CommentTok{\# Define number of steps}
+\NormalTok{n\_burnin }\OperatorTok{=} \FloatTok{10\_000}
+\NormalTok{n\_samples }\OperatorTok{=} \FloatTok{1\_000}
+
+\NormalTok{chain }\OperatorTok{=}\NormalTok{ Turing.}\FunctionTok{sample}\NormalTok{(}
+\NormalTok{    model, Turing.}\FunctionTok{NUTS}\NormalTok{(), Turing.}\FunctionTok{MCMCThreads}\NormalTok{(), n\_burnin }\OperatorTok{+}\NormalTok{ n\_samples, }\FloatTok{4}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Sampling (4 threads)   0%|                              |  ETA: N/A
+┌ Info: Found initial step size
+└   ϵ = 0.4
+┌ Info: Found initial step size
+└   ϵ = 0.8
+┌ Info: Found initial step size
+└   ϵ = 1.6
+┌ Info: Found initial step size
+└   ϵ = 0.8
+Sampling (4 threads)  25%|███████▌                      |  ETA: 0:00:21
+Sampling (4 threads)  50%|███████████████               |  ETA: 0:00:07
+Sampling (4 threads)  75%|██████████████████████▌       |  ETA: 0:00:02
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:06
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:06
+\end{verbatim}
+
+\begin{verbatim}
+Chains MCMC chain (11000×17×4 Array{Float64, 3}):
+
+Iterations        = 1001:1:12000
+Number of chains  = 4
+Samples per chain = 11000
+Wall duration     = 5.85 seconds
+Compute duration  = 22.85 seconds
+parameters        = ic50, a, b, c, σ²
+internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
+
+Summary Statistics
+  parameters      mean       std      mcse     ess_bulk     ess_tail      rhat ⋯
+      Symbol   Float64   Float64   Float64      Float64      Float64   Float64 ⋯
+
+        ic50    1.3615    0.0783    0.0006   21996.9818   15834.2853    1.0001 ⋯
+           a    0.9776    0.0641    0.0005   14338.2651   16755.4871    1.0000 ⋯
+           b    7.5525    2.9801    0.0243   15179.8530   18757.0920    1.0000 ⋯
+           c    0.1183    0.0456    0.0004   14321.6452   10118.2654    1.0002 ⋯
+          σ²    0.0102    0.0066    0.0001   14265.0218   17759.7256    1.0002 ⋯
+                                                                1 column omitted
+
+Quantiles
+  parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+      Symbol   Float64   Float64   Float64   Float64   Float64
+
+        ic50    1.1980    1.3177    1.3639    1.4079    1.5098
+           a    0.8545    0.9372    0.9761    1.0169    1.1094
+           b    3.6070    5.6275    6.9973    8.7969   14.6326
+           c    0.0281    0.0886    0.1180    0.1470    0.2112
+          σ²    0.0037    0.0062    0.0085    0.0121    0.0270
+\end{verbatim}
+
+Let's look at the posterior distribution of the parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot corner plot for chains}
+\NormalTok{PairPlots.}\FunctionTok{pairplot}\NormalTok{(}
+\NormalTok{    chain[n\_burnin}\OperatorTok{+}\FloatTok{1}\OperatorTok{:}\KeywordTok{end}\NormalTok{, }\OperatorTok{:}\NormalTok{, }\OperatorTok{:}\NormalTok{],}
+\NormalTok{    PairPlots.}\FunctionTok{Truth}\NormalTok{(}
+\NormalTok{        (;}
+\NormalTok{        ic50}\OperatorTok{=}\NormalTok{ic50\_true,}
+\NormalTok{        a}\OperatorTok{=}\NormalTok{a\_true,}
+\NormalTok{        b}\OperatorTok{=}\NormalTok{b\_true,}
+\NormalTok{        c}\OperatorTok{=}\NormalTok{c\_true,}
+\NormalTok{        σ²}\OperatorTok{=}\NormalTok{σ²\_true}
+\NormalTok{    )}
+\NormalTok{    )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=19.20833in,height=19.60417in]{iwasawa_bayesian_inference_files/figure-pdf/cell-25-output-1.png}
+
+The model is still able to recover the ground truth parameters. Let's
+now plot the posterior predictive check.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+
+\CommentTok{\# Initialize matrix to store samples}
+\NormalTok{y\_samples }\OperatorTok{=} \FunctionTok{Array}\DataTypeTok{\{Float64\}}\NormalTok{(}\ConstantTok{undef}\NormalTok{, }\FunctionTok{length}\NormalTok{(x), n\_samples)}
+
+\CommentTok{\# Loop through samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \CommentTok{\# Generate mean for sample}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{=} \FunctionTok{logistic\_alt}\NormalTok{(}
+\NormalTok{        x,}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{a][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{b][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{c][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{ic50][i]}
+\NormalTok{    )}
+    \CommentTok{\# Add noise}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{.+=} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(x)) }\OperatorTok{*} \FunctionTok{√}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    title}\OperatorTok{=}\StringTok{"Posterior Predictive Check"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+
+\CommentTok{\# Plot samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \FunctionTok{lines!}\NormalTok{(ax, x, y\_samples[}\OperatorTok{:}\NormalTok{, i], color}\OperatorTok{=}\NormalTok{(}\OperatorTok{:}\NormalTok{gray, }\FloatTok{0.05}\NormalTok{))}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Plot data}
+\FunctionTok{scatterlines!}\NormalTok{(ax, x, y)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-26-output-1.png}
+
+Everything looks good. Let's again test it on the \textcite{iwasawa2022}
+data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\CommentTok{\# Define prior parameters}
+\NormalTok{prior\_params }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{    a}\OperatorTok{=}\NormalTok{(}\FunctionTok{log}\NormalTok{(}\FloatTok{0.1}\NormalTok{), }\FloatTok{0.1}\NormalTok{),}
+\NormalTok{    b}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{    c}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{1}\NormalTok{),}
+\NormalTok{    σ²}\OperatorTok{=}\NormalTok{(}\FloatTok{0}\NormalTok{, }\FloatTok{0.01}\NormalTok{)}
+\NormalTok{)}
+\CommentTok{\# Define data}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ df\_group[}\FloatTok{2}\NormalTok{]}
+\CommentTok{\# Clean data}
+\NormalTok{outliers\_idx }\OperatorTok{=} \FunctionTok{fit\_logistic\_and\_detect\_outliers}\NormalTok{(}
+    \FunctionTok{log2}\NormalTok{.(data.concentration\_ugmL), data.OD, threshold}\OperatorTok{=}\FloatTok{2}
+\NormalTok{)}
+\NormalTok{data\_clean }\OperatorTok{=}\NormalTok{ data[.!outliers\_idx, }\OperatorTok{:}\NormalTok{]}
+
+\CommentTok{\# Perform inference}
+\NormalTok{model }\OperatorTok{=} \FunctionTok{logistic\_alt\_model}\NormalTok{(}
+\NormalTok{    data\_clean.concentration\_ugmL,}
+\NormalTok{    data\_clean.OD,}
+\NormalTok{    prior\_params}
+\NormalTok{)}
+
+\CommentTok{\# Define number of steps}
+\NormalTok{n\_burnin }\OperatorTok{=} \FloatTok{10\_000}
+\NormalTok{n\_samples }\OperatorTok{=} \FloatTok{1\_000}
+
+\NormalTok{chain }\OperatorTok{=}\NormalTok{ Turing.}\FunctionTok{sample}\NormalTok{(}
+\NormalTok{    model, Turing.}\FunctionTok{NUTS}\NormalTok{(), Turing.}\FunctionTok{MCMCThreads}\NormalTok{(), n\_burnin }\OperatorTok{+}\NormalTok{ n\_samples, }\FloatTok{4}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Sampling (4 threads)   0%|                              |  ETA: N/A
+┌ Info: Found initial step size
+└   ϵ = 0.00625
+┌ Info: Found initial step size
+└   ϵ = 0.0125
+┌ Info: Found initial step size
+└   ϵ = 0.00625
+┌ Info: Found initial step size
+└   ϵ = 0.00625
+Sampling (4 threads)  25%|███████▌                      |  ETA: 0:00:21
+Sampling (4 threads)  50%|███████████████               |  ETA: 0:00:07
+Sampling (4 threads)  75%|██████████████████████▌       |  ETA: 0:00:02
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:07
+Sampling (4 threads) 100%|██████████████████████████████| Time: 0:00:07
+\end{verbatim}
+
+\begin{verbatim}
+Chains MCMC chain (11000×17×4 Array{Float64, 3}):
+
+Iterations        = 1001:1:12000
+Number of chains  = 4
+Samples per chain = 11000
+Wall duration     = 6.52 seconds
+Compute duration  = 24.81 seconds
+parameters        = ic50, a, b, c, σ²
+internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
+
+Summary Statistics
+  parameters      mean       std      mcse     ess_bulk     ess_tail      rhat ⋯
+      Symbol   Float64   Float64   Float64      Float64      Float64   Float64 ⋯
+
+        ic50    8.5831    0.1769    0.0011   25568.1627   25963.0962    1.0003 ⋯
+           a    0.1165    0.0038    0.0000   18041.1443   20901.4168    1.0002 ⋯
+           b    9.6366    1.5316    0.0097   26259.3918   25025.7026    1.0000 ⋯
+           c    0.0710    0.0035    0.0000   17294.7757   21118.9348    1.0002 ⋯
+          σ²    0.0001    0.0000    0.0000   29855.3383   28397.5187    1.0001 ⋯
+                                                                1 column omitted
+
+Quantiles
+  parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+      Symbol   Float64   Float64   Float64   Float64   Float64
+
+        ic50    8.2417    8.4631    8.5828    8.6994    8.9339
+           a    0.1091    0.1139    0.1164    0.1190    0.1241
+           b    7.2053    8.5622    9.4488   10.4964   13.1592
+           c    0.0640    0.0687    0.0711    0.0734    0.0777
+          σ²    0.0001    0.0001    0.0001    0.0001    0.0002
+\end{verbatim}
+
+Let's look at the posterior distribution of the parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot corner plot for chains}
+\NormalTok{PairPlots.}\FunctionTok{pairplot}\NormalTok{(chain[n\_burnin}\OperatorTok{+}\FloatTok{1}\OperatorTok{:}\KeywordTok{end}\NormalTok{, }\OperatorTok{:}\NormalTok{, }\OperatorTok{:}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=19.5625in,height=20.02083in]{iwasawa_bayesian_inference_files/figure-pdf/cell-28-output-1.png}
+
+Nothing looks obviously wrong. Let's plot the posterior predictive
+check.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+
+\CommentTok{\# Define unique concentrations}
+\NormalTok{unique\_concentrations }\OperatorTok{=} \FunctionTok{sort}\NormalTok{(}\FunctionTok{unique}\NormalTok{(data\_clean.concentration\_ugmL))}
+
+\CommentTok{\# Initialize matrix to store samples}
+\NormalTok{y\_samples }\OperatorTok{=} \FunctionTok{Array}\DataTypeTok{\{Float64\}}\NormalTok{(}
+    \ConstantTok{undef}\NormalTok{, }\FunctionTok{length}\NormalTok{(unique\_concentrations), n\_samples}
+\NormalTok{)}
+
+\CommentTok{\# Loop through samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \CommentTok{\# Generate mean for sample}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{=} \FunctionTok{logistic\_alt}\NormalTok{(}
+\NormalTok{        unique\_concentrations,}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{a][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{b][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{c][i],}
+\NormalTok{        chain[}\OperatorTok{:}\NormalTok{ic50][i]}
+\NormalTok{    )}
+    \CommentTok{\# Add noise}
+\NormalTok{    y\_samples[}\OperatorTok{:}\NormalTok{, i] }\OperatorTok{.+=} \FunctionTok{randn}\NormalTok{(}\FunctionTok{length}\NormalTok{(unique\_concentrations)) }\OperatorTok{*} \FunctionTok{√}\NormalTok{(chain[}\OperatorTok{:}\NormalTok{σ²][i])}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{350}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"antibiotic concentration"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"optical density"}\NormalTok{,}
+\NormalTok{    title}\OperatorTok{=}\StringTok{"Posterior Predictive Check"}\NormalTok{,}
+\NormalTok{    xscale}\OperatorTok{=}\NormalTok{log2}
+\NormalTok{)}
+
+\CommentTok{\# Plot samples}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \FloatTok{1}\OperatorTok{:}\NormalTok{n\_samples}
+    \FunctionTok{lines!}\NormalTok{(}
+\NormalTok{        ax,}
+\NormalTok{        unique\_concentrations,}
+\NormalTok{        y\_samples[}\OperatorTok{:}\NormalTok{, i],}
+\NormalTok{        color}\OperatorTok{=}\NormalTok{(ColorSchemes.Paired\_12[}\FloatTok{1}\NormalTok{], }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{    )}
+\ControlFlowTok{end} \CommentTok{\# for}
+
+\CommentTok{\# Plot data}
+\FunctionTok{scatter!}\NormalTok{(ax, data\_clean.concentration\_ugmL, data\_clean.OD)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=7.29167in,height=6.25in]{iwasawa_bayesian_inference_files/figure-pdf/cell-29-output-1.png}
+
+With this parameterization, the model performs as well as the previous
+one.
+
+\subsection{Conclusion}\label{conclusion}
+
+In this notebook, we have performed Bayesian inference on the data from
+\textcite{iwasawa2022} using two different parameterizations of the
+logistic function. Both parameterizations perform equally well, and we
+are able to recover the ground truth parameters from simulated data.
+Furthermore, implementing an outlier detection scheme improved the fit
+significantly.
+
+
+
+\end{document}

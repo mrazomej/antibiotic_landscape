@@ -1,0 +1,1222 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Lower the position of page numbers
+\usepackage{fancyhdr}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{100pt} % Increase this value to lower the page numbers
+
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+% Change font size
+\usepackage[font={footnotesize, sf}, labelfont=bf, margin=0.05\linewidth]{caption}
+\renewcommand{\familydefault}{\sfdefault}
+% Bold the 'Figure #' in the caption and separate it from the title/caption
+% with a period
+% Captions will be left justified
+\usepackage[
+	aboveskip=1pt,
+	labelfont=bf,
+	labelsep=period,
+	justification=raggedright,
+	singlelinecheck=off
+]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Add numbered lines
+\usepackage{lineno}
+% \linenumbers
+
+% Package to include multiple title pages
+% This will allow me to add a tile to the main text and to the SI
+\usepackage{titling}
+
+% Define command to begin the supplementary section
+\newcommand{\beginsupplement}{
+\setcounter{page}{1} % Restart page counter
+\setcounter{section}{0} % Restart section counter
+% \renewcommand{\thesection}{\Alph{section}}%
+\renewcommand{\thesection}{}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\setcounter{table}{0} % Restart table counter
+\renewcommand{\thetable}{\Alph{table}}
+\setcounter{figure}{0} % Restart figure counter
+\renewcommand{\thefigure}{\Alph{figure}}%
+\setcounter{equation}{0} % Restart equation counter
+\renewcommand{\theequation}{S\arabic{equation}}%
+}
+
+% Add author affiliations
+\usepackage{authblk}
+
+% Allow to define personalized colors
+\usepackage{xcolor}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[
+    style=vancouver,
+    sorting=none,				% Do not sort bibliography
+	url=false, 					% Do not show url in reference
+	doi=false, 					% Do not show doi in reference
+	isbn=false, 				% Do not show isbn link in reference
+	eprint=false, 			    % Do not show eprint link in reference
+	maxbibnames=9, 			    % Include up to 9 names in citation
+	firstinits=true,
+]{biblatex}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addbibresource{../references.bib}
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Training an RHVAE on synthetic data},
+  pdfauthor={Manuel Razo-Mejia},
+  pdfkeywords={variational autoencoders, Riemannian geometry, deep
+learning},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add title
+\title{Training an RHVAE on synthetic data}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add list of authors
+
+% Loop through authors
+\author[1]{Manuel Razo-Mejia}
+
+% Loop through affiliations
+\affil[1]{Department of Biology, Stanford University}
+
+% Add corresponding author
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set affiliations in small font
+\renewcommand\Affilfont{\itshape\small}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Remove date
+\date{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Add package for line numbering
+\usepackage{lineno}
+
+\begin{document}
+\linenumbers
+\maketitle
+(c) This work is licensed under a
+\href{https://creativecommons.org/licenses/by/4.0/}{Creative Commons
+Attribution License CC-BY 4.0}. All code contained herein is licensed
+under an \href{https://opensource.org/licenses/MIT}{MIT license}.
+
+\section{Riemannian Hamiltonian Variational Autoencoder for Phenotypic
+Space
+Reconstruction}\label{riemannian-hamiltonian-variational-autoencoder-for-phenotypic-space-reconstruction}
+
+This notebook implements a Riemannian Hamiltonian Variational
+Autoencoder (RHVAE) to analyze fitness profiles generated from
+evolutionary simulations, as the ones generated in the
+\href{evolutionary_dynamics.qmd}{Evolutionary Dynamics} notebook. We'll
+train the RHVAE to learn a low-dimensional representation (latent space)
+of these fitness profiles, with the goal of reconstructing the
+underlying phenotypic coordinates.
+
+\subsection{Introduction to RHVAEs}\label{introduction-to-rhvaes}
+
+Variational Autoencoders (VAEs) are generative models that learn to
+encode high-dimensional data into a lower-dimensional latent space and
+then decode it back. A standard VAE consists of an encoder network that
+maps input data to a distribution in latent space, and a decoder network
+that reconstructs the input from samples from this distribution.
+
+The Riemannian Hamiltonian VAE (RHVAE) extends this framework by
+modeling the latent space as a Riemannian manifold, learning not only
+the encoding/decoding functions but also the geometric structure of the
+latent space. This is achieved by:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Learning a position-dependent metric tensor that captures how
+  distances in latent space relate to distances in data space.
+\item
+  Using Hamiltonian dynamics to move in latent space in a geometry-aware
+  manner.
+\end{enumerate}
+
+The RHVAE is particularly useful for our application because: - It
+captures nonlinear relationships between fitness profiles and underlying
+phenotypes. - It provides meaningful distances in latent space via the
+learned metric tensor. - It offers a principled way to interpolate
+between points in latent space.
+
+\subsection{Setup Environment}\label{setup-environment}
+
+First, let's import the necessary packages for our implementation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Import project package}
+\ImportTok{import} \BuiltInTok{Antibiotic}
+\ImportTok{import} \BuiltInTok{Antibiotic.mh}\NormalTok{ as mh }\CommentTok{\# Metropolis{-}Hastings dynamics module}
+
+\CommentTok{\# Import AutoEncoderToolkit to train VAEs}
+\ImportTok{import} \BuiltInTok{AutoEncoderToolkit}\NormalTok{ as AET}
+
+\CommentTok{\# Import packages for manipulating results}
+\ImportTok{import} \BuiltInTok{DimensionalData}\NormalTok{ as DD}
+\ImportTok{import} \BuiltInTok{DataFrames}\NormalTok{ as DF}
+\ImportTok{import} \BuiltInTok{Glob}
+
+\CommentTok{\# Import ML libraries}
+\ImportTok{import} \BuiltInTok{Flux}
+
+\CommentTok{\# Import CUDA (if available) to train using GPU}
+\CommentTok{\# import CUDA}
+
+\CommentTok{\# Import library to save models}
+\ImportTok{import} \BuiltInTok{JLD2}
+
+\CommentTok{\# Import libraries for data handling}
+\ImportTok{import} \BuiltInTok{IterTools}
+\ImportTok{import} \BuiltInTok{StatsBase}
+\ImportTok{import} \BuiltInTok{Random}
+
+\CommentTok{\# Load Plotting packages}
+\ImportTok{using} \BuiltInTok{CairoMakie}
+\ImportTok{import} \BuiltInTok{ColorSchemes}
+\ImportTok{import} \BuiltInTok{Colors}
+
+\CommentTok{\# Activate backend}
+\NormalTok{CairoMakie.}\FunctionTok{activate!}\NormalTok{()}
+
+\CommentTok{\# Set plotting style}
+\NormalTok{Antibiotic.viz.}\FunctionTok{theme\_makie!}\NormalTok{()}
+
+\CommentTok{\# Set random seed for reproducibility}
+\BuiltInTok{Random}\NormalTok{.}\FunctionTok{seed!}\NormalTok{(}\FloatTok{42}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Defining Directories}\label{defining-directories}
+
+We'll set up the directories where we'll load data from and save our
+model and results to.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Defining directories...}
+
+\CommentTok{\# Define output directory}
+\NormalTok{out\_dir }\OperatorTok{=} \StringTok{"./sim\_metropolis\_dynamics"}
+
+\CommentTok{\# Define model state directory}
+\NormalTok{state\_dir }\OperatorTok{=} \StringTok{"}\SpecialCharTok{$}\NormalTok{(out\_dir)}\StringTok{/rhvae\_model\_state"}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Model Architecture and
+Hyperparameters}\label{model-architecture-and-hyperparameters}
+
+The RHVAE architecture consists of three main components: 1.
+\textbf{Encoder}: Maps fitness profiles to a distribution in latent
+space 2. \textbf{Decoder}: Reconstructs fitness profiles from latent
+space coordinates 3. \textbf{Metric Network}: Learns the Riemannian
+metric tensor of the latent space
+
+Let's define the hyperparameters and architecture of our model
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Defining hyperparameters...}
+
+\CommentTok{\# Define dimensionality of latent space}
+\NormalTok{n\_latent }\OperatorTok{=} \FloatTok{2}
+\CommentTok{\# Define number of neurons in hidden layers}
+\NormalTok{n\_neuron }\OperatorTok{=} \FloatTok{128}
+
+\CommentTok{\# Define RHVAE hyper{-}parameters}
+\NormalTok{T }\OperatorTok{=} \FloatTok{0.8f0} \CommentTok{\# Temperature}
+\NormalTok{λ }\OperatorTok{=} \FloatTok{1.0f{-}2} \CommentTok{\# Regularization parameter}
+\NormalTok{n\_centroids }\OperatorTok{=} \FloatTok{256} \CommentTok{\# Number of centroids}
+
+\CommentTok{\# Define loss function hyper{-}parameters}
+\NormalTok{ϵ }\OperatorTok{=} \FunctionTok{Float32}\NormalTok{(}\FloatTok{1E{-}3}\NormalTok{) }\CommentTok{\# Leapfrog step size}
+\NormalTok{K }\OperatorTok{=} \FloatTok{10} \CommentTok{\# Number of leapfrog steps}
+\NormalTok{βₒ }\OperatorTok{=} \FloatTok{0.3f0} \CommentTok{\# Initial temperature for tempering}
+
+\CommentTok{\# Define RHVAE hyper{-}parameters in a named tuple}
+\NormalTok{rhvae\_kwargs }\OperatorTok{=}\NormalTok{ (K}\OperatorTok{=}\NormalTok{K, ϵ}\OperatorTok{=}\NormalTok{ϵ, βₒ}\OperatorTok{=}\NormalTok{βₒ)}
+
+\CommentTok{\# Define training hyperparameters}
+\NormalTok{n\_epoch }\OperatorTok{=} \FloatTok{75} \CommentTok{\# Number of epochs}
+\NormalTok{n\_batch }\OperatorTok{=} \FloatTok{512} \CommentTok{\# Batch size}
+\NormalTok{n\_batch\_loss }\OperatorTok{=} \FloatTok{512} \CommentTok{\# Batch size for loss computation}
+\NormalTok{η }\OperatorTok{=} \FloatTok{10}\OperatorTok{\^{}{-}}\FloatTok{3} \CommentTok{\# Learning rate}
+\NormalTok{split\_frac }\OperatorTok{=} \FloatTok{0.85} \CommentTok{\# Train/val split}
+
+\CommentTok{\# Define ELBO prefactors}
+\NormalTok{logp\_prefactor }\OperatorTok{=}\NormalTok{ [}\FloatTok{10.0f0}\NormalTok{, }\FloatTok{0.1f0}\NormalTok{, }\FloatTok{0.1f0}\NormalTok{]}
+\NormalTok{logq\_prefactor }\OperatorTok{=}\NormalTok{ [}\FloatTok{0.1f0}\NormalTok{, }\FloatTok{0.1f0}\NormalTok{, }\FloatTok{0.1f0}\NormalTok{]}
+
+\CommentTok{\# Define loss function kwargs in a NamedTuple}
+\NormalTok{loss\_kwargs }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{    K}\OperatorTok{=}\NormalTok{K,}
+\NormalTok{    ϵ}\OperatorTok{=}\NormalTok{ϵ,}
+\NormalTok{    βₒ}\OperatorTok{=}\NormalTok{βₒ,}
+\NormalTok{    logp\_prefactor}\OperatorTok{=}\NormalTok{logp\_prefactor,}
+\NormalTok{    logq\_prefactor}\OperatorTok{=}\NormalTok{logq\_prefactor,}
+\NormalTok{)}
+
+\CommentTok{\# Define by how much to subsample the time series}
+\NormalTok{n\_sub }\OperatorTok{=} \FloatTok{10}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Loading and Preprocessing
+Data}\label{loading-and-preprocessing-data}
+
+Now let's load the fitness profiles from our evolutionary simulations
+and preprocess them for training. Since the simulations are very densly
+sampled over time, we will train the RHVAE on a subsampled time series,
+taking every \texttt{n\_sub} time point.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Loading data into memory...}
+
+\CommentTok{\# Load fitnotype profiles}
+\NormalTok{fitnotype\_profiles }\OperatorTok{=}\NormalTok{ JLD2.}\FunctionTok{load}\NormalTok{(}\StringTok{"}\SpecialCharTok{$}\NormalTok{(out\_dir)}\StringTok{/sim\_evo.jld2"}\NormalTok{)[}\StringTok{"fitnotype\_profiles"}\NormalTok{]}
+
+\CommentTok{\# Extract initial and final time points}
+\NormalTok{t\_init, t\_final }\OperatorTok{=} \FunctionTok{collect}\NormalTok{(DD.}\FunctionTok{dims}\NormalTok{(fitnotype\_profiles, }\OperatorTok{:}\NormalTok{time)[[}\FloatTok{1}\NormalTok{, }\KeywordTok{end}\NormalTok{]])}
+\CommentTok{\# Subsample time series}
+\NormalTok{fitnotype\_profiles }\OperatorTok{=}\NormalTok{ fitnotype\_profiles[time}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(t\_init}\OperatorTok{:}\NormalTok{n\_sub}\OperatorTok{:}\NormalTok{t\_final)]}
+
+\CommentTok{\# Define number of environments}
+\NormalTok{n\_env }\OperatorTok{=} \FunctionTok{length}\NormalTok{(DD.}\FunctionTok{dims}\NormalTok{(fitnotype\_profiles, }\OperatorTok{:}\NormalTok{landscape))}
+
+\CommentTok{\# Extract fitness data bringing the fitness dimension to the first dimension}
+\NormalTok{fit\_data }\OperatorTok{=} \FunctionTok{permutedims}\NormalTok{(fitnotype\_profiles.fitness.data, (}\FloatTok{5}\NormalTok{, }\FloatTok{1}\NormalTok{, }\FloatTok{2}\NormalTok{, }\FloatTok{3}\NormalTok{, }\FloatTok{4}\NormalTok{, }\FloatTok{6}\NormalTok{))}
+\CommentTok{\# Reshape the array to a Matrix}
+\NormalTok{fit\_data }\OperatorTok{=} \FunctionTok{reshape}\NormalTok{(fit\_data, }\FunctionTok{size}\NormalTok{(fit\_data, }\FloatTok{1}\NormalTok{), }\OperatorTok{:}\NormalTok{)}
+
+\CommentTok{\# Reshape the array to stack the 3rd dimension}
+\NormalTok{fit\_mat }\OperatorTok{=} \FunctionTok{log}\NormalTok{.(fit\_data)}
+
+\CommentTok{\# Fit model to standardize data to mean zero and standard deviation 1 on each}
+\CommentTok{\# environment }
+\NormalTok{dt }\OperatorTok{=}\NormalTok{ StatsBase.}\FunctionTok{fit}\NormalTok{(StatsBase.ZScoreTransform, fit\_mat, dims}\OperatorTok{=}\FloatTok{2}\NormalTok{)}
+
+\CommentTok{\# Standardize the data to have mean 0 and standard deviation 1}
+\NormalTok{fit\_std }\OperatorTok{=}\NormalTok{ StatsBase.}\FunctionTok{transform}\NormalTok{(dt, fit\_mat)}
+
+\CommentTok{\# Split indexes of data into training and validation}
+\NormalTok{train\_idx, val\_idx }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{splitobs}\NormalTok{(}
+    \FloatTok{1}\OperatorTok{:}\FunctionTok{size}\NormalTok{(fit\_std, }\FloatTok{2}\NormalTok{), at}\OperatorTok{=}\NormalTok{split\_frac, shuffle}\OperatorTok{=}\ConstantTok{true}
+\NormalTok{)}
+
+\CommentTok{\# Extract train and validation data}
+\NormalTok{train\_data }\OperatorTok{=}\NormalTok{ fit\_std[}\OperatorTok{:}\NormalTok{, train\_idx]}
+\NormalTok{val\_data }\OperatorTok{=}\NormalTok{ fit\_std[}\OperatorTok{:}\NormalTok{, val\_idx]}
+\end{Highlighting}
+\end{Shaded}
+
+Our data preprocessing involves several key steps: 1. \textbf{Log
+transformation}: We apply a logarithmic transformation to the fitness
+values to make their distribution more amenable to the model. 2.
+\textbf{Standardization}: We standardize the log-fitness values per
+environment to have mean 0 and standard deviation 1. This is common
+practice when training neural networks as it helps with numerical
+stability and convergence. 3. \textbf{Train-validation split}: We split
+the data into training (85\%) and validation (15\%) sets. The validation
+set is used to monitor the model's performance during training.
+
+\subsection{Defining the RHVAE Model
+Architecture}\label{defining-the-rhvae-model-architecture}
+
+We now define the RHVAE model architecture with its three core
+components: encoder, decoder, and metric network. For this, we use the
+\texttt{AutoEncoderToolkit.jl} package \autocite{razo-mejia2024}.
+
+The first step is to select the centroids used to ``anchor'' the metric
+tensor learned by the RHVAE. We do this by using the
+\texttt{centroids\_kmedoids} function from the
+\texttt{AutoEncoderToolkit.jl} package. These centroids will be part of
+the definition of the RHVAE model itself.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Selecting centroids via k{-}means...}
+
+\CommentTok{\# Select centroids via k{-}medoids}
+\NormalTok{centroids\_data }\OperatorTok{=}\NormalTok{ AET.utils.}\FunctionTok{centroids\_kmedoids}\NormalTok{(fit\_std, n\_centroids)}
+\end{Highlighting}
+\end{Shaded}
+
+Now, we can define the RHVAE architecture. We start by defining the
+encoder, which maps the fitness profiles to a distribution in latent
+space. Since \texttt{AutoEncoderToolkit.jl} is based on
+\texttt{Flux.jl}, we will build all of the components of the RHVAE using
+\texttt{Flux.jl} components.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define JointGaussianLogEncoder...}
+
+\CommentTok{\# Define encoder chain}
+\NormalTok{encoder\_chain }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{Chain}\NormalTok{(}
+    \CommentTok{\# First layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_env }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.identity),}
+    \CommentTok{\# Second layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+    \CommentTok{\# Third layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+    \CommentTok{\# Fourth layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+\NormalTok{)}
+
+\CommentTok{\# Define layers for µ and log(σ)}
+\NormalTok{µ\_layer }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_latent, Flux.identity)}
+\NormalTok{logσ\_layer }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_latent, Flux.identity)}
+
+\CommentTok{\# build encoder}
+\NormalTok{encoder }\OperatorTok{=}\NormalTok{ AET.}\FunctionTok{JointGaussianLogEncoder}\NormalTok{(encoder\_chain, µ\_layer, logσ\_layer)}
+\end{Highlighting}
+\end{Shaded}
+
+Now, we define the decoder, which maps the latent space coordinates to
+the fitness profiles.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define SimpleGaussianDecoder...}
+
+\CommentTok{\# Initialize decoder}
+\NormalTok{decoder }\OperatorTok{=}\NormalTok{ AET.}\FunctionTok{SimpleGaussianDecoder}\NormalTok{(}
+\NormalTok{    Flux.}\FunctionTok{Chain}\NormalTok{(}
+        \CommentTok{\# First layer}
+\NormalTok{        Flux.}\FunctionTok{Dense}\NormalTok{(n\_latent }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.identity),}
+        \CommentTok{\# Second Layer}
+\NormalTok{        Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+        \CommentTok{\# Third layer}
+\NormalTok{        Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+        \CommentTok{\# Fourth layer}
+\NormalTok{        Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+        \CommentTok{\# Output layer}
+\NormalTok{        Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_env, Flux.identity)}
+\NormalTok{    )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Finally, we define the metric network, which learns the Riemannian
+metric tensor of the latent space.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define MetricChain...}
+
+\CommentTok{\# Define mlp chain}
+\NormalTok{mlp\_chain }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{Chain}\NormalTok{(}
+    \CommentTok{\# First layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_env }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.identity),}
+    \CommentTok{\# Second layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+    \CommentTok{\# Third layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+    \CommentTok{\# Fourth layer}
+\NormalTok{    Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_neuron, Flux.leakyrelu),}
+\NormalTok{)}
+
+\CommentTok{\# Define layers for the diagonal and lower triangular part of the covariance}
+\CommentTok{\# matrix}
+\NormalTok{diag }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{Dense}\NormalTok{(n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_latent, Flux.identity)}
+\NormalTok{lower }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{Dense}\NormalTok{(}
+\NormalTok{    n\_neuron }\OperatorTok{=\textgreater{}}\NormalTok{ n\_latent }\OperatorTok{*}\NormalTok{ (n\_latent }\OperatorTok{{-}} \FloatTok{1}\NormalTok{) }\OperatorTok{÷} \FloatTok{2}\NormalTok{, Flux.identity}
+\NormalTok{)}
+
+\CommentTok{\# Build metric chain}
+\NormalTok{metric\_chain }\OperatorTok{=}\NormalTok{ AET.RHVAEs.}\FunctionTok{MetricChain}\NormalTok{(mlp\_chain, diag, lower)}
+\end{Highlighting}
+\end{Shaded}
+
+For the final step, we bring all the components together to define the
+RHVAE model itself.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Initialize rhvae}
+\NormalTok{rhvae }\OperatorTok{=}\NormalTok{ AET.RHVAEs.}\FunctionTok{RHVAE}\NormalTok{(}
+\NormalTok{    encoder }\OperatorTok{*}\NormalTok{ decoder,}
+\NormalTok{    metric\_chain,}
+\NormalTok{    centroids\_data,}
+\NormalTok{    T,}
+\NormalTok{    λ}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The RHVAE architecture comprises:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Encoder}:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Takes fitness profiles (dimension = number of environments) as input
+  \item
+    Processes through 4 hidden layers with 128 neurons each
+  \item
+    Outputs mean (μ) and log-variance (log σ) parameters of a diagonal
+    Gaussian distribution in latent space
+  \end{itemize}
+\item
+  \textbf{Decoder}:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Takes latent space coordinates (dimension = 2) as input
+  \item
+    Processes through 4 hidden layers with 128 neurons each
+  \item
+    Outputs reconstructed fitness profiles
+  \end{itemize}
+\item
+  \textbf{Metric Network}:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Learns the parameters of the Riemannian metric tensor
+  \item
+    Takes decoded fitness profiles as input
+  \item
+    Outputs parameters for the diagonal and lower triangular parts of
+    the metric tensor
+  \end{itemize}
+\end{enumerate}
+
+We also select centroids using k-medoids clustering to approximate the
+data manifold, which helps in computing the metric tensor more
+efficiently.
+
+\subsection{Training the RHVAE}\label{training-the-rhvae}
+
+Now, let's train our RHVAE model on the fitness profiles:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{println}\NormalTok{(}\StringTok{"Checking previous model states..."}\NormalTok{)}
+
+\CommentTok{\# List previous model parameters}
+\NormalTok{model\_states }\OperatorTok{=} \FunctionTok{sort}\NormalTok{(Glob.}\FunctionTok{glob}\NormalTok{(}\StringTok{"}\SpecialCharTok{$}\NormalTok{(state\_dir)}\StringTok{/beta{-}rhvae\_epoch*.jld2"}\NormalTok{[}\FloatTok{2}\OperatorTok{:}\KeywordTok{end}\NormalTok{], }\StringTok{"/"}\NormalTok{))}
+
+\CommentTok{\# Check if model states exist}
+\ControlFlowTok{if} \FunctionTok{length}\NormalTok{(model\_states) }\OperatorTok{\textgreater{}} \FloatTok{0}
+    \CommentTok{\# Load model state}
+\NormalTok{    model\_state }\OperatorTok{=}\NormalTok{ JLD2.}\FunctionTok{load}\NormalTok{(model\_states[}\KeywordTok{end}\NormalTok{])[}\StringTok{"model\_state"}\NormalTok{]}
+    \CommentTok{\# Input parameters to model}
+\NormalTok{    Flux.}\FunctionTok{loadmodel!}\NormalTok{(rhvae, model\_state)}
+    \CommentTok{\# Update metric parameters}
+\NormalTok{    AET.RHVAEs.}\FunctionTok{update\_metric!}\NormalTok{(rhvae)}
+    \CommentTok{\# Extract epoch number}
+\NormalTok{    epoch\_init }\OperatorTok{=} \FunctionTok{parse}\NormalTok{(}
+        \DataTypeTok{Int}\NormalTok{, }\FunctionTok{match}\NormalTok{(}\StringTok{r"epoch}\CharTok{(}\SpecialCharTok{\textbackslash{}d+}\CharTok{)}\StringTok{"}\NormalTok{, model\_states[}\KeywordTok{end}\NormalTok{]).captures[}\FloatTok{1}\NormalTok{]}
+\NormalTok{    ) }\OperatorTok{+} \FloatTok{1}
+\ControlFlowTok{else}
+\NormalTok{    epoch\_init }\OperatorTok{=} \FloatTok{1}
+\ControlFlowTok{end} \CommentTok{\# if}
+
+\FunctionTok{println}\NormalTok{(}\StringTok{"Initial epoch: }\SpecialCharTok{$}\NormalTok{epoch\_init}\StringTok{"}\NormalTok{)}
+
+\FunctionTok{println}\NormalTok{(}\StringTok{"Uploading model to GPU..."}\NormalTok{)}
+
+\CommentTok{\# Check if CUDA is available}
+\ControlFlowTok{if}\NormalTok{ CUDA.}\FunctionTok{functional}\NormalTok{()}
+    \CommentTok{\# Upload model to GPU}
+\NormalTok{    rhvae }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{gpu}\NormalTok{(rhvae)}
+    \CommentTok{\# Upload data to GPU}
+\NormalTok{    train\_data }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{gpu}\NormalTok{(train\_data)}
+\NormalTok{    val\_data }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{gpu}\NormalTok{(val\_data)}
+\ControlFlowTok{end}
+
+\CommentTok{\# Explicit setup of optimizer}
+\NormalTok{opt\_rhvae }\OperatorTok{=}\NormalTok{ Flux.Train.}\FunctionTok{setup}\NormalTok{(}
+\NormalTok{    Flux.Optimisers.}\FunctionTok{Adam}\NormalTok{(η),}
+\NormalTok{    rhvae}
+\NormalTok{)}
+
+\FunctionTok{println}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{Training RHVAE...}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+
+\CommentTok{\# Loop through number of epochs}
+\ControlFlowTok{for}\NormalTok{ epoch }\KeywordTok{in}\NormalTok{ epoch\_init}\OperatorTok{:}\NormalTok{n\_epoch}
+    \CommentTok{\# Define number of batches}
+\NormalTok{    num\_batches }\OperatorTok{=} \FunctionTok{size}\NormalTok{(train\_data, }\FloatTok{2}\NormalTok{) }\OperatorTok{÷}\NormalTok{ n\_batch}
+    \CommentTok{\# Shuffle data indexes}
+\NormalTok{    idx\_shuffle }\OperatorTok{=} \BuiltInTok{Random}\NormalTok{.}\FunctionTok{shuffle}\NormalTok{(}\FloatTok{1}\OperatorTok{:}\FunctionTok{size}\NormalTok{(train\_data, }\FloatTok{2}\NormalTok{))}
+    \CommentTok{\# Split indexes into batches}
+\NormalTok{    idx\_batches }\OperatorTok{=}\NormalTok{ IterTools.}\FunctionTok{partition}\NormalTok{(idx\_shuffle, n\_batch)}
+    \CommentTok{\# Loop through batches}
+    \ControlFlowTok{for}\NormalTok{ (i, idx\_tuple) }\KeywordTok{in} \FunctionTok{enumerate}\NormalTok{(idx\_batches)}
+        \FunctionTok{println}\NormalTok{(}\StringTok{"Epoch: }\SpecialCharTok{$}\NormalTok{(epoch)}\StringTok{ | Batch: }\SpecialCharTok{$}\NormalTok{(i)}\StringTok{ / }\SpecialCharTok{$}\NormalTok{(}\FunctionTok{length}\NormalTok{(idx\_batches))}\StringTok{"}\NormalTok{)}
+        \CommentTok{\# Extract indexes}
+\NormalTok{        idx\_batch }\OperatorTok{=} \FunctionTok{collect}\NormalTok{(idx\_tuple)}
+        \CommentTok{\# Train RHVAE}
+\NormalTok{        loss\_epoch }\OperatorTok{=}\NormalTok{ AET.RHVAEs.}\FunctionTok{train!}\NormalTok{(}
+\NormalTok{            rhvae, train\_data[}\OperatorTok{:}\NormalTok{, idx\_batch], opt\_rhvae;}
+\NormalTok{            loss\_kwargs}\OperatorTok{=}\NormalTok{loss\_kwargs, verbose}\OperatorTok{=}\ConstantTok{false}\NormalTok{, loss\_return}\OperatorTok{=}\ConstantTok{true}
+\NormalTok{        )}
+        \FunctionTok{println}\NormalTok{(}\StringTok{"Loss: }\SpecialCharTok{$}\NormalTok{(loss\_epoch)}\StringTok{"}\NormalTok{)}
+    \ControlFlowTok{end} \CommentTok{\# for train\_loader}
+
+    \CommentTok{\# Sample train data}
+\NormalTok{    train\_sample }\OperatorTok{=}\NormalTok{ train\_data[}
+        \OperatorTok{:}\NormalTok{,}
+\NormalTok{        StatsBase.}\FunctionTok{sample}\NormalTok{(}\FloatTok{1}\OperatorTok{:}\FunctionTok{size}\NormalTok{(train\_data, }\FloatTok{2}\NormalTok{), n\_batch\_loss, replace}\OperatorTok{=}\ConstantTok{false}\NormalTok{)}
+\NormalTok{    ]}
+    \CommentTok{\# Sample val data}
+\NormalTok{    val\_sample }\OperatorTok{=}\NormalTok{ val\_data}
+
+    \FunctionTok{println}\NormalTok{(}\StringTok{"Computing loss in training and validation data..."}\NormalTok{)}
+\NormalTok{    loss\_train }\OperatorTok{=}\NormalTok{ AET.RHVAEs.}\FunctionTok{loss}\NormalTok{(rhvae, train\_sample; loss\_kwargs}\OperatorTok{...}\NormalTok{)}
+\NormalTok{    loss\_val }\OperatorTok{=}\NormalTok{ AET.RHVAEs.}\FunctionTok{loss}\NormalTok{(rhvae, val\_sample; loss\_kwargs}\OperatorTok{...}\NormalTok{)}
+
+    \CommentTok{\# Forward pass sample through model}
+    \FunctionTok{println}\NormalTok{(}\StringTok{"Computing MSE in training and validation data..."}\NormalTok{)}
+\NormalTok{    out\_train }\OperatorTok{=} \FunctionTok{rhvae}\NormalTok{(train\_sample; rhvae\_kwargs}\OperatorTok{...}\NormalTok{).μ}
+\NormalTok{    mse\_train }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{mse}\NormalTok{(train\_sample, out\_train)}
+\NormalTok{    out\_val }\OperatorTok{=} \FunctionTok{rhvae}\NormalTok{(val\_sample; rhvae\_kwargs}\OperatorTok{...}\NormalTok{).μ}
+\NormalTok{    mse\_val }\OperatorTok{=}\NormalTok{ Flux.}\FunctionTok{mse}\NormalTok{(val\_sample, out\_val)}
+
+    \FunctionTok{println}\NormalTok{(}
+        \StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{ Epoch: }\SpecialCharTok{$}\NormalTok{(epoch)}\StringTok{ / }\SpecialCharTok{$}\NormalTok{(n\_epoch)}\SpecialCharTok{\textbackslash{}n}\StringTok{ "} \OperatorTok{*}
+        \StringTok{"   {-} loss\_train: }\SpecialCharTok{$}\NormalTok{(loss\_train)}\SpecialCharTok{\textbackslash{}n}\StringTok{"} \OperatorTok{*}
+        \StringTok{"   {-} loss\_val: }\SpecialCharTok{$}\NormalTok{(loss\_val)}\SpecialCharTok{\textbackslash{}n}\StringTok{"} \OperatorTok{*}
+        \StringTok{"   {-} mse\_train: }\SpecialCharTok{$}\NormalTok{(mse\_train)}\SpecialCharTok{\textbackslash{}n}\StringTok{"} \OperatorTok{*}
+        \StringTok{"   {-} mse\_val: }\SpecialCharTok{$}\NormalTok{(mse\_val)}\SpecialCharTok{\textbackslash{}n}\StringTok{"}
+\NormalTok{    )}
+
+    \CommentTok{\# Save checkpoint}
+\NormalTok{    JLD2.}\FunctionTok{jldsave}\NormalTok{(}
+        \StringTok{"}\SpecialCharTok{$}\NormalTok{(state\_dir)}\StringTok{/beta{-}rhvae\_epoch}\SpecialCharTok{$}\NormalTok{(}\FunctionTok{lpad}\NormalTok{(epoch, }\FloatTok{5}\NormalTok{, }\StringTok{"0"}\NormalTok{))}\StringTok{.jld2"}\NormalTok{,}
+\NormalTok{        model\_state}\OperatorTok{=}\NormalTok{Flux.}\FunctionTok{state}\NormalTok{(rhvae) }\OperatorTok{|\textgreater{}}\NormalTok{ Flux.cpu,}
+\NormalTok{        loss\_train}\OperatorTok{=}\NormalTok{loss\_train,}
+\NormalTok{        loss\_val}\OperatorTok{=}\NormalTok{loss\_val,}
+\NormalTok{        mse\_train}\OperatorTok{=}\NormalTok{mse\_train,}
+\NormalTok{        mse\_val}\OperatorTok{=}\NormalTok{mse\_val,}
+\NormalTok{        train\_idx}\OperatorTok{=}\NormalTok{train\_idx,}
+\NormalTok{        val\_idx}\OperatorTok{=}\NormalTok{val\_idx,}
+\NormalTok{    )}
+\ControlFlowTok{end} \CommentTok{\# for n\_epoch}
+\end{Highlighting}
+\end{Shaded}
+
+The training process involves:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Batched Training}: We process the data in batches of size 512.
+\item
+  \textbf{Loss Computation}: We use a custom loss function for RHVAEs
+  that combines:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Reconstruction loss (how well the model reconstructs the input)
+  \item
+    KL divergence (a regularization term)
+  \item
+    Hamiltonian loss (related to the metric tensor)
+  \end{itemize}
+\item
+  \textbf{Optimization}: We use the Adam optimizer with a learning rate
+  of 0.001.
+\item
+  \textbf{Checkpointing}: We save the model state after each epoch,
+  allowing us to resume training if needed.
+\end{enumerate}
+
+The loss includes several components weighted by the
+\texttt{logp\_prefactor} and \texttt{logq\_prefactor} parameters, which
+balance reconstruction quality against regularization.
+
+\subsection{Analyzing Training
+Results}\label{analyzing-training-results}
+
+After training, we can analyze the training results to understand how
+well our model is learning. First, let's load the loss and mean squared
+error (MSE) training curves into a dataframe.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Loading trained model...}
+
+\CommentTok{\# Find model file}
+\NormalTok{model\_file }\OperatorTok{=} \FunctionTok{first}\NormalTok{(Glob.}\FunctionTok{glob}\NormalTok{(}\StringTok{"}\SpecialCharTok{$}\NormalTok{(out\_dir)}\StringTok{/rhvae\_model*.jld2"}\NormalTok{))}
+\CommentTok{\# List epoch parameters}
+\NormalTok{model\_states }\OperatorTok{=}\NormalTok{ Glob.}\FunctionTok{glob}\NormalTok{(}\StringTok{"}\SpecialCharTok{$}\NormalTok{(state\_dir)}\StringTok{/*.jld2"}\NormalTok{)}
+
+\CommentTok{\# Initialize dataframe to store files metadata}
+\NormalTok{df\_meta }\OperatorTok{=}\NormalTok{ DF.}\FunctionTok{DataFrame}\NormalTok{()}
+
+\CommentTok{\# Loop over files}
+\ControlFlowTok{for}\NormalTok{ f }\KeywordTok{in}\NormalTok{ model\_states}
+    \CommentTok{\# Extract epoch number from file name using regular expression}
+\NormalTok{    epoch }\OperatorTok{=} \FunctionTok{parse}\NormalTok{(}\DataTypeTok{Int}\NormalTok{, }\FunctionTok{match}\NormalTok{(}\StringTok{r"epoch}\CharTok{(}\SpecialCharTok{\textbackslash{}d+}\CharTok{)}\StringTok{"}\NormalTok{, f).captures[}\FloatTok{1}\NormalTok{])}
+    \CommentTok{\# Load model\_state file}
+\NormalTok{    f\_load }\OperatorTok{=}\NormalTok{ JLD2.}\FunctionTok{load}\NormalTok{(f)}
+    \CommentTok{\# Extract values}
+\NormalTok{    loss\_train }\OperatorTok{=}\NormalTok{ f\_load[}\StringTok{"loss\_train"}\NormalTok{]}
+\NormalTok{    loss\_val }\OperatorTok{=}\NormalTok{ f\_load[}\StringTok{"loss\_val"}\NormalTok{]}
+\NormalTok{    mse\_train }\OperatorTok{=}\NormalTok{ f\_load[}\StringTok{"mse\_train"}\NormalTok{]}
+\NormalTok{    mse\_val }\OperatorTok{=}\NormalTok{ f\_load[}\StringTok{"mse\_val"}\NormalTok{]}
+    \CommentTok{\# Generate temporary dataframe to store metadata}
+\NormalTok{    df\_tmp }\OperatorTok{=}\NormalTok{ DF.}\FunctionTok{DataFrame}\NormalTok{(}
+        \OperatorTok{:}\NormalTok{epoch }\OperatorTok{=\textgreater{}}\NormalTok{ epoch,}
+        \OperatorTok{:}\NormalTok{loss\_train }\OperatorTok{=\textgreater{}}\NormalTok{ loss\_train,}
+        \OperatorTok{:}\NormalTok{loss\_val }\OperatorTok{=\textgreater{}}\NormalTok{ loss\_val,}
+        \OperatorTok{:}\NormalTok{mse\_train }\OperatorTok{=\textgreater{}}\NormalTok{ mse\_train,}
+        \OperatorTok{:}\NormalTok{mse\_val }\OperatorTok{=\textgreater{}}\NormalTok{ mse\_val,}
+        \OperatorTok{:}\NormalTok{model\_file }\OperatorTok{=\textgreater{}}\NormalTok{ model\_file,}
+        \OperatorTok{:}\NormalTok{model\_state }\OperatorTok{=\textgreater{}}\NormalTok{ f,}
+\NormalTok{    )}
+    \CommentTok{\# Append temporary dataframe to main dataframe}
+    \KeywordTok{global}\NormalTok{ df\_meta }\OperatorTok{=}\NormalTok{ DF.}\FunctionTok{vcat}\NormalTok{(df\_meta, df\_tmp)}
+\ControlFlowTok{end} \CommentTok{\# for f in model\_states}
+\end{Highlighting}
+\end{Shaded}
+
+Now, we can plot the training loss and mean squared error (MSE) training
+curves.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plotting training loss...}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{600}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"epoch"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"loss"}\NormalTok{,}
+\NormalTok{)}
+
+\CommentTok{\# Plot training loss}
+\FunctionTok{lines!}\NormalTok{(}
+\NormalTok{    ax,}
+\NormalTok{    df\_meta.epoch,}
+\NormalTok{    df\_meta.loss\_train,}
+\NormalTok{    label}\OperatorTok{=}\StringTok{"train"}\NormalTok{,}
+\NormalTok{)}
+\CommentTok{\# Plot validation loss}
+\FunctionTok{lines!}\NormalTok{(}
+\NormalTok{    ax,}
+\NormalTok{    df\_meta.epoch,}
+\NormalTok{    df\_meta.loss\_val,}
+\NormalTok{    label}\OperatorTok{=}\StringTok{"validation"}\NormalTok{,}
+\NormalTok{)}
+
+\CommentTok{\# Add legend}
+\FunctionTok{axislegend}\NormalTok{(ax, position}\OperatorTok{=:}\NormalTok{rt)}
+
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{2}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"epoch"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"mean squared error"}\NormalTok{,}
+\NormalTok{)}
+
+\CommentTok{\# Plot training loss}
+\FunctionTok{lines!}\NormalTok{(}
+\NormalTok{    ax,}
+\NormalTok{    df\_meta.epoch,}
+\NormalTok{    df\_meta.mse\_train,}
+\NormalTok{    label}\OperatorTok{=}\StringTok{"train"}\NormalTok{,}
+\NormalTok{)}
+\CommentTok{\# Plot validation loss}
+\FunctionTok{lines!}\NormalTok{(}
+\NormalTok{    ax,}
+\NormalTok{    df\_meta.epoch,}
+\NormalTok{    df\_meta.mse\_val,}
+\NormalTok{    label}\OperatorTok{=}\StringTok{"validation"}\NormalTok{,}
+\NormalTok{)}
+
+\CommentTok{\# Add legend}
+\FunctionTok{axislegend}\NormalTok{(ax, position}\OperatorTok{=:}\NormalTok{rt)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=12.5in,height=6.25in]{rhvae_sim_files/figure-pdf/cell-13-output-1.png}
+
+This code loads all the training checkpoints and plots the training
+curves, showing: 1. The total loss over time for both training and
+validation sets 2. The Mean Squared Error (MSE) over time for both sets
+
+These plots help us assess if the model is learning effectively and if
+it's overfitting or underfitting the data. Since both curves perfectly
+track each other, we can conclude that the model is learning effectively
+without overfitting the training data.
+
+\subsection{Mapping Data to Latent
+Space}\label{mapping-data-to-latent-space}
+
+Now that we have a trained model, we can use it to map our fitness
+profiles to the latent space. Again, we will take advantage of the
+\texttt{DimArray} type to preserve the metadata of the fitness profiles
+when mapping them to the latent space.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Mapping data to latent space...}
+
+\CommentTok{\# Standardize the data to have mean 0 and standard deviation 1}
+\NormalTok{log\_fitnotype\_std }\OperatorTok{=}\NormalTok{ DD.}\FunctionTok{DimArray}\NormalTok{(}
+    \FunctionTok{mapslices}\NormalTok{(slice }\OperatorTok{{-}\textgreater{}}\NormalTok{ StatsBase.}\FunctionTok{transform}\NormalTok{(dt, slice),}
+        \FunctionTok{log}\NormalTok{.(fitnotype\_profiles.fitness.data),}
+\NormalTok{        dims}\OperatorTok{=}\NormalTok{[}\FloatTok{5}\NormalTok{]),}
+\NormalTok{    fitnotype\_profiles.fitness.dims,}
+\NormalTok{)}
+
+\CommentTok{\# Load model}
+\NormalTok{rhvae }\OperatorTok{=}\NormalTok{ JLD2.}\FunctionTok{load}\NormalTok{(model\_file)[}\StringTok{"model"}\NormalTok{]}
+\CommentTok{\# Load latest model state}
+\NormalTok{Flux.}\FunctionTok{loadmodel!}\NormalTok{(rhvae, JLD2.}\FunctionTok{load}\NormalTok{(df\_meta.model\_state[}\KeywordTok{end}\NormalTok{])[}\StringTok{"model\_state"}\NormalTok{])}
+\CommentTok{\# Update metric parameters}
+\NormalTok{AET.RHVAEs.}\FunctionTok{update\_metric!}\NormalTok{(rhvae)}
+
+\CommentTok{\# Define latent space dimensions}
+\NormalTok{latent }\OperatorTok{=}\NormalTok{ DD.}\FunctionTok{Dim}\DataTypeTok{\{:latent\}}\NormalTok{([}\OperatorTok{:}\NormalTok{latent1, }\OperatorTok{:}\NormalTok{latent2])}
+
+\CommentTok{\# Map data to latent space}
+\NormalTok{dd\_latent }\OperatorTok{=}\NormalTok{ DD.}\FunctionTok{DimArray}\NormalTok{(}
+    \FunctionTok{dropdims}\NormalTok{(}
+        \FunctionTok{mapslices}\NormalTok{(slice }\OperatorTok{{-}\textgreater{}}\NormalTok{ rhvae.vae.}\FunctionTok{encoder}\NormalTok{(slice).μ,}
+\NormalTok{            log\_fitnotype\_std.data,}
+\NormalTok{            dims}\OperatorTok{=}\NormalTok{[}\FloatTok{5}\NormalTok{]);}
+\NormalTok{        dims}\OperatorTok{=}\FloatTok{1}
+\NormalTok{    ),}
+\NormalTok{    (log\_fitnotype\_std.dims[}\FloatTok{2}\OperatorTok{:}\FloatTok{4}\NormalTok{]}\OperatorTok{...}\NormalTok{, latent, log\_fitnotype\_std.dims[}\FloatTok{6}\NormalTok{]),}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+This process involves: 1. Loading the fitness data again and applying
+the same preprocessing steps 2. Loading our trained RHVAE model 3. Using
+the encoder part of the RHVAE to map each fitness profile to a point in
+the 2D latent space 4. Storing the results in a dimensional array that
+preserves the metadata (lineage, time, etc.)
+
+We now have a low-dimensional representation of our fitness profiles
+that we can visualize and analyze.
+
+\subsection{Visualizing the Latent
+Space}\label{visualizing-the-latent-space}
+
+Let's visualize the latent space to see how our model has organized the
+fitness profiles:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plotting latent space coordinates...}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{300}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"latent dimension 1"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"latent dimension 2"}\NormalTok{,}
+\NormalTok{    aspect}\OperatorTok{=}\FunctionTok{AxisAspect}\NormalTok{(}\FloatTok{1}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Plot latent space}
+\FunctionTok{scatter!}\NormalTok{(}
+\NormalTok{    ax,}
+    \FunctionTok{vec}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1)]),}
+    \FunctionTok{vec}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2)]),}
+\NormalTok{    markersize}\OperatorTok{=}\FloatTok{5}\NormalTok{,}
+\NormalTok{)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=6.25in,height=6.25in]{rhvae_sim_files/figure-pdf/cell-15-output-1.png}
+
+This basic plot shows all points in the latent space. Each point
+represents the encoding of a fitness profile. Next, let's colorize the
+points by lineage to gain more insight:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plotting latent space coordinates colored by lineage...}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{300}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+
+\CommentTok{\# Add axis}
+\NormalTok{ax }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"latent dimension 1"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"latent dimension 2"}\NormalTok{,}
+\NormalTok{    aspect}\OperatorTok{=}\FunctionTok{AxisAspect}\NormalTok{(}\FloatTok{1}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Loop over lineages}
+\ControlFlowTok{for}\NormalTok{ (i, lin) }\KeywordTok{in} \FunctionTok{enumerate}\NormalTok{(DD.}\FunctionTok{dims}\NormalTok{(dd\_latent, }\OperatorTok{:}\NormalTok{lineage))}
+    \CommentTok{\# Plot latent space}
+    \FunctionTok{scatter!}\NormalTok{(}
+\NormalTok{        ax,}
+        \FunctionTok{vec}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1), lineage}\OperatorTok{=}\NormalTok{lin]),}
+        \FunctionTok{vec}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2), lineage}\OperatorTok{=}\NormalTok{lin]),}
+\NormalTok{        markersize}\OperatorTok{=}\FloatTok{5}\NormalTok{,}
+\NormalTok{        color}\OperatorTok{=}\NormalTok{(ColorSchemes.seaborn\_colorblind[i], }\FloatTok{0.25}\NormalTok{),}
+\NormalTok{    )}
+\ControlFlowTok{end} \CommentTok{\# for }
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=6.25in,height=6.25in]{rhvae_sim_files/figure-pdf/cell-16-output-1.png}
+
+This plot shows the latent space colored by lineage. Each lineage is
+assigned a distinct color, allowing us to see how different lineages are
+distributed in the latent space.
+
+\subsubsection{Visualizing the latent space
+curvature}\label{visualizing-the-latent-space-curvature}
+
+One of the main advantages of the RHVAE is that it learns a Riemannian
+metric on the latent space, which allows us to relate distances in the
+latent space with distances in the original data space, despite the
+nonlinear transformations.
+
+The metric tensor, \(\underline{\underline{G}}(\underline{z})\), is a
+position-dependent positive-definite matrix that we can evaluate at any
+point \(\underline{z}\) in the latent space. For at 2D latent space,
+this results in a 2x2 matrix. A way to visualize the local curvature of
+the latent space is to compute the so-called metric volume, defined as
+the square root of the determinant of the metric tensor,
+\(\sqrt{\det(\underline{\underline{G}}(\underline{z}))}\).
+\texttt{AutoEncoderToolkit.jl} provides a function to compute the
+inverse metric tensor, \(G^{-1}(\underline{z})\), from the model. We can
+use this directly to compute the metric volume at each point in the
+latent space.
+
+Let's define the ranges of the latent space dimensions and evaluate the
+metric tensor at each point in the latent space.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Computing metric tensor...}
+
+\CommentTok{\# Define number of points per axis}
+\NormalTok{n\_points }\OperatorTok{=} \FloatTok{250}
+
+\CommentTok{\# Extract latent space ranges}
+\NormalTok{latent1\_range }\OperatorTok{=} \FunctionTok{range}\NormalTok{(}
+    \FunctionTok{minimum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1)]) }\OperatorTok{{-}} \FloatTok{1.5}\NormalTok{,}
+    \FunctionTok{maximum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1)]) }\OperatorTok{+} \FloatTok{1.5}\NormalTok{,}
+\NormalTok{    length}\OperatorTok{=}\NormalTok{n\_points}
+\NormalTok{)}
+\NormalTok{latent2\_range }\OperatorTok{=} \FunctionTok{range}\NormalTok{(}
+    \FunctionTok{minimum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2)]) }\OperatorTok{{-}} \FloatTok{1.5}\NormalTok{,}
+    \FunctionTok{maximum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2)]) }\OperatorTok{+} \FloatTok{1.5}\NormalTok{,}
+\NormalTok{    length}\OperatorTok{=}\NormalTok{n\_points}
+\NormalTok{)}
+\CommentTok{\# Define latent points to evaluate}
+\NormalTok{z\_mat }\OperatorTok{=} \FunctionTok{reduce}\NormalTok{(hcat, [[x, y] for x }\KeywordTok{in}\NormalTok{ latent1\_range, y }\KeywordTok{in}\NormalTok{ latent2\_range])}
+
+\CommentTok{\# Compute inverse metric tensor}
+\NormalTok{Ginv }\OperatorTok{=}\NormalTok{ AET.RHVAEs.}\FunctionTok{G\_inv}\NormalTok{(z\_mat, rhvae)}
+
+\CommentTok{\# Compute metric }
+\NormalTok{logdetG }\OperatorTok{=} \FunctionTok{reshape}\NormalTok{(}
+    \OperatorTok{{-}}\FloatTok{1} \OperatorTok{/} \FloatTok{2} \OperatorTok{*}\NormalTok{ AET.utils.}\FunctionTok{slogdet}\NormalTok{(Ginv), n\_points, n\_points}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Now, let's plot the heatmap of the metric volume and the surface of the
+latent space.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plotting latent space metric...}
+
+\CommentTok{\# Initialize figure}
+\NormalTok{fig }\OperatorTok{=} \FunctionTok{Figure}\NormalTok{(size}\OperatorTok{=}\NormalTok{(}\FloatTok{700}\NormalTok{, }\FloatTok{300}\NormalTok{))}
+
+\CommentTok{\# Add axis}
+\NormalTok{ax1 }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{1}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"latent dimension 1"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"latent dimension 2"}\NormalTok{,}
+\NormalTok{    aspect}\OperatorTok{=}\FunctionTok{AxisAspect}\NormalTok{(}\FloatTok{1}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{ax2 }\OperatorTok{=} \FunctionTok{Axis}\NormalTok{(}
+\NormalTok{    fig[}\FloatTok{1}\NormalTok{, }\FloatTok{2}\NormalTok{],}
+\NormalTok{    xlabel}\OperatorTok{=}\StringTok{"latent dimension 1"}\NormalTok{,}
+\NormalTok{    ylabel}\OperatorTok{=}\StringTok{"latent dimension 2"}\NormalTok{,}
+\NormalTok{    aspect}\OperatorTok{=}\FunctionTok{AxisAspect}\NormalTok{(}\FloatTok{1}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Plot heatmpat of log determinant of metric tensor}
+\NormalTok{hm }\OperatorTok{=} \FunctionTok{heatmap!}\NormalTok{(}
+\NormalTok{    ax1,}
+\NormalTok{    latent1\_range,}
+\NormalTok{    latent2\_range,}
+\NormalTok{    logdetG,}
+\NormalTok{    colormap}\OperatorTok{=}\FunctionTok{Reverse}\NormalTok{(}\FunctionTok{to\_colormap}\NormalTok{(ColorSchemes.PuBu)),}
+\NormalTok{)}
+
+\FunctionTok{surface!}\NormalTok{(}
+\NormalTok{    ax2,}
+\NormalTok{    latent1\_range,}
+\NormalTok{    latent2\_range,}
+\NormalTok{    logdetG,}
+\NormalTok{    colormap}\OperatorTok{=}\FunctionTok{Reverse}\NormalTok{(}\FunctionTok{to\_colormap}\NormalTok{(ColorSchemes.PuBu)),}
+\NormalTok{    shading}\OperatorTok{=}\NormalTok{NoShading,}
+\NormalTok{    rasterize}\OperatorTok{=}\ConstantTok{true}\NormalTok{,}
+\NormalTok{)}
+
+\CommentTok{\# Plot latent space}
+\FunctionTok{scatter!}\NormalTok{(}
+\NormalTok{    ax2,}
+    \FunctionTok{vec}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1)]),}
+    \FunctionTok{vec}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2)]),}
+\NormalTok{    markersize}\OperatorTok{=}\FloatTok{4}\NormalTok{,}
+\NormalTok{    color}\OperatorTok{=}\NormalTok{(}\OperatorTok{:}\NormalTok{white, }\FloatTok{0.3}\NormalTok{),}
+\NormalTok{    rasterize}\OperatorTok{=}\ConstantTok{true}\NormalTok{,}
+\NormalTok{)}
+
+\CommentTok{\# Find axis limits from minimum and maximum of latent points}
+\FunctionTok{xlims!}\NormalTok{.(}
+\NormalTok{    [ax2, ax1],}
+    \FunctionTok{minimum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1)]) }\OperatorTok{{-}} \FloatTok{1.5}\NormalTok{,}
+    \FunctionTok{maximum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent1)]) }\OperatorTok{+} \FloatTok{1.5}
+\NormalTok{)}
+\FunctionTok{ylims!}\NormalTok{.(}
+\NormalTok{    [ax2, ax1],}
+    \FunctionTok{minimum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2)]) }\OperatorTok{{-}} \FloatTok{1.5}\NormalTok{,}
+    \FunctionTok{maximum}\NormalTok{(dd\_latent[latent}\OperatorTok{=}\NormalTok{DD.}\FunctionTok{At}\NormalTok{(}\OperatorTok{:}\NormalTok{latent2)]) }\OperatorTok{+} \FloatTok{1.5}
+\NormalTok{)}
+
+\CommentTok{\# Add colorbar}
+\FunctionTok{Colorbar}\NormalTok{(fig[}\FloatTok{1}\NormalTok{, }\FloatTok{3}\NormalTok{], hm, label}\OperatorTok{=}\StringTok{"√log[det(G̲̲)]"}\NormalTok{)}
+
+\NormalTok{fig}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=14.58333in,height=6.25in]{rhvae_sim_files/figure-pdf/cell-18-output-1.png}
+
+This plot shows the heatmap of the metric volume and the surface of the
+latent space. The colorbar shows the metric volume, which is a measure
+of the local curvature of the latent space. The darker the region, the
+flatter the latent space. One neat feature of the RHVAE is that the
+learned metric tensor ``cages'' the data cloud, clearly defining the
+regions in which the model is able to make meaningful predictions (since
+neural networks are famously terrible at extrapolation). We also see
+that within the data cloud, regions of high curvature coincide with the
+four regions of low genotype-phenotype fitness we originally defined in
+the \href{evolutionary_dynamics.qmd}{Evolutionary Dynamics}, suggesting
+that the model is able to capture the underlying phenotypic space.
+
+\subsection{Conclusion}\label{conclusion}
+
+In this notebook, we've trained a Riemannian Hamiltonian Variational
+Autoencoder (RHVAE) on synthetic data generated from evolutionary
+simulations. We've used the RHVAE to learn a low-dimensional
+representation of the fitness profiles and visualized the latent space
+to gain insights into the model's organization of the fitness profiles.
+
+
+
+\end{document}

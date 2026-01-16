@@ -1,0 +1,368 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Lower the position of page numbers
+\usepackage{fancyhdr}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{100pt} % Increase this value to lower the page numbers
+
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+% Change font size
+\usepackage[font={footnotesize, sf}, labelfont=bf, margin=0.05\linewidth]{caption}
+\renewcommand{\familydefault}{\sfdefault}
+% Bold the 'Figure #' in the caption and separate it from the title/caption
+% with a period
+% Captions will be left justified
+\usepackage[
+	aboveskip=1pt,
+	labelfont=bf,
+	labelsep=period,
+	justification=raggedright,
+	singlelinecheck=off
+]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Add numbered lines
+\usepackage{lineno}
+% \linenumbers
+
+% Package to include multiple title pages
+% This will allow me to add a tile to the main text and to the SI
+\usepackage{titling}
+
+% Define command to begin the supplementary section
+\newcommand{\beginsupplement}{
+\setcounter{page}{1} % Restart page counter
+\setcounter{section}{0} % Restart section counter
+% \renewcommand{\thesection}{\Alph{section}}%
+\renewcommand{\thesection}{}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\setcounter{table}{0} % Restart table counter
+\renewcommand{\thetable}{\Alph{table}}
+\setcounter{figure}{0} % Restart figure counter
+\renewcommand{\thefigure}{\Alph{figure}}%
+\setcounter{equation}{0} % Restart equation counter
+\renewcommand{\theequation}{S\arabic{equation}}%
+}
+
+% Add author affiliations
+\usepackage{authblk}
+
+% Allow to define personalized colors
+\usepackage{xcolor}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[
+    style=vancouver,
+    sorting=none,				% Do not sort bibliography
+	url=false, 					% Do not show url in reference
+	doi=false, 					% Do not show doi in reference
+	isbn=false, 				% Do not show isbn link in reference
+	eprint=false, 			    % Do not show eprint link in reference
+	maxbibnames=9, 			    % Include up to 9 names in citation
+	firstinits=true,
+]{biblatex}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addbibresource{references.bib}
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Code Overview},
+  pdfauthor={Manuel Razo-Mejia},
+  pdfkeywords={variational autoencoders, evolutionary
+dynamics, antibiotic resistance},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add title
+\title{Code Overview}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add list of authors
+
+% Loop through authors
+\author[1]{Manuel Razo-Mejia}
+
+% Loop through affiliations
+\affil[1]{Department of Biology, Stanford University}
+
+% Add corresponding author
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set affiliations in small font
+\renewcommand\Affilfont{\itshape\small}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Remove date
+\date{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Add package for line numbering
+\usepackage{lineno}
+
+\begin{document}
+\linenumbers
+\maketitle
+\section{Code Documentation}\label{code-documentation}
+
+This section provides interactive code examples and demonstrations of
+the computational methods used in our research on evolutionary
+landscapes and phenotype-to-fitness maps.
+
+\subsection{Available Notebooks}\label{available-notebooks}
+
+We provide several computational notebooks that showcase different
+aspects of our methodology and analysis:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{\href{code/evolutionary_dynamics.qmd}{Evolutionary Dynamics
+  Simulation}}
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  Simulates the dynamics of populations evolving in a 2-dimensional
+  phenotypic space under various fitness landscapes and fixed mutational
+  constraints. This notebook demonstrates how populations navigate
+  phenotypic space influenced by both fitness gradients and
+  genotype-phenotype density.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  \textbf{\href{code/rhvae_sim.qmd}{RHVAE on Simulated Data}}
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  Implements a Riemannian Hamiltonian Variational Autoencoder (RHVAE) to
+  analyze fitness profiles generated from evolutionary simulations. This
+  notebook shows how we can learn low-dimensional representations of
+  high-dimensional fitness data while preserving the geometric structure
+  of the underlying phenotypic space.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  \textbf{\href{code/iwasawa_bayesian_inference.qmd}{Bayesian Inference
+  of IC₅₀ Values}}
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  Performs Bayesian inference on the IC₅₀ values of antibiotic
+  resistance landscapes using experimental data. This notebook
+  demonstrates model fitting of dose-response curves using different
+  parameterizations and implements outlier detection techniques.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \textbf{\href{code/metropolis_kimura_evolution.qmd}{Metropolis-Kimura
+  Evolution}}
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  Explores a biologically motivated model of evolution combining
+  elements of the Metropolis-Hastings algorithm with Motoo Kimura's
+  population genetics theory. This model accounts separately for
+  mutation accessibility and selection via fixation probability.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  \textbf{\href{code/metropolis_hastings_evolution.qmd}{Metropolis-Hastings
+  Evolution}}
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  Implements the Metropolis-Hastings algorithm for simulating
+  evolutionary dynamics on fitness landscapes with mutational
+  constraints.
+\end{itemize}
+
+\subsection{Running the Code}\label{running-the-code}
+
+All notebooks can be run interactively if you have Julia installed with
+the required packages. Each notebook is self-contained with detailed
+explanations, mathematical background, and visualization of results.
+
+\subsubsection{Required Packages}\label{required-packages}
+
+To run these notebooks, you'll need:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Data Processing}: \texttt{DataFrames}, \texttt{CSV},
+  \texttt{DimensionalData}
+\item
+  \textbf{Scientific Computing}: \texttt{LinearAlgebra},
+  \texttt{StatsBase}, \texttt{Distributions}, \texttt{LsqFit}
+\item
+  \textbf{Bayesian Inference}: \texttt{Turing}
+\item
+  \textbf{Deep Learning}: \texttt{Flux}, \texttt{AutoEncoderToolkit}
+\item
+  \textbf{Visualization}: \texttt{CairoMakie}, \texttt{ColorSchemes}
+\end{itemize}
+
+Click on any of the notebooks in the sidebar to explore the code in
+detail.
+
+
+
+\end{document}
