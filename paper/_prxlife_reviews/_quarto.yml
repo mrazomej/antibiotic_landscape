@@ -1,0 +1,76 @@
+project:
+  title: "prxlife_reviews"
+  output-dir: _output
+  resources:
+    - prxlife_reviews.pdf
+  render:
+    - prxlife_reviews.qmd
+
+# Title
+title: "PRX Life reviews for Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps"
+
+# Authors
+author:
+  - name: Manuel Razo-Mejia
+    orcid: 0000-0002-9510-0527
+    email: manuel.razo.m@gmail.com
+    affiliations: 
+      - ref: stanfordbio
+    corresponding: true
+  - name: Madhav Mani
+    orcid: 0000-0002-5812-4167
+    affiliations: 
+      - ref: nwqbio
+      - ref: nweng
+  - name: Dmitri Petrov
+    orcid: 0000-0002-3664-9130
+    affiliations:
+      - ref: stanfordbio
+      - ref: stanfordcancer
+      - ref: czb
+
+# Author affiliations
+affiliations:
+  - id: stanfordbio
+    number: 1
+    name: Department of Biology, Stanford University
+    city: Stanford
+    state: CA
+    country: USA
+  - id: stanfordcancer
+    number: 4
+    name: Stanford Cancer Institute, Stanford University School of Medicine
+    city: Stanford
+    state: CA
+    country: USA
+  - id: nwqbio
+    number: 2
+    name: NSF-Simons Center for Quantitative Biology, Northwestern University
+    city: Chicago
+    state: IL
+    country: USA
+  - id: nweng
+    number: 3
+    name: Department of Engineering Sciences and Applied Mathematics, Northwestern University
+    city: Chicago
+    state: IL
+    country: USA
+  - id: czb
+    number: 5
+    name: Chan Zuckerberg Biohub
+    city: San Francisco
+    state: CA
+    country: USA
+
+bibliography: references.bib
+
+format:
+  pdf: 
+    documentclass: scrartcl
+    template: template.tex
+    include-in-header:
+      - file: _preamble.tex
+    keep-tex: true
+    filters:
+      - color-text-span.lua
+      - tcolorbox-filter.lua

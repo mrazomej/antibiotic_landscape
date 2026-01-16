@@ -1,0 +1,316 @@
+---
+editor:
+    render-on-save: true
+format: 
+  html:
+    css: _preamble.css
+    default-image-extension: png
+---
+
+::: {.graybox} 
+The authors applied a geometric deep learning method, called the Riemannian
+Hamiltonian Variational Autoencoder, to simulated adaptive dynamics to verify
+its potential for reconstructing the low-dimensional geometry of the
+phenotype-fitness map. This framework was also successful in inferring the
+geometry of a hidden trait space from a dataset of high-throughput fitness
+measurements of E. coli under different antibiotic pressures, outperforming a
+linear approach. This work provides a data-driven approach to inferring the
+geometric structure of adaptive landscapes to understand evolutionary dynamics.
+
+The manuscript fits PRX Life very well. The topic is significant in both
+experimental and theoretical sides of evolutionary biology. The authors not only
+verified the validity of their framework based on the simulation of adaptive
+dynamics but also demonstrated its predictive power for out-of-sample data using
+high-throughput experimental fitness profile data. Considering the metric
+information often lacking from non-linear dimension reduction analysis, this
+work could be a new standard method to construct a more biologically relevant
+phenotype-fitness map from experimental data without direct phenotype
+measurements.
+
+I have some major and minor questions and suggestions as follows.
+
+## Major points
+
+1. Is a genotype-phenotype map necessary for this framework? Genotypes are not
+crucial in this manuscript because the central results are about fitness
+landscapes in phenotype space. For example, in L102, genotype can be replaced by
+phenotype. From the perspective of microbiology, there could be phenotype
+variation without genetic change, like phase variation, sporulation, and
+bacterial persistence. Also, it sounds like an assumption that the
+genotype-phenotype map is unchanged by the environmental conditions (LL123-125).
+:::
+
+We appreciate the reviewer for pointing out this source of confusion regarding
+our definition of "phenotype." We recognize that our initial explanation was not
+sufficiently clear, leading to misunderstandings. While we agree that one way to
+conceptualize time-varying phenotypes is to consider dynamic changes in a
+genotype's coordinates within phenotype space, this is not the conventional
+definition used in evolutionary dynamics models. Typically, populations are
+understood to navigate a fitness landscape where the genotype defines a fixed
+coordinate in phenotypic space, and changes occur solely due to mutation.
+
+In our work, we aim to portray a broader concept of phenotype, which includes
+the notion of time-varying phenotypes as suggested by the reviewer, yet these
+are still defined by a single fixed coordinate. 
+
+For dynamic phenotypes, one might intuitively think that a mutation-induced
+change in coordinate could alter the dynamic rules governing the phenotype's
+manifestation over time. For instance, if we consider the time to complete a
+cell cycle as a phenotype, a specific genotype establishes the molecular
+machinery responsible for cell division. While the functioning of this machinery
+may be stochastic, resulting in variability in cell cycle duration across
+individual cells, the statistical characteristics—such as the mean and variance
+of the cycle duration—are determined by the genotype and remain constant. A
+mutation could modify an enzyme's efficiency, resulting in a new genotype with a
+different mean cell cycle duration. Thus, although the phenotype (cell cycle
+time) may exhibit variation, the underlying rules that govern this variation are
+fixed characteristics of the genotype, with its parameters serving as
+coordinates in our conceptual phenotypic space.
+
+Based on the reviewer's suggestion, we have changed the following part in the
+manuscript:
+
+> Figure 1(A) shows a schematic of the genotype-phenotype-fitness map. A genotype
+$g$ produces a set of measurable traits or phenotypes $\underline{p}$---depicted
+as two potential molecular phenotypes, such as an efflux pump rate and the
+sensitivity of a membrane receptor. 
+<span style="color: #912E27;"> 
+Following the tradition in evolutionary biology, we take the most general
+definition of phenotype, which includes time-varying organism characteristics as
+a single phenotype. In other words, any genetically-determined organism
+characteristic---including time-varying features such as developmental time---is
+considered a single phenotype.
+</span>
+The fitness of each genotype is determined
+by the value of these phenotypes and the environment $E$---depicted as the
+doubling time of a bacterial population. To formalize this mathematically, we
+represent genotypes as points in a multi-dimensional phenotypic space, where
+each dimension is a different trait ($\underline{p} \in \mathbb{R}^P$, where $P$
+is the number of traits). Thus, any genotype $g$ has a unique mapping to a
+phenotypic coordinate. 
+<span style="color: #912E27;"> 
+We emphasize again that even dynamically changing organism characteristics are
+still defined by a single fixed coordinate in phenotype space [@fragata2019a].
+</span>
+However, this mapping is not necessarily bijective...
+
+::: {.graybox}
+2. I have a suggestion about simulating adaptive dynamics. This statement at
+LL150- 153 does not entirely convince me. If beta only appears in fitness term
+of Eq 1, it is convincing, but the fact that beta also appears in GP term makes
+it complex to do such a simple interpretation. The Metropolis-Kimura algorithm
+in SM is easier to understand because the control parameters are separated.
+Could the author separate control parameters? Or, it could also be an option to
+replace the figures in the main text with the corresponding supplemental
+figures.
+:::
+
+We thank the reviewer for this suggestion. We completely agree that separating
+the control parameters into $\beta_F$ and $\beta_{GP}$ would make the
+interpretation of the simulation easier. We have therefore indicated in the
+manuscript and the Supplementary Materials that the control parameters are
+separated. More specifically, we have added the following to the manuscript:
+
+> Specifically, as derived in the Supplementary Materials section B, the
+probability of accepting a transition is given by
+>
+> $$
+\textcolor{customred}{
+P_{\text{accept}} = \min\left(
+    1,
+    \frac{F(\underline{p}')^{\beta_F} GP(\underline{p}')^{\beta_{GP}}}
+    {F(\underline{p})^{\beta_F} GP(\underline{p})^{\beta_{GP}}}
+\right),
+}
+$${#eq-acceptance-probability}
+>
+> <span style="color: #912E27;">
+where $\beta_F$ and $\beta_{GP}$ are parameters that separately control the
+balance between selection and drift. These parameters can be interpreted as the
+strength of selection and the inaccessibility of certain phenotypes,
+respectively---higher values of $\beta_F$ lead to more deterministic
+trajectories that closely follow fitness gradients, while lower values allow for
+more stochastic exploration of the phenotype space. In a similar fashion, higher
+values of $\beta_{GP}$ lead to trajectories that avoid low genotype-to-phenotype
+density regions with higher probability. Detailed mathematical derivations and
+analysis of this algorithm can be found in the Supplementary Materials section
+B. For simplicity, in this work we make the simplifying assumption that $\beta_F
+= \beta_{GP} = \beta$, as this was sufficient to explore the effects of varying
+evolutionary stochasticity on the overall landscape.
+</span>
+
+Although we believe that the reviewer's suggestion generalizes our modeling
+scheme and makes the modeling framework more flexible, we still retain the
+simplifying assumption that $\beta_F = \beta_{GP} = \beta$ as we believe it
+still satisfies our primary modeling goal.
+
+::: {.graybox}
+3. RHVAE marginally improved the performance compared to a traditional VAE. Does
+this mean that the results of the traditional VAE were close enough to those of
+RHVAE, even though the former did not learn the geometry? Or could it be
+possible to evaluate the significance of learning geometry with other measures
+(like the separability of lineages)?
+:::
+
+We thank the reviewer for this insightful question. While the improvement in
+reconstruction error of the RHVAE over the VAE may seem modest, we argue that
+this single metric overlooks the primary, qualitative advantages of our
+approach. As we demonstrate in our paper, the RHVAE provides a much richer and
+more interpretable latent space, which is crucial for understanding the
+underlying biological processes.
+
+Specifically, our results show that the RHVAE-derived latent space better
+preserves the global structure of the phenotypic space and the relative
+positions of different lineages (see Fig. 4(A) in the main text). Furthermore,
+while a 2D VAE's reconstruction error is comparable to an 8D linear PCA model,
+our 2D RHVAE matches a 10D PCA model (Fig. 4(C)), indicating a more efficient
+and powerful representation.
+
+Most importantly, the RHVAE's ability to learn the geometry of the latent space
+offers unique insights. The learned metric tensor allows us to identify regions
+of high and low phenotypic density, which correspond to regions of high and low
+curvature in the latent space (Fig. 4(D)). This provides a data-driven method to
+map out accessible evolutionary paths, a feature not available in standard VAEs.
+The computation of geodesics is a direct application of this learned geometry,
+and we include a preliminary, and admittedly speculative, exploration of this in
+the Supplementary Materials Section F. While our current dataset lacks the
+genetic information to fully validate these paths against lineage relationships,
+this geometric framework provides a principled way to explore phenotypic
+trajectories that goes far beyond simple reconstruction error.
+
+With the aim to follow up on this excellent suggestion by the reviewer in future
+work, we have added the following text to the Discussion section:
+
+> Although not fully
+conclusive, when comparing the shortest path in latent space between the initial
+and final latent coordinates, some *E. coli* lineages seem to follow the
+predicted shortest path (See Supplementary Material section F for a detailed discussion).
+It is tempting to speculate about the biological significance of this
+observation and whether it is a more general property of the evolutionary
+process, as it suggests a potential analogous least-action principle of
+evolution in phenotypic space. Nevertheless, more work is needed to explore this
+hypothesis further with a larger number of genotypes and environments. 
+<span style="color: #912E27;"> 
+A crucial next step will be to integrate genomic data, which would enable a
+direct comparison between the geodesic paths in our inferred phenotypic space
+and the actual genetic changes driving adaptation. Such an analysis could reveal
+whether the geometrically shortest paths correspond to more frequent or probable
+evolutionary trajectories at the genetic level, providing a powerful,
+data-driven link between the geometry of adaptation and its underlying molecular
+mechanisms.
+</span>
+
+::: {.graybox}
+4. There is a lot of content in SM. Although I find it interesting, it is
+somewhat challenging to find a specific section when SM is cited in the main
+text. A bit more detail of the cited results in SM should be described in the
+main text.
+:::
+
+We thank the reviewer for pointing out this issue. We have populated the entire
+manuscript with specific references to the corresponding sections of the
+Supplementary Materials. Any reference to the Supplementary Materials now reads
+something like:
+
+> For illustration purposes, we set the $GP$ map to contain four
+negative Gaussian peaks, representing four regions of the phenotype space that
+are unlikely to be sampled (see Supplementary Material 
+<span style="color: #912E27;"> 
+section B 
+</span>
+for a more detailed
+discussion)
+
+::: {.graybox}
+## Minor points
+
+- Some references seem to lack their details (arXiv preprints?)
+:::
+
+We thank the reviewer for pointing out this issue. These are indeed arXiv
+preprints. The bib file we provide the publisher contains all of the information
+required to generate the full references. We will leave the final formatting of
+the references to the publisher in case the paper is accepted.
+
+::: {.graybox}
+- GP(x) should be non-negative, but Eq. S17 looks negative.
+:::
+
+We thank the reviewer for pointing out this issue. The sign of the right-hand
+side of Eq. S17 is correct. However, we were missing a term in the equation. Our
+formulation uses an offset term $C$ to "align" the genetic density and fitness
+peaks in their baseline, making the competition between them reasonable. Eq. S17
+now reads correctly as follows:
+
+> 
+$$
+GP(\underline{x}) = \textcolor{customred}{C} -
+\sum_{p=1}^P B_p
+\exp\left(
+    -\frac{1}{2}
+    (\underline{x} - \underline{\hat{x}}^{(p)})^T 
+    \Sigma_p^{-1} 
+    (\underline{x} - \underline{\hat{x}}^{(p)})
+\right),
+$${#eq-genotype-phenotype-density-peaks}
+</span>
+>
+> <span style="color: #912E27;"> 
+ where $C$ is a constant offset---set to be the negative of the lowest peak
+value to have the maximum value of 1, and 
+</span>
+ and $B_p$ is the depth of the $p$-th peak, and
+$\underline{\hat{x}}^{(p)}$ is the $N$-dimensional vector of optimal phenotypes
+for the $p$-th peak.
+
+::: {.graybox}
+- Is Eq. S19 correct? I think the sign of the RHS should be negative
+:::
+
+We are genuinely impressed by the reviewer's keen eye for detail. We have
+corrected the sign of the right-hand side of Eq. S19 to be negative, as the
+reviewer correctly pointed out.
+
+This level of detail review is greatly appreciated.
+
+::: {.graybox}
+- In the first line of C.1. of SM, is the equation after “Give a data set”
+correct?
+:::
+
+We are again incredibly grateful for the reviewer's exquisite attention to
+detail. We have corrected the equation in the first line of C.1. of SM to read:
+
+> Given a dataset $\underline{x}^{1:N} = \{\underline{x}_1, \underline{x}_2,
+\ldots, \underline{x}_N\}$, where each individual observation $\underline{x}_i
+\in \mathcal{X} \subseteq \mathbb{R}^D$, where the superscript denotes a set of
+$N$ observations,...
+
+::: {.graybox}
+- In Eq. S91, $\beta_0^{d / 2} \rightarrow \beta_0^{-d / 2}$?
+:::
+
+We are again grateful for the reviewer highlighting this typo. We have corrected
+the equation in Eq. S91 to have the correct sign.
+
+::: {.graybox}
+- In Eq. S120, $sXR \rightarrow sRX$?
+:::
+
+Another incredible catch by the reviewer. We have corrected the equation in
+Eq. S120 to have the correct order of the matrices.
+
+::: {.graybox}
+- In SM K.3, the descriptions are lacking for Figs. O, P, and Q correspond to
+Figs. 2, 4, and 5 in the main text. The authors write “same results”, but a bit
+more details are preferable.
+:::
+
+We thank the reviewer for this suggestion. We have added a short description
+above each of the figures in the Supplementary Materials Section K.3., comparing
+the results with the main text and highlighting how our proposed computational
+framework applies to the reconstruction of fitness landscapes regardless of the
+underlying evolutionary dynamics. However, we recognize there is more work to be
+done to understand the constraints having to do with the amount of data needed
+and the ability of the framework to scale with the dimensionality of the
+underlying phenotype space.

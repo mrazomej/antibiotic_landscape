@@ -1,0 +1,12 @@
+.graybox {
+    border: 2px solid #05080F;
+    /* myframe color */
+    background-color: #E6E6EF;
+    /* mybackground color */
+    padding: 10px;
+    /* Space inside the box */
+    margin-bottom: 10px;
+    /* Space outside the box */
+    border-radius: 5px;
+    /* Rounded corners */
+}

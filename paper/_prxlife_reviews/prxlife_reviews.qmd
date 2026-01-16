@@ -1,0 +1,48 @@
+Dear Editor,
+
+We are grateful for the opportunity to revise and resubmit our manuscript,
+"*Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals
+Hidden Structure in Phenotype-to-Fitness Maps*." We would also like to thank the
+reviewers for their time and effort in providing thoughtful and constructive
+feedback.
+
+We have found the reviewers' comments to be extremely valuable and have
+addressed them in full. We took every comment very seriously and have worked
+diligently to revise the manuscript. We believe the manuscript is substantially
+improved as a result. The revisions include clarifications of our methodology,
+acknowledgement of the shortcomings of our work, and a more balanced discussion
+of our results.
+
+A detailed, point-by-point response to each of the reviewers' comments is
+provided below, outlining the changes we have made.
+
+We are confident that the revised manuscript and our accompanying responses have
+addressed all the concerns raised. We hope that you and the reviewers will find
+our revised work to be a significant contribution and suitable for publication.
+
+Thank you for your consideration.
+
+Sincerely,
+
+The authors
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+:::
+
+# Reviewer 1
+
+{{< include _reviewer_01.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+:::
+
+# Reviewer 2
+
+{{< include _reviewer_02.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+# References {.unnumbered}
+:::

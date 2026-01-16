@@ -1,0 +1,75 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+csl: ieee.csl
+format:
+  typst:
+    default-image-extension: png
+---
+
+# Tweetorial: Uncovering Hidden Structure in Evolutionary Data
+
+1/n 🧵 Excited to share our new paper! We developed a framework to reveal hidden simplicity in how organisms adapt to different environments, particularly focusing on antibiotic resistance evolution. #EvolutionaryBiology #MachineLearning
+
+2/n A central challenge in evolutionary biology: Can we predict how organisms adapt to different environments? The sheer number of possible genetic changes and the lack of understanding of the underlying phenotypic changes driving adaptation makes this incredibly difficult to answer.
+
+3/n A simpler question one can ask is: when populations adapts to an environment, are there a limited set of phenotypic changes that dominate the adaptive process? I.e., can we uncover the dimensionality of the adaptive phenotypic landscape we observe in experimental evolution setups?
+![](./fig/tweetorial/fig01_phenotype_dimensionality)
+
+4/n In other words, given that we are able to track a microbial population as it evolves in the lab, are there a limited set of phenotypic changes that are frequent enough and adaptive enough (large µs in the pop gen lingo) that keep appearing in the population over and over again?
+
+5/n Our lab and others have taken an approach based on our ability to measure fitness in the lab for multiple genotypes in different environments. For example, Kinsler et al. 2020 & Gosh et al. 2025 determined the fitness of many yeast genotypes in different environments.
+![](./fig/tweetorial/fig02_kinsler)
+
+6/n The idea being that the GxE (genotype-environment) variation in fitness must be due to the phenotypic effects and thus the structure of the GxE variation in fitness can be used to infer phenotypic layer without measuring any phenotypes explicitly
+
+7/n The task is then to use a statistical model that takes as input some abstract phenotypic features and predicts the fitness of the genotype. In this way, Kinsler et al. 2020 found that 8 of these features were sufficient to predict their data
+![](./fig/tweetorial/fig03_fitnotype)
+
+8/n This approach involved a linear decomposition of the fitness matrix via SVD. In other words, the authors assumed that fitness is a linear function of the phenotypic features.
+![](./fig/tweetorial/fig04_svd)
+
+9/n This strong assumption can limit our ability to uncover the true dimensionality of the adaptive phenotypic landscape as phenotypes could be non-linearly related to fitness. This is where our paper comes in!
+
+10/n To relax the linear assumption, we take advantage of the progress made in the field of geometric deep learning. More specifically, we use a specialized neural network called a "Riemannian Hamiltonian Variational Autoencoder" (RHVAE) that not only reduces dimensionality but preserves the geometric relationships between data points.
+![](./fig/tweetorial/fig05_rhvae)
+
+11/n Think of it like creating a 2D map of Earth's 3D surface, but also knowing exactly how distances on the map relate to real distances anywhere on the planet. That's what our RHVAE does with complex fitness data!
+
+12/n We first tested this on simulated data where we knew the "ground truth.” For this, we took the conceptual picture of Fisher’s geometric model very seriously and imagined having organisms with fixed coordinates in a phenotypic space, while the fitness landscape defined by the environment changes, giving us different fitness readouts.
+![](./fig/tweetorial/fig06_fisher)
+
+13/n Given this picture, we can then simulate adaptive walks in this phenotype space, and measure the fitness of the genotypes along the way.
+![](./fig/tweetorial/fig07_sim)
+
+14/n From this data, we can then fit a model to reconstruct the phenotypic coordinates of each genotype only from the fitness data. In other words, given that we only get the "z-axis" in multiple environments, we ask: can we recover the relative "x" and "y" coordinates of each genotype?
+
+15/n For this, we compared the performance of a linear model (PCA), a vanilla variational autoencoder (VAE), and our RHVAE. The non-linear models accurately reconstructed the underlying structure and relationships that generated the fitness patterns.
+![](./fig/tweetorial/fig08_reconstruction)
+
+16/n Moreover, with only two non-linear dimensions, the RHVAE has the same reconstruction accuracy as a 10-dimensional PCA!
+![](./fig/tweetorial/fig09_reconstruction_accuracy)
+
+17/n Another cool feature of the RHVAE applied to this problem is that it allowed us to qualitatively reconstruct the underlying fitness landscapes from which the adaptive walks were drawn.
+![](./fig/tweetorial/fig10_fitness_landscape)
+
+18/n Then we applied it to real-world data: E. coli evolving under different antibiotics. For this, we used the data from the incredible paper by Iwasawa et al. 2022, where they measured the fitness of E. coli evolving under different antibiotics.
+![](./fig/tweetorial/fig11_iwasawa_experiment)
+
+19/n The results? We can represent complex resistance patterns in just two dimensions while preserving key relationships!
+![](./fig/tweetorial/fig12_real_data)
+
+20/n As with the simulated data, our 2D nonlinear representation worked better than linear methods (like PCA) with a significantly larger number of dimensions. Simpler AND more accurate! #DataScience
+
+21/n This approach could help us better understand and predict evolutionary trajectories, with potential applications for antibiotic resistance, viral evolution, and cancer treatment.
+
+22/n The broader implication: evolution may be more predictable than we thought, with organisms following constrained paths as they adapt to new environments.
+
+23/n This work bridges evolutionary biology and machine learning, showing how geometry-aware deep learning can reveal hidden structure in biological complexity. All of the julia code utilized for this project is available at https://github.com/mrazomej/antibiotic_landscape! #OpenScience
+
+24/n Furthermore, we have a custom website for the paper, where you can find the HTML version as well as detailed notebooks explaining the computational approaches involved in the project. Shout-out to quarto for facilitating the creation of this website!
+
+25/n We're excited to see how this approach can be applied to other problems in evolutionary biology and beyond.
+
+26/n Thank you for reading. If you have any questions or comments, please reach out!

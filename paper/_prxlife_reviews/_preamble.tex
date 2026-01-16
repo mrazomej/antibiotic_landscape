@@ -1,0 +1,40 @@
+% Change font size
+\usepackage[font={footnotesize, sf}, labelfont=bf, margin=0.05\linewidth]{caption}
+\renewcommand{\familydefault}{\sfdefault}
+% Bold the 'Figure #' in the caption and separate it from the title/caption
+% with a period
+% Captions will be left justified
+\usepackage[
+	aboveskip=1pt,
+	labelfont=bf,
+	labelsep=period,
+	justification=raggedright,
+	singlelinecheck=off
+]{caption}
+
+% Add author affiliations
+\usepackage{authblk}
+
+% Allow to define personalized colors
+\usepackage{xcolor}
+% Allow for text color boxes
+\usepackage{tcolorbox}
+% Define custom colors
+\definecolor{customred}{HTML}{912E27}
+
+% Define colors for text box
+\definecolor{myframe}{HTML}{05080F} % Hex code for the background
+\definecolor{mybackground}{HTML}{E6E6EF}
+
+% Define custom command for box
+\newtcolorbox{graybox}{colback=mybackground,colframe=myframe}
+
+% Customize bibliography heading to add page break and References title
+% Use AtBeginDocument to ensure biblatex is loaded first
+\AtBeginDocument{%
+  \defbibheading{bibliography}[\refname]{%
+    \newpage%
+    \section*{References}%
+    \addcontentsline{toc}{section}{References}%
+  }%
+}

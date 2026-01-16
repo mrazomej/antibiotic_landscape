@@ -1,0 +1,353 @@
+---
+editor:
+    render-on-save: true
+bibliography: references.bib
+format: 
+  html:
+    css: _preamble.css
+    default-image-extension: png
+---
+
+::: {.graybox}
+In the manuscript entitled “Learning the Shape of Evolutionary Landscapes:
+Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps,”
+the authors apply an existing dimensionality reduction method (RHVAE) to
+multi-dimensional data from experimental evolution. They propose interpreting
+the latent space learned from the data as a representation of the organism’s
+phenotypic space.
+
+The authors first attempt to validate this idea using artificial data, where
+evolutionary dynamics are simulated under simplifying assumptions. The generated
+data is processed using three dimensionality reduction methods, PCA, a “vanilla”
+VAE, and RHVAE, and the authors compare their performance based on geometric
+similarity between the ground-truth phenotypic space and the learned latent
+space. They conclude that RHVAE better captures the underlying structure of the
+phenotype space. These methods are then applied to a set of real data obtained
+by another group (Iwasawa et al., 2022), and the authors claim that the
+VAE-based approaches can “predict” the fitness of a cell population in a new
+condition.
+
+Although the manuscript is relatively clear in explaining what was done, I do
+not think it convincingly validates its central claim that RHVAE, when applied
+to high-dimensional fitness data, can capture the structure of phenotypic space.
+The resemblance between the latent space and the ground-truth phenotype space in
+a specific simulation does not imply that RHVAE can reliably extract phenotypic
+structure from real data, especially when the simulation setting appears
+oversimplified (see below). In addition, the proposed analysis does not seem to
+yield any new insights into the real evolutionary experiment. The authors’ claim
+that their method can “predict” fitness in a new environment is undermined by
+the fact that such a “prediction” requires actual data from that new
+environment. It is therefore unclear how this constitutes a meaningful
+prediction if the experiment must be performed beforehand.
+
+For these reasons, I do not believe this manuscript meets the standards of PRX
+Life. At this stage, it is unclear whether the work offers sufficient novelty or
+insight to merit publication even in a more specialized journal. 
+:::
+
+## Major concerns
+
+::: {.graybox}
+1. The simulation setting appears to overlook the complexity of
+evolutionary adaptation.
+
+- In particular, it neglects a fundamental property of cells: their ability to
+physiologically adapt to new environments through changes in gene expression.
+Incorporating this property would likely require fundamental changes in how the
+latent space extracted from fitness data is interpreted.
+:::
+
+We thank the reviewer for this insightful comment, which allows us to clarify a
+crucial aspect of our modeling framework. We agree that our model does not
+explicitly simulate the dynamics of physiological adaptation, such as changes in
+gene expression. However, our definition of "phenotype" is broad enough to
+encompass these complex, time-varying characteristics within a fixed coordinate
+in phenotypic space.
+
+This approach builds upon the long tradition in evolutionary biology of using
+simplified genotype-phenotype-fitness relationships, with the fitness landscape
+being the canonical example [@orr2005]. In this tradition, even dynamic or
+stochastic traits are represented by their underlying, genetically-determined
+parameters.
+
+For instance, consider the reviewer's example of physiological adaptation
+through gene expression. A specific genotype defines the regulatory network that
+governs the expression of certain genes in response to environmental cues. While
+the expression levels themselves may fluctuate over time, the parameters
+defining the *response function*---such as the induction threshold or the
+maximum expression level---are stable characteristics of that genotype. These
+parameters can be treated as the coordinates in our phenotypic space. A mutation
+might alter a promoter region, leading to a new genotype with a different
+induction threshold, and thus, a different, fixed coordinate in the phenotypic
+space.
+
+Therefore, while our framework simplifies the dynamic process, it is capable of
+capturing the heritable variation in the *rules* that govern physiological
+adaptation. The latent space we extract from fitness data can thus be
+interpreted as representing these underlying parameters that define a cell's
+adaptive capabilities.
+
+To clarify this point, we have added the following text to the manuscript:
+
+> Figure 1(A) shows a schematic of the genotype-phenotype-fitness map. A genotype
+$g$ produces a set of measurable traits or phenotypes $\underline{p}$---depicted
+as two potential molecular phenotypes, such as an efflux pump rate and the
+sensitivity of a membrane receptor. 
+<span style="color: #912E27;"> 
+Following the tradition in evolutionary biology, we take the most general
+definition of phenotype, which includes time-varying organism characteristics as
+a single phenotype. In other words, any genetically-determined organism
+characteristic---including time-varying features such as developmental time---is
+considered a single phenotype.
+</span>
+The fitness of each genotype is determined
+by the value of these phenotypes and the environment $E$---depicted as the
+doubling time of a bacterial population. To formalize this mathematically, we
+represent genotypes as points in a multi-dimensional phenotypic space, where
+each dimension is a different trait ($\underline{p} \in \mathbb{R}^P$, where $P$
+is the number of traits). Thus, any genotype $g$ has a unique mapping to a
+phenotypic coordinate. 
+<span style="color: #912E27;"> 
+We emphasize again that even dynamically changing organism characteristics are
+still defined by a single fixed coordinate in phenotype space [@fragata2019a].
+</span>
+However, this mapping is not necessarily bijective...
+
+::: {.graybox}
+- The dimensionality of phenotypic space is assumed to be very low (as low as
+two dimensions), but it is unclear under what conditions this assumption is
+validated. In the context of cellular adaptation to antibiotic environments,
+relevant phenotypic traits may include membrane permeability, biofilm formation
+(which involves quorum sensing, motility, etc.), metabolic state, cell
+morphology, enzymatic degradation, and stress response, to name a few. Many of
+these are dynamic and require multiple parameters to characterize. Thus, the
+assumption that cellular phenotype can be captured by a few numbers seems rather
+strong.
+
+- Relatedly, the assumption that the dimensionality of phenotypic space is much
+lower than that of the fitness data is quite strong. The dimensionality of the
+data is set by the number of environments tested in an experiment. In most
+cases, including Iwasawa et al., this number is small—their dataset has
+dimensionality of only eight. Given the complexity of cellular phenotypes, it is
+unclear whether this assumption holds in real-world settings. 
+:::
+
+We again thank the reviewer for this insightful comment, which allows us to
+clarify a crucial aspect of our modeling framework.
+
+Our work is inspired by the recent body of work suggesting that **effective**
+phenotypic changes are low dimensional. Work coming from our own lab
+[@kinsler2020], in which yeast populations adapted to minimal glucose media
+found cells explore a low-dimensional phenotype space---as determined by a
+linear rather than a nonlinear dimensionality reduction method. More recent work
+from our lab [@ghosh2025] confirmed this finding, suggesting the existence of
+"limiting functions"---organismal functions that, as the name suggests, limit
+the organism's ability to adapt to new environments---creating "effective
+phenotypes" or degrees of freedom that evolution can exploit to achieve adaption
+to novel environments.
+
+The experimental work in which we based our analysis [@iwasawa2022] found a
+similar result utilizing a linear dimensionality reduction method in the context
+of antibiotic resistance. The authors found that the phenotype space of a
+bacterial population adapting to an antibiotic is low dimensional, even though
+populations were exposed to different antibiotics, again suggesting the
+existence of low-dimensional phenotype spaces in which adaptation takes place.
+
+Furthermore, theoretical work from the group of Professor Kaneko
+[@kaneko2015;@furusawa2018;@sato2020;@sato2023] points to the existence of these
+low-dimensional phenotypic spaces. In this body of work, *in silico*-evolved
+complex systems made of multiple interacting components converge to explore
+effective low-dimensional degrees of freedom. More work in the literature,
+summarized in the excellent review by @russo2025b, demonstrates that the
+existence of these effective low-dimensional degrees of freedom are a widespread
+phenomenon in biology. From the effectiveness of bacterial growth laws
+[@Scott2010] in which the microscopic details of how this global observable can
+be ignored, giving rise to effective degrees of freedom, to the existence of
+community-function landscapes in microbial ecology [@skwara2023a] determining
+community compositions from a few effective degrees of freedom.
+
+Part of our argument is that harvesting the generality of deep neural networks
+as function approximators can be used to extract these effective degrees of
+freedom from high-dimensional data in an even more efficient way.
+
+To emphasize this point, based on the reviewer's comment, we have added the
+following text to the introduction:
+
+> In this model, multiple
+lineages perform a biased random walk on a low-dimensional phenotypic space
+towards regions of higher fitness, defined by the environment-specific
+topography of the fitness landscape. 
+<span style="color: #912E27;"> 
+Of course, the true phenotypic state of a
+cell is controlled by many interacting variables---membrane permeability,
+metabolic state, stress responses, and more. Our assumption is not that these
+axes disappear, but that adaptation proceeds along effective, emergent
+low-dimensional manifolds that summarize these complex processes [@kaneko2015;
+@furusawa2018].
+</span>
+Changing the
+environment, therefore, amounts to changing the landscape topography while
+keeping the phenotypic coordinates of the lineages constant. We show that the
+geometry-informed variational autoencoder (hereafter *RHVAE* for Riemannian
+Hamiltonian Variational Autoencoder [@chadebec2020]) is able to learn a
+low-dimensional embedding that retains information about the relative
+positions of the simulated lineages in the original phenotypic space. 
+
+Furthermore, in the discussion, we have added the following text:
+
+> Our ability to experimentally track evolving microbial populations presents an
+unprecedented opportunity to better understand the complexity of the space in
+which evolutionary dynamics take place. The recent wave of work following the
+strategy of determining the fitness of multiple genotypes, not in one, but
+multiple environments [@kinsler2020; @iwasawa2022; @ascensao2023; @ghosh2025]
+suggests that this is a powerful approach to try to uncover the underlying
+structure of the genotype-phenotype-fitness map. Combined with the body of
+theoretical work suggesting that the genotype-phenotype map is
+low-dimensional---meaning that a large number of genotypes result in a small
+number of distinct phenotypes [@kaneko2015; @louis2016; @furusawa2018;
+@russo2025b]---there is hope that we can leverage these large-scale datasets to
+uncover features of the phenotypic space underlying adaptation in a data-driven
+way. 
+<span style="color: #912E27;"> 
+These studies support a view where, although cellular phenotype is
+intrinsically high-dimensional, adaptation is constrained by a few effective
+degrees of freedom. This distinction between mechanistic high dimensionality and
+effective low dimensionality helps reconcile our assumption with the underlying
+biological complexity.
+</span>
+
+::: {.graybox}
+2. The condition under which their method is valid remains unclear
+
+- The authors argue that the latent space learned from “high-dimensional fitness
+profiles” can be interpreted as phenotypic space, based on a single simulation
+setting that appears overly simplistic, as discussed above. However, even if the
+simulation were sufficiently realistic, the resemblance between the latent space
+and phenotypic space in one specific simulation does not imply that latent space
+inferred from real data captures the structure of the phenotype space. Thus,
+questions that need to be addressed include: How sensitive is the resemblance to
+the experimental design, data quantity, or dimensionality? Is there any
+theoretical justification for why one should expect the latent space to reflect
+the structure of the phenotypic space? These questions are not addressed in the
+manuscript, making it difficult to accept the proposed interpretation of the
+latent space. 
+:::
+
+We thank the reviewer for mentioning these concerns with our work. We agree that
+questions of sensitivity to the experimental design, data quantity, and
+dimensionality are important to address. We have only briefly touched on these
+points in the supplementary material, where we provide a comparison between the
+predictions of a 2D vs. a 3D latent space on the @iwasawa2022 dataset. However,
+a more thorough analysis of these points is beyond the scope of the present
+manuscript, as it would require a more extensive dataset. We are more than happy
+to expand on the limitations of our work in the manuscript.
+
+As for the theoretical justification for why one should expect the latent space
+to reflect the structure of the phenotypic space, we mentioned in the manuscript
+the classic Fisher geometric model [@orr2005] as a general theoretical scaffold
+widely used in evolutionary biology to describe the structure of phenotype
+space. If anything, the model utilized in our simulations generalizes this
+classic model, as it allows for the existence of more than one fitness peak
+within the landscape. To the degree that the idea of a fitness landscape
+captures any reality of the dynamics of evolution, the generality of neural
+networks as function approximators should suffice to represent some aspects of
+this structure in a data-driven way. We have softened the language
+used in the manuscript to emphasize that the latent space is not necessarily a
+scale-invariant map to the phenotype space but rather a map that captures some
+aspects of the structure of this space. The degree to which this is a meaningful
+map is a question that will depend on the specific application. More explicitly,
+we have added the following text at the end of the section 2.1:
+
+> <span style="color: #912E27;"> 
+We stress that the latent space inferred by our framework should not be
+interpreted as a one-to-one reconstruction of the full phenotypic space.
+Rather, it captures effective structural features of the phenotype–fitness
+relationship given the data available. The fidelity of this representation will
+depend on experimental design, data quantity, and dimensionality, all of which
+we only begin to explore here.
+</span>
+
+Furthermore, in the discussion, we have added the following text:
+
+> <span style="color: #912E27;"> 
+Our interpretation of latent space as a proxy for phenotypic space comes with
+limitations. The degree to which this mapping is faithful depends on factors
+such as data richness, experimental design, and the intrinsic dimensionality of
+the underlying traits. A full sensitivity analysis will require larger and more
+varied datasets, which is beyond the scope of the present work. Thus, our
+results should be viewed as proof of principle rather than a definitive
+characterization.
+</span>
+
+::: {.graybox}
+3. It is unclear what new insights RHVAE provides when applied to real
+data.
+
+- The authors argue in section 2.7 that RHVAE “predicts” responses to a missing
+antibiotic. However, this wording of “prediction” is misleading, since the data
+from the “missing” antibiotic is required to make the prediction. The results
+shown in this section seem to follow quite straightforwardly from those
+presented in the previous section. Thus, the analysis conducted on real data
+does not appear to yield any new insights into the data or enable predictions
+about untested antibiotics. 
+:::
+
+We are grateful to the reviewer for highlighting this point. In our mind, this
+comment is at the core of a philosophical debate of what prediction means in
+science. Although, we agree that an ideal prediction would not require the use
+of any data from the missing environment, giving a parameter-free prediction, we
+are not aware of any method that can make such a prediction for such a complex
+system without any parameter calibration.
+
+Nevertheless, we consider our contribution to be meaningful in the sense that
+the construction of the latent space did not contain any information about the
+missing environment. However, because of the nature of deep learning methods,
+only post-facto predictions can be made after calibrating the model on a subset
+of the data. As we explain in the manuscript, this is analogous to what was done
+by @kinsler2020 with linear models.
+
+It is important to note that previous studies, including @kinsler2020 and
+@iwasawa2022, relied on linear approximations for dimensionality reduction. At
+the outset of our work, it was not obvious that a lower-dimensional nonlinear
+mapping would perform as well as, or better than, these established full linear
+approximations. Our findings demonstrate that nonlinear methods can indeed
+capture the underlying structure more effectively, which represents a meaningful
+advancement over the linear approaches used in prior work.
+
+Our work does not address the full potential of the proposed methodology. The
+power of the present computational framework can be further harnessed in the
+limit of a larger number of environments and a larger number of mutants. We
+imagine a scenario in which having a much more extensive dataset to calibrate
+the model would allow for predictions of unseen phenotypes with a smaller number
+of measurements for unseen mutants.
+
+Moreover, the main goal of our work is to propose a conceptual framework with
+which to address the need to understand the underlying structure of
+high-dimensional fitness measurements that are increasingly being used in
+evolutionary biology.
+
+To address the reviewer's comment, we added the following text to the section 2.7:
+
+> In essence, we use seven antibiotics to place each genotype in
+latent space, then test how accurately these coordinates predict resistance to
+the eighth antibiotic. 
+<span style="color: #912E27;"> 
+We emphasize that this prediction is not parameter-free:
+the model must first be calibrated on the available environments. What is novel
+is that the latent structure inferred without access to the missing antibiotic
+nevertheless generalizes well, allowing us to reconstruct its response profile
+post hoc. We direct interested readers to the Supplementary Material section E
+for a detailed description of the of both approaches.
+</span>
+
+In the discussion, we have added the following text:
+
+> <span style="color: #912E27;"> 
+Our approach does not yet allow prediction of responses to completely unseen
+antibiotics without calibration data. Rather, its contribution lies in
+demonstrating that nonlinear latent variable models can capture the effective
+structure of high-dimensional fitness profiles and generalize across held-out
+environments. This shows that the low-dimensional manifold underlying adaptation
+is robust enough to be recovered even when parts of the data are missing, a
+point that was not guaranteed from prior linear approaches.
+</span>

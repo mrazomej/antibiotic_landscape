@@ -1,0 +1,25 @@
+::: {.maintext}
+
+<!-- # Abstract {.unnumbered}
+
+This is a test -->
+
+# Introduction
+
+{{< include _intro.qmd >}}
+
+# Results
+
+<!-- Experimental results -->
+<!-- {{< include _experiment.qmd >}} -->
+
+# Discussion
+
+<!-- {{< include _discussion.qmd >}} -->
+
+# Materials and Methods {.unnumbered}
+
+# Acknowledgements {.unnumbered}
+
+{{< include _acknowledgements.qmd >}}
+:::

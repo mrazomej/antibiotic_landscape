@@ -1,0 +1,98 @@
+Dear Editors,
+
+We are grateful for the opportunity to finalize our manuscript and for your
+guidance throughout this review process. We also thank the referees for their
+continued engagement with our work.
+
+We are pleased that Referee A is satisfied with our revisions. We have corrected
+the typographical error in equation S58 as noted in their second report, as well
+as the formatting error throughout the manuscript. We also appreciate the
+feedback from the external expert and have ensured that the limitations of our
+interpretations are more prominently discussed.
+
+As requested, we provide below a brief clarification of which aspects of our
+work we consider to be key results, which are plausible interpretations, and
+which remain speculative directions for future investigation.
+
+## Hierarchy of Claims
+
+### Key Results (Well-Supported by Evidence)
+
+The following findings are directly demonstrated by the analyses presented in
+our manuscript:
+
+1. **Reconstruction accuracy:** The geometry-informed variational autoencoder
+   (RHVAE) successfully learns a low-dimensional latent space from
+   high-dimensional fitness profiles. Our two-dimensional nonlinear latent space
+   achieves reconstruction accuracy comparable to a five- to ten-dimensional
+   linear (PCA) representation.
+
+2. **Predictive power:** In leave-one-out cross-validation, latent coordinates
+   constructed without access to a held-out antibiotic nonetheless predict
+   responses to that antibiotic with superior accuracy compared to linear
+   approaches.
+
+3. **Lineage separation:** Evolved lineages separate more clearly in the
+   RHVAE-derived latent space than in principal component space, suggesting the
+   nonlinear embedding captures biologically meaningful structure.
+
+4. **Synthetic validation:** On simulated data with known ground truth, the
+   RHVAE recovers the relative positions of lineages in phenotypic space and
+   reconstructs the topography of the underlying fitness landscape.
+
+### Plausible Interpretations (Supported by Theory and Literature)
+
+The following interpretations are consistent with our results and grounded in
+prior theoretical and empirical work, though they are not definitively proven by
+our data alone:
+
+1. **Latent space as phenotypic proxy:** We interpret the learned latent space
+   as capturing aspects of an effective phenotypic space. This interpretation is
+   supported by a substantial body of theoretical work suggesting that
+   genotype-phenotype maps are intrinsically low-dimensional, and by empirical
+   studies demonstrating that adaptation proceeds along a limited number of
+   effective degrees of freedom.
+
+2. **Metric tensor and accessibility:** The learned Riemannian metric may relate
+   to the density of genotypes mapping to different regions of phenotype space,
+   thereby encoding information about the accessibility of evolutionary paths.
+
+### Speculative Directions (Future Investigation)
+
+The following ideas are presented as avenues for future research rather than as
+established conclusions:
+
+1. **Geodesics and evolutionary trajectories:** We observe that some evolved
+   lineages appear to follow paths resembling geodesics in latent space. Whether
+   this reflects a general principle—akin to a least-action formulation of
+   adaptation—remains an open and speculative question requiring larger datasets
+   and independent validation.
+
+2. **Integration with genomic data:** A crucial next step would be to compare
+   geodesic paths in our inferred space with actual genetic changes, which could
+   reveal whether geometric shortest paths correspond to probable mutational
+   trajectories.
+
+3. **Scaling to richer datasets:** The full potential of this framework may only
+   be realized with substantially larger numbers of environments and genotypes,
+   enabling predictions for truly unseen conditions.
+
+---
+
+We have added a dedicated subsection to the Discussion section of the manuscript
+explicitly summarizing this hierarchy of claims, so that readers can readily
+distinguish between our demonstrated findings, plausible interpretations, and
+speculative directions.
+
+We trust that this clarification, together with the limitations already
+discussed throughout the revised manuscript, addresses the concerns raised. We
+remain fully committed to presenting our work with appropriate intellectual
+honesty and are happy to make any further adjustments you deem necessary.
+
+Thank you again for your consideration and for the care with which you have
+handled this review process.
+
+Sincerely,
+
+Manuel Razo-Mejia (on behalf of all authors)
+
