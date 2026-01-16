@@ -323,9 +323,8 @@ $if(natbib)$
 $endif$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-$if(biblatex)$
 \usepackage[
-    $if(biblio-style)$style=$biblio-style$,$endif$
+    style=vancouver,
     sorting=none,				% Do not sort bibliography
 	url=false, 					% Do not show url in reference
 	doi=false, 					% Do not show doi in reference
@@ -338,7 +337,6 @@ $if(biblatex)$
 $for(bibliography)$
 \addbibresource{$bibliography$}
 $endfor$
-$endif$
 $endif$
 $if(nocite-ids)$
 \nocite{$for(nocite-ids)$$it$$sep$, $endfor$}

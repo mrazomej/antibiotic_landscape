@@ -1,10 +1,3 @@
----
-editor:
-    render-on-save: true
-bibliography: references.bib
-csl: ieee.csl
----
-
 ## Riemannian Hamiltonian Variational Autoencoders Mathematical Background
 
 The bulk of this work makes use of the variational autoencoder variation
@@ -601,7 +594,7 @@ $${#eq-leapfrog-full-step}
 3. A half step for the momentum:
 
 $$
-\underline{\rho}\left(t + \frac{\epsilon}{2}\right) = 
+\underline{\rho}(t + \epsilon) = 
 \underline{\rho}\left(t + \frac{\epsilon}{2}\right) - 
 \frac{\epsilon}{2} \nabla_{\underline{z}} H_{\underline{x}}\left(
     \underline{z}(t + \epsilon), \underline{\rho}\left(t + \frac{\epsilon}{2}\right)
@@ -1047,7 +1040,7 @@ $$
 \frac{\varepsilon}{2} 
 \nabla_{\underline{z}} H_{\underline{x}}^{\mathcal{M}}\left(
     \underline{z}(t+\varepsilon), 
-    \underline{\rho}\left(t+\frac{\varepsilon}{2}\right)
+    \underline{\rho}(t+\varepsilon)
 \right).
 $${#eq-generalized-leapfrog-momentum-full-step}
 

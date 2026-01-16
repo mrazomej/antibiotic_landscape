@@ -116,6 +116,13 @@ can be obtained using the Metropolis-Kimura algorithm.
 
 #### Figure 2 Main Text
 
+As shown in @fig-02-kimura, the evolutionary trajectories generated with the
+Metropolis-Kimura algorithm are qualitatively identical to those in the main
+text. The lineages evolve towards regions of higher fitness while respecting the
+constraints imposed by the genotype-phenotype density, confirming that our main
+conclusions are robust to the specific choice of the evolutionary simulation
+algorithm.
+
 ![**Evolutionary dynamics on phenotype space with Metropolis-Kimura dynamics**.
 (A) Top: Metropolis-like evolutionary dynamics on phenotype space. Each line
 represents the trajectory of a lineage as it evolves over time, with crosses and
@@ -129,6 +136,13 @@ resulting fitness readouts change as the topography of the environment-dependent
 fitness landscape changes (bottom panels).](./fig/supplementary/figSI_02_kimura){#fig-02-kimura}
 
 #### Figure 4 Main Text
+
+Similarly, @fig-04-kimura demonstrates that when we analyze the synthetic data
+from the Metropolis-Kimura simulation, our main findings regarding the latent
+space hold. The RHVAE continues to outperform both the standard VAE and PCA in
+preserving the geometric structure of the original phenotypic space and achieves
+superior reconstruction accuracy. This confirms that the advantages of the
+geometry-informed approach are not an artifact of the simulation method.
 
 ![**Geometry-informed latent space captures phenotypic structure and improves
 reconstruction accuracy**. (A) Latent space coordinates of simulated fitness
@@ -147,6 +161,14 @@ curvature that correspond to areas of low genotype-phenotype density in the
 simulation.](./fig/supplementary/figSI_04_kimura){#fig-04-kimura}
 
 #### Figure 5 Main Text
+
+Finally, @fig-05-kimura shows the fitness landscape reconstructions from the
+data generated with the Metropolis-Kimura dynamics. Consistent with the results
+in the main text, the RHVAE model successfully reconstructs the complex,
+nonlinear topography of the landscapes across different environments. This
+result further strengthens our conclusion that the RHVAE framework is a powerful
+tool for inferring fitness landscapes from high-dimensional data, regardless of
+the precise evolutionary dynamics used to generate it.
 
 ![**Geometry-informed latent space enables accurate reconstruction of complex
 fitness landscapes**. Comparison of ground truth and reconstructed fitness

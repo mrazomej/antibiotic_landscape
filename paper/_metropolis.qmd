@@ -88,8 +88,9 @@ selection and mutation.
 <span style="color: #912E27;">
 We can define this distribution as
 </span>
+
 $$
-\textcolor{#912E27}{
+\textcolor{customred}{
 \pi(\underline{x}) \propto 
 F_E(\underline{x})^{\beta_F} GP(\underline{x})^{\beta_{GP}},
 }
@@ -151,7 +152,7 @@ Substituting @eq-metropolis-hastings-target-distribution into
 acceptance probability as
 <span style="color: #912E27;">
 $$
-\textcolor{#912E27}{
+\textcolor{customred}{
 P_{\text{accept}} = \min\left(
     1,
     \frac{
@@ -168,7 +169,7 @@ Given our simplifying assumption that $\beta_F = \beta_{GP} = \beta$, this can
 be rewritten as
 </span>
 $$
-\textcolor{#912E27}{
+\textcolor{customred}{
 P_{\text{accept}} = \min\left(
     1,
     \frac{F_E(\underline{x}{\prime})^\beta GP(\underline{x}{\prime})^\beta}

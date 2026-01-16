@@ -25,7 +25,7 @@ through mutations. Specifically, as derived in the Supplementary Materials secti
 probability of accepting a transition is given by
 
 $$
-\textcolor{#912E27}{
+\textcolor{customred}{
 P_{\text{accept}} = \min\left(
     1,
     \frac{F(\underline{p}')^{\beta_F} GP(\underline{p}')^{\beta_{GP}}}

@@ -5,13 +5,13 @@ project:
     - paper.pdf
   render:
     - paper.qmd
-    - supplementary.qmd
-    - code.qmd
-    - code/metropolis_hastings_evolution.qmd
-    - code/evolutionary_dynamics.qmd
-    - code/rhvae_sim.qmd
-    - code/iwasawa_bayesian_inference.qmd
-    - code/metropolis_kimura_evolution.qmd
+    # - supplementary.qmd
+    # - code.qmd
+    # - code/metropolis_hastings_evolution.qmd
+    # - code/evolutionary_dynamics.qmd
+    # - code/rhvae_sim.qmd
+    # - code/iwasawa_bayesian_inference.qmd
+    # - code/metropolis_kimura_evolution.qmd
 
 # Title
 title: "Learning the Shape of Evolutionary Landscapes: Geometric Deep Learning Reveals Hidden Structure in Phenotype-to-Fitness Maps"
@@ -127,19 +127,19 @@ format:
     default-image-extension: png
     toc: true
     filters:
+      - strip-yaml-frontmatter.lua
       - maintext-filter.lua
       - sitext-filter.lua
   pdf: 
     documentclass: scrartcl
     numbersections: true
     template: template.tex
-    cite-method: biblatex
     default-image-extension: pdf
     include-in-header:
       - file: _preamble.tex
-    biblio-style: vancouver
     keep-tex: true
     filters:
+      - strip-yaml-frontmatter.lua
       - abstract-filter.lua
       - color-text-span.lua
       - maintext-filter.lua
