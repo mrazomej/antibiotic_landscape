@@ -110,3 +110,5 @@ code/fig/output/
 data/*
 output/*
 fig/*
+
+/.luarc.json
