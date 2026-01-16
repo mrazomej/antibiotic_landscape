@@ -97,11 +97,6 @@ Manifest.toml
 doc/*_files/*
 doc/_*.html
 doc/_*.pdf
-paper/*_files/*
-paper/_*.html
-paper/_*.pdf
-paper/_output/*
-paper/site_libs/*
 code/analysis/*/output/
 code/processing/*/output/
 code/processing/*/*/output/
@@ -110,5 +105,35 @@ code/fig/output/
 data/*
 output/*
 fig/*
+
+# =============================================================================
+# Quarto-generated files (paper/)
+# =============================================================================
+# HTML output files (we use docs/ for GitHub Pages instead)
+paper/*.html
+paper/**/*.html
+
+# Quarto HTML asset directories (libs, figures, etc.)
+paper/*_files/
+paper/**/*_files/
+
+# Quarto website output
+paper/_output/
+paper/site_libs/
+
+# Review folder - only track source files (.qmd, template.tex, _preamble.tex, etc.)
+# Ignore generated output files
+paper/_prxlife_reviews/prxlife_reviews.tex
+paper/_prxlife_reviews/prxlife_reviews02.tex
+paper/_prxlife_reviews/*.pdf
+paper/_prxlife_reviews/_output/
+
+# Code notebooks - ignore generated HTML/assets (keep .qmd and .tex)
+paper/code/*.html
+
+# Data files in paper/code that can be regenerated
+paper/code/iwasawa_data/
+paper/code/sim_metropolis_dynamics/*.jld2
+paper/code/sim_metropolis_dynamics/*_state/
 
 /.luarc.json
