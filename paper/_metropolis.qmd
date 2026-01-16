@@ -85,9 +85,7 @@ used to sample from a target probability distribution $\pi(\underline{x})$. In
 our evolutionary context, $\pi(\underline{x})$ can be thought of as the
 steady-state distribution of phenotypes under the combined influence of
 selection and mutation.
-<span style="color: #912E27;">
 We can define this distribution as
-</span>
 
 $$
 \textcolor{customred}{
@@ -96,7 +94,6 @@ F_E(\underline{x})^{\beta_F} GP(\underline{x})^{\beta_{GP}},
 }
 $${#eq-metropolis-hastings-target-distribution}
 
-<span style="color: #912E27;">
 where $\beta_F$ and $\beta_{GP}$ are parameters that separately control the
 influence of fitness and genotype-phenotype density, respectively. $\beta_F$ can
 be interpreted as a parameter controlling the strength of selection, akin to an
@@ -109,7 +106,6 @@ statistical mechanics) that controls the level of stochasticity in the system. A
 higher $\beta$ means the system is more likely to move towards higher fitness and
 genotype-phenotype density. In a sense, $\beta$ can be related to the effective
 population size, controlling the directness of the evolutionary dynamics.
-</span>
 
 At each step, we propose a new phenotype $\underline{x}{\prime}$ from a proposal
 distribution $q(\underline{x}{\prime} | \underline{x})$. For simplicity, we can
@@ -146,11 +142,9 @@ P_{\text{accept}} = \min\left(
     \right).
 $${#eq-metropolis-hastings-acceptance-probability-simplified}
 
-<span style="color: #912E27;">
 Substituting @eq-metropolis-hastings-target-distribution into
 @eq-metropolis-hastings-acceptance-probability-simplified, we get the general
 acceptance probability as
-<span style="color: #912E27;">
 $$
 \textcolor{customred}{
 P_{\text{accept}} = \min\left(
@@ -164,10 +158,8 @@ P_{\text{accept}} = \min\left(
 }
 $${#eq-acceptance-general}
 
-<span style="color: #912E27;">
 Given our simplifying assumption that $\beta_F = \beta_{GP} = \beta$, this can
 be rewritten as
-</span>
 $$
 \textcolor{customred}{
 P_{\text{accept}} = \min\left(

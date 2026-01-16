@@ -19,13 +19,11 @@ our interpretation of the data.
 $g$ produces a set of measurable traits or phenotypes $\underline{p}$---depicted
 as two potential molecular phenotypes, such as an efflux pump rate and the
 sensitivity of a membrane receptor. 
-<span style="color: #912E27;"> 
 Following the tradition in evolutionary biology, we take the most general
 definition of phenotype, which includes time-varying organism characteristics as
 a single phenotype. In other words, any genetically-determined organism
 characteristic---including time-varying features such as developmental time---is
 considered a single phenotype.
-</span>
 The fitness of each genotype is determined
 by the value of these phenotypes and the environment $E$---depicted as the
 doubling time of a bacterial population. To formalize this mathematically, we
@@ -33,10 +31,8 @@ represent genotypes as points in a multi-dimensional phenotypic space, where
 each dimension is a different trait ($\underline{p} \in \mathbb{R}^P$, where $P$
 is the number of traits). Thus, any genotype $g$ has a unique mapping to a
 phenotypic coordinate. 
-<span style="color: #912E27;"> 
 We emphasize again that even dynamically changing organism characteristics are
 still defined by a single fixed coordinate in phenotype space [@fragata2019a].
-</span>
 However, this mapping is not necessarily bijective, i.e.,
 multiple genotypes may map to the same phenotype. To represent the likelihood of
 sampling some genotype $g$ that maps to some coordinate $\underline{p}$ in
@@ -49,7 +45,7 @@ equivalent phenotypes and some phenotypes being extremely rare [@louis2016].
 @fig-01(B, left) shows a schematic of one possible $GP$ map overlaid on a 2D
 phenotype space. For illustration purposes, we set the $GP$ map to contain four
 negative Gaussian peaks, representing four regions of the phenotype space that
-are unlikely to be sampled (see Supplementary Material section B for a more detailed
+are unlikely to be sampled (see Supplementary Material [@supplementalmaterial] section B for a more detailed
 discussion). The location and size of these peaks are assumed to be fixed by the
 genotype-to-phenotype map, irrespective of the environment. Finally, we
 introduce a fitness function $F$ that maps a phenotypic coordinate
@@ -78,14 +74,12 @@ asking whether it is possible to reverse the mapping from phenotypes to fitness
 values and predict the phenotypic coordinates of a genotype based only on its
 fitness values across multiple environments.
 
-<span style="color: #912E27;"> 
 We stress that the latent space inferred by our framework should not be
 interpreted as a one-to-one reconstruction of the full phenotypic space.
 Rather, it captures effective structural features of the phenotype–fitness
 relationship given the data available. The fidelity of this representation will
 depend on experimental design, data quantity, and dimensionality, all of which
 we only begin to explore here.
-</span>
 
 ![**Model of phenotype-fitness dynamics**. (A) Schematic of the
 genotype-phenotype-fitness map. A pair of genotypes $g^{(\text{b})}$ and

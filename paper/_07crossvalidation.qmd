@@ -29,15 +29,13 @@ missing antibiotic. This approach allows us to directly compare how well
 different dimensionality reduction methods capture information needed for
 prediction. In essence, we use seven antibiotics to place each genotype in
 latent space, then test how accurately these coordinates predict resistance to
-the eighth antibiotic. 
-<span style="color: #912E27;"> 
-We emphasize that this prediction is not parameter-free:
+the eighth antibiotic. We emphasize that this prediction is not parameter-free:
 the model must first be calibrated on the available environments. What is novel
 is that the latent structure inferred without access to the missing antibiotic
 nevertheless generalizes well, allowing us to reconstruct its response profile
-post hoc. We direct interested readers to the Supplementary Material section E
-for a detailed description of the of both approaches.
-</span>
+post hoc. We direct interested readers to the Supplementary Material
+[@supplementalmaterial] section E for a detailed description of the of both
+approaches.
 
 @fig-07(B) compares the predictive power of the three models across different
 numbers of linear latent space dimensions in terms of reconstruction error. For
@@ -54,8 +52,8 @@ under study, allowing for more accurate predictions of out-of-sample data.
 Furthermore, increasing the dimensionality of the nonlinear latent space from
 two to three dimensions only marginally improves the predictive power of the
 model, suggesting that the 2D nonlinear latent space captures most of the
-information about the phenotypic state of the system (see Supplementary Material section E
-for a detailed discussion).
+information about the phenotypic state of the system (see Supplementary Material
+[@supplementalmaterial] section E for a detailed discussion).
 
 ![**Nonlinear latent space models demonstrate superior predictive power for
 out-of-sample antibiotic data**. (A) Schematic representation of the

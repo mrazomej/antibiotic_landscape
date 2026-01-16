@@ -26,7 +26,8 @@ increasing resistance to the antibiotic over time. From these titration curves,
 we can use Bayesian inference to extract the value of the antibiotic
 concentration at which the optical density is 50% of the maximum value. This
 value---known as the *antibiotic $IC_{50}$*---is a measure of the antibiotic
-resistance of the evolved strains (see Supplementary Material section A for more details).
+resistance of the evolved strains (see Supplementary Material
+[@supplementalmaterial] section A for more details).
 
 @fig-06(C) shows the time trajectories of the $IC_{50}$ in all eight antibiotics
 for all cultures evolved in TET. Over time, all lineages increase their
@@ -50,12 +51,12 @@ trajectories of $IC_{50}$ values across all eight antibiotics (tetracycline
 salicylate (SS)) for lineages evolved in tetracycline, demonstrating direct
 resistance increase in the selection antibiotic and complex collateral effects
 in other antibiotics. Error bars represent the 95% credible region as obtained
-via Bayesian inference (see Supplementary Material section A) (D) Latent space projections
-using PCA, VAE, and RHVAE (first three panels) trained on $IC_{50}$ values, with
-colors representing different evolution conditions, showing improved
-disentanglement of lineages in nonlinear latent spaces and superior
-reconstruction accuracy of RHVAE compared to other dimensionality reduction
-methods. Different colors represent different lineages evolved in different
-antibiotics. The rightmost panel shows the reconstruction error of the three
-methods as a function of the number of PCs used for dimensionality
-reduction.](./fig/main/fig06_v02_compiled){#fig-06}
+via Bayesian inference (see Supplementary Material [@supplementalmaterial]
+section A) (D) Latent space projections using PCA, VAE, and RHVAE (first three
+panels) trained on $IC_{50}$ values, with colors representing different
+evolution conditions, showing improved disentanglement of lineages in nonlinear
+latent spaces and superior reconstruction accuracy of RHVAE compared to other
+dimensionality reduction methods. Different colors represent different lineages
+evolved in different antibiotics. The rightmost panel shows the reconstruction
+error of the three methods as a function of the number of PCs used for
+dimensionality reduction.](./fig/main/fig06_v02_compiled){#fig-06}
