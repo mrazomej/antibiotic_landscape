@@ -321,22 +321,9 @@ $if(natbib)$
 \usepackage[$natbiboptions$]{natbib}
 \bibliographystyle{$if(biblio-style)$$biblio-style$$else$plainnat$endif$}
 $endif$
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[
-    style=vancouver,
-    sorting=none,				% Do not sort bibliography
-	url=false, 					% Do not show url in reference
-	doi=false, 					% Do not show doi in reference
-	isbn=false, 				% Do not show isbn link in reference
-	eprint=false, 			    % Do not show eprint link in reference
-	maxbibnames=9, 			    % Include up to 9 names in citation
-	firstinits=true,
-]{biblatex}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-$for(bibliography)$
-\addbibresource{$bibliography$}
-$endfor$
+$if(biblatex)$
+$-- Biblatex is handled by Quarto with options from YAML
+$endif$
 $endif$
 $if(nocite-ids)$
 \nocite{$for(nocite-ids)$$it$$sep$, $endfor$}

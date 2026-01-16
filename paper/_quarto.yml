@@ -5,7 +5,7 @@ project:
     - paper.pdf
   render:
     - paper.qmd
-    # - supplementary.qmd
+    - supplementary.qmd
     # - code.qmd
     # - code/metropolis_hastings_evolution.qmd
     # - code/evolutionary_dynamics.qmd
@@ -138,6 +138,16 @@ format:
     include-in-header:
       - file: _preamble.tex
     keep-tex: true
+    cite-method: biblatex
+    biblatexoptions:
+      - style=vancouver
+      - sorting=none
+      - url=false
+      - doi=false
+      - isbn=false
+      - eprint=false
+      - maxbibnames=9
+      - giveninits=true
     filters:
       - strip-yaml-frontmatter.lua
       - abstract-filter.lua
